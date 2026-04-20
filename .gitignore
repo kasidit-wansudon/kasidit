@@ -1,0 +1,32 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node / build artifacts (in case of tooling)
+node_modules/
+dist/
+build/
+*.log
+
+# Local test outputs
+.kasidit-test/
+.kasidit-full-test/
+/tmp/
+*.tar.gz
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Plugin cache (if testing locally)
+.claude/plugins/cache/

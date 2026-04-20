@@ -1,0 +1,48 @@
+{
+  "name": "kasidit",
+  "owner": {
+    "name": "Kasidit Wansudon",
+    "email": "kasidit.wans@gmail.com"
+  },
+  "metadata": {
+    "description": "Mindful AI coding framework — discipline over cleverness. Works on any model tier.",
+    "version": "0.9.0",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "kasidit",
+      "source": "./plugins/kasidit",
+      "description": "Mindful AI coding framework that forces discipline to prevent hallucination. Checklists, confidence labels, tier-aware rules, Claude Design integration for visual work.",
+      "version": "0.9.0",
+      "author": {
+        "name": "Kasidit Wansudon",
+        "email": "kasidit.wans@gmail.com"
+      },
+      "homepage": "https://kasidit.ai",
+      "repository": "https://github.com/kasidit-wansudon/kasidit",
+      "license": "MIT",
+      "keywords": [
+        "ai-coding",
+        "discipline",
+        "hallucination-prevention",
+        "code-review",
+        "security-audit",
+        "claude-design",
+        "multi-agent",
+        "legacy-code",
+        "haiku",
+        "opus"
+      ],
+      "category": "engineering",
+      "tags": [
+        "skill",
+        "commands",
+        "agents",
+        "framework",
+        "review",
+        "debug"
+      ]
+    }
+  ]
+}
