@@ -744,6 +744,80 @@ This is the v0.9 equivalent of PATTERNS.md for visual work.
 
 ---
 
+## Master Orchestrator Rule (v0.9.1)
+
+> The master watches. The specialists work. Confusion of roles is confusion of output.
+
+When Kasidit is invoked on any mission that qualifies as **strong work** — multi-file change, migration, performance hunt, security audit, new feature, deep research — the main agent becomes **the master orchestrator** and is **forbidden from executing the work itself**.
+
+### What the master MAY do
+
+- Narrow the mission (Rule 1) and confirm scope with user.
+- Detect domain and tier.
+- Read top-level context only: `CLAUDE.md`, `PATTERNS.md`, `DESIGN_SYSTEM.md`, `สารบัญ`, `.kasidit/knowledge/` index.
+- Pick the specialist agent from the registry below.
+- Write the dispatch brief (mission + inputs + expected output format).
+- Synthesize specialist outputs into a user-facing report.
+- Decide next step (same specialist again, different specialist, done, ask user).
+
+### What the master MAY NOT do
+
+- ❌ Write code.
+- ❌ Edit files.
+- ❌ Run tests or servers.
+- ❌ Read source files beyond the top-level index set above.
+- ❌ Search, grep, or glob beyond initial scope detection.
+- ❌ Fetch docs (delegate to `deep-researcher`).
+- ❌ Write migrations (delegate to `migration-specialist`).
+
+If the master catches itself doing any of the above → **stop, spawn a specialist**, pass the accumulated context to it.
+
+### Specialist Agent Registry
+
+| Agent | Strong-task trigger | Scope |
+|-------|---------------------|-------|
+| `bug-hunter` | error, crash, wrong output, regression | root-cause + minimal fix |
+| `architect-planner` | new feature, design, refactor > 2 files | plan only, no code |
+| `perf-profiler` | slow, N+1, high cost, before-scale | find bottleneck, rank impact |
+| `test-writer` | add tests, regression after fix, backfill coverage | runnable tests + gap notes |
+| `refactor-surgeon` | named refactor (extract/rename/split/inline) | preserves behavior exactly |
+| `deep-researcher` | library/API/framework research, version-matched docs | findings + sources, cache to `.kasidit/knowledge/` |
+| `migration-specialist` | schema change, framework upgrade, backfill | backward-compat + zero-downtime plan |
+| `code-reviewer` | PR / diff / audit | multi-dimensional review |
+| `security-auditor` | OWASP / CVE / auth boundary | security-focused deep audit |
+| `legacy-specialist` | legacy PHP, old framework, no-test code | legacy-safe refactor |
+
+### Dispatch brief format
+
+Every specialist invocation must pass:
+
+```
+MISSION: <one sentence, verifiable outcome>
+INPUTS:
+  - <file paths, symptoms, measurements, versions>
+CONSTRAINTS:
+  - <deadline, compat, perf budget>
+EXPECTED OUTPUT:
+  - <matches the agent's documented output block>
+PRIOR CONTEXT:
+  - <findings from earlier specialists, if any>
+```
+
+### When master may do work itself (narrow exceptions)
+
+- Trivial one-line fix on a single file the user explicitly pointed to.
+- Answering a pure question with no code change.
+- Reading the top-level index files listed above.
+- Writing the final user-facing summary.
+
+Everything else → delegate.
+
+### Why this rule exists
+
+When the master both plans and executes, context pollution compounds: half-loaded files, partial greps, and intermediate hypotheses poison the final synthesis. Isolation = clean handoffs = fewer hallucinations. This is Kasidit Rule 1 (one mission, one focus) applied at the orchestration layer.
+
+---
+
 ## Multi-Agent Orchestration (v3)
 
 For large missions (code review, large refactor), use subagents for context isolation and parallelism.
@@ -1094,6 +1168,10 @@ Confirm → step 1.
 - ❌ Implement from a mockup without saving it to `.kasidit/prototypes/` (v0.9).
 - ❌ Mockup introduces new tokens without updating DESIGN_SYSTEM.md (v0.9).
 - ❌ Parity check by vibes — token-level comparison required (v0.9).
+- ❌ Master agent writing code on a strong-work mission (v0.9.1) — delegate to specialist.
+- ❌ Master reading source files beyond the top-level index (v0.9.1) — delegate to specialist.
+- ❌ Invoking a specialist without a dispatch brief (v0.9.1) — mission + inputs + expected output required.
+- ❌ Specialist working outside its documented scope (v0.9.1) — refuse, return to master.
 
 ---
 
@@ -1148,6 +1226,7 @@ This skill is the discipline.
 
 ## Version
 
+- `v0.9.1` — **Master Orchestrator Rule.** Master agent delegates strong work to specialists, never executes it. 7 new specialized agents added: `bug-hunter`, `architect-planner`, `perf-profiler`, `test-writer`, `refactor-surgeon`, `deep-researcher`, `migration-specialist`. Specialist Agent Registry + dispatch brief format.
 - `v0.9` — Claude Design Integration. New Design/Visual Mode. DESIGN_SYSTEM.md. `.kasidit/prototypes/` store. Mockup-to-code handoff + parity check. UI Override requires visual target (screenshot / values / Claude Design mockup). New commands: design / mockup / extract-system / parity / report visual. Haiku: no hand-coded mockups — always route to Claude Design.
 - `v0.8` — Tier Cascade orchestration (Opus plans, Sonnet works, Haiku greps). Local embedding knowledge layer (sentence-transformers).
 - `v0.7.4` — SWE-bench validation runs (56/300 tasks, 60.7% strict PASS / 87.5% valid). Rule 2.3 no fake metrics. Rule 2.4 numbered options. Rule 2.5 native language. Rule 2.6 mandatory git log --grep + git log -S before bug fixes.

@@ -4,6 +4,25 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.9.1] — 2026-04-22
+
+### Added
+- **Master Orchestrator Rule** in SKILL.md. Master agent delegates strong work to specialists; never executes code, edits, tests, or searches beyond top-level index.
+- **Specialist Agent Registry** — 10 agents total (3 existing + 7 new).
+- **Dispatch brief format** — every specialist invocation requires mission + inputs + constraints + expected output + prior context.
+- 7 new specialist agents:
+  - `bug-hunter` — root-cause debugging, minimal-change fix, mandatory `git log --grep` / `git log -S`.
+  - `architect-planner` — plan only, no code; trade-offs + open questions + step sequence.
+  - `perf-profiler` — measure first, rank by impact × confidence, top 5 only, does not optimize.
+  - `test-writer` — one target per invocation, regression case mandatory after bug fix.
+  - `refactor-surgeon` — named refactor only, zero behavior change, test-parity verified.
+  - `deep-researcher` — trust hierarchy (source > official docs > release notes > blogs), cache to `.kasidit/knowledge/`.
+  - `migration-specialist` — expand-contract phases, rollback per phase, risk classification GREEN/YELLOW/RED.
+
+### Changed
+- Anti-patterns list expanded with 4 master/specialist violations.
+- Existing "Multi-Agent Orchestration (v3)" section now framed as implementation detail of the Master rule.
+
 ## [0.9.0] — 2026-04-20
 
 ### Added
@@ -77,6 +96,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Mission counter** — retry budget + Wave 1 / Wave 2 escalation.
 - **สารบัญ system** — INDEX.md / RELATIONS.md / MEMORY.md for project-level knowledge.
 
+[0.9.1]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.9.1
 [0.9.0]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.9.0
 [0.8.0]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.8.0
 [0.7.4]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.7.4
