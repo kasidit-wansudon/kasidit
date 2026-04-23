@@ -97,6 +97,37 @@ Main (synthesizer) → report with confidence + priority
 - Each agent returns structured output, not prose
 - Verifier pass removes false positives (Haiku mandatory, Sonnet recommended for security)
 
+## Fan-Out Mode (`/kasi-multi`, [[v0.9.2]])
+
+When user wants parallel execution over dependency-chained execution, fan out.
+
+```
+/kasi-multi [N] [mission]       # explicit
+sudo <mission>                   # shorthand for N=6 + skip clarifying Qs
+sudo <N> <mission>               # shorthand with N
+```
+
+**Default N=6 roster** (heuristic, swappable by mission kind):
+
+| Slot | Agent |
+|---|---|
+| 1 | `architect-planner` or `deep-researcher` |
+| 2 | `general-purpose` (build step) |
+| 3 | `general-purpose` (secondary workstream) |
+| 4 | `general-purpose` (extract / glue) |
+| 5 | `test-writer` or `general-purpose` (verification) |
+| 6 | `code-reviewer` |
+
+**Tier caps:**
+
+- Opus — full fan-out
+- Sonnet — default, prefer 4 on large contexts
+- Haiku — cap at N=4 (synthesis collapses with more)
+
+**`sudo` is a pacing signal, not a permission escalation.** It still respects the destructive-op confirmation rule.
+
+See [[Commands#kasi-multi|/kasi-multi]] for full flow.
+
 ## Tier-specific orchestration ([[v0.8.0]] Tier Cascade)
 
 ```

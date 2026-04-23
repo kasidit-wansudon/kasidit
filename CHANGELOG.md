@@ -20,6 +20,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - `/kasi-sync` — audit drift between local and hub. Read-only; prints per-item suggestions but does not mutate.
   - `/kasi-wiki-sync` — push `docs/wiki/*.md` into the GitHub wiki repo (`kasidit.wiki.git`). Dry-run by default; `apply` flag required to push. Manual only — not wired to commit hooks.
 
+- **Multi-Agent Mode** — `/kasi-multi [N] [mission]` fan-out command dispatches N specialist agents in parallel (default N=6) with mission-kind-heuristic roster selection and a single-pass synthesis step. New `sudo <mission>` / `sudo <N> <mission>` keyword shorthand enters fan-out mode with reasonable-assumption pacing (does NOT bypass destructive-op confirmation). Haiku tier caps N at 4 to avoid synthesis collapse. See `commands/kasi-multi.md` + new SKILL.md section **Multi-Agent Mode — Fan-Out (v0.9.2)**.
+
 - **`/kasi-init`** — one-shot project bootstrap. Chains `/kasi-scaffold` → `/kasi-docs` → `.kasidit/MISSION.md` seed → optional `/kasi-review` → registers project-level auto-invoke (SessionStart hook in `.claude/settings.local.json` + pointer in project `CLAUDE.md`). Skip flags: `skip docs`, `skip review`, `no auto-invoke`, `dry-run`.
 
 - **Global prompt log** — new `UserPromptSubmit` hook (`~/.claude/hooks/kasidit-log.sh` + `kasidit-log.py`) writes every user prompt to `~/.claude/skills/kasidit/center/logs/YYYY-MM-DD.jsonl`. Prompts > 200 lines are trimmed to first 40 + last 20 lines with a `[trimmed N lines] ...` marker. Shared across all projects (user scope). Never blocks prompt; errors swallowed. Hook script + `README.md` bundled under `plugins/kasidit/hooks/` for install reference.

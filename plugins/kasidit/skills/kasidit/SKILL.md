@@ -1175,6 +1175,70 @@ Confirm → step 1.
 
 ---
 
+## Multi-Agent Mode — Fan-Out (v0.9.2)
+
+> When reasoning benefits from parallel contexts, spawn N specialists at once. Synthesize, don't serialize.
+
+Introduced in v0.9.2 as a user-visible command and a `sudo` keyword shorthand. Sits on top of the Master Orchestrator Rule (v0.9.1) — this is "how" the master dispatches when fan-out is warranted.
+
+### Triggers
+
+- `/kasi-multi [N] [mission]` — explicit fan-out. Default N=6.
+- `sudo <mission>` — shorthand for `/kasi-multi 6 <mission>` + "skip clarifying Qs; narrate assumptions briefly". Not a permission escalation.
+- `sudo <N> <mission>` — with explicit N.
+
+### Behavior
+
+1. **Narrow the mission** (still required, even on sudo). If truly vague, refuse and offer numbered narrowing options.
+2. **Pick N specialists** from the registry — mission-kind heuristic.
+3. **Write one dispatch brief per agent** — `MISSION / INPUTS / CONSTRAINTS / EXPECTED OUTPUT / PRIOR CONTEXT`.
+4. **Dispatch all N in a single message** (parallel tool calls). Serial fan-out defeats the purpose.
+5. **Synthesize** — dedupe, rank by severity × confidence, produce one report.
+6. **Suggest next step**. Destructive actions surface but do not auto-execute.
+
+### N selection heuristic
+
+| N | Fits when |
+|---|-----------|
+| 2 | one dependency (research → implement) |
+| 3 | triage: planner + worker + reviewer |
+| 4 | audit or small build with 2–3 workstreams |
+| **6 (default)** | medium mission, 4 workers + reviewer + researcher |
+| 8 | multi-subsystem work |
+| 10 | max — full registry, rare |
+
+Larger N ≠ better. Synthesis cost scales with N; redundancy climbs.
+
+### Tier-specific caps
+
+- **Opus** — fan-out freely; synthesis is where it earns cost.
+- **Sonnet** — default; prefer 4 on large contexts.
+- **Haiku** — **cap N at 4**. Haiku synthesis is weak with many inputs. On Haiku, `sudo` implicitly caps at 4 even if user says 8.
+
+### `sudo` keyword — what it does and does not
+
+Does:
+- Fan out (default N=6).
+- Skip clarifying Qs the agent would normally ask; instead, narrate the assumption made.
+- Proceed on reasonable defaults.
+
+Does not:
+- Bypass destructive-op confirmation (hard rule still applies).
+- Override tier caps.
+- Allow scope creep — mission must still be narrow enough to verify.
+
+### Anti-patterns
+
+- ❌ Fanning out on a one-line fix — overhead > benefit.
+- ❌ Running `N=10` by default — pick the smallest N that covers needed slots.
+- ❌ Dispatching without briefs.
+- ❌ Forwarding raw agent outputs to the user without synthesis.
+- ❌ Using `sudo` to bypass destructive-op confirmation.
+
+See `commands/kasi-multi.md` for full command flow and `Multi-Agent-Orchestration.md` (wiki) for the underlying framework.
+
+---
+
 ## Gravity Pattern — Centerlite + Dcenterlite (v0.9.2)
 
 > Two-tier knowledge system. Center has mass. Local has autonomy. Things fall in when proven.
@@ -1335,6 +1399,8 @@ Optional commands user may use to steer the skill:
 - **`/kasi-pull <type> <name>`** — fetch Centerlite item into project (v0.9.2, Gravity).
 - **`/kasi-sync`** — audit drift between dcenterlite and Centerlite (v0.9.2, Gravity).
 - **`/kasi-wiki-sync`** — push `docs/wiki/` to the GitHub wiki repo (v0.9.2, dry-run by default).
+- **`/kasi-multi [N] [mission]`** — fan out mission to N specialists in parallel (v0.9.2, default N=6).
+- **`sudo <mission>`** — shorthand for `/kasi-multi 6 <mission>` with "skip clarifying Qs" pacing (v0.9.2).
 
 These are suggestions. Real commands depend on host environment (Claude Code, Cursor, Cowork, etc.).
 
@@ -1367,7 +1433,7 @@ This skill is the discipline.
 
 ## Version
 
-- `v0.9.2` — **Gravity Pattern** (Centerlite + Dcenterlite): two-tier knowledge system with `/kasi-promote`, `/kasi-pull`, `/kasi-sync`. **Global prompt log** via `UserPromptSubmit` hook into `~/.claude/skills/kasidit/center/logs/` (200-line trim, head/tail markers). **`/kasi-init`** chains scaffold + docs + review + project auto-invoke. **`/kasi-wiki-sync`** pushes `docs/wiki/` to the GitHub wiki (manual, dry-run default). Expanded default allow-list for Kasidit paths, hooks, and common read-only bash patterns.
+- `v0.9.2` — **Gravity Pattern** (Centerlite + Dcenterlite): two-tier knowledge system with `/kasi-promote`, `/kasi-pull`, `/kasi-sync`. **Multi-Agent Mode** — `/kasi-multi [N]` fan-out + `sudo` shorthand for fast parallel specialist dispatch. **Global prompt log** via `UserPromptSubmit` hook into `~/.claude/skills/kasidit/center/logs/` (200-line trim, head/tail markers). **`/kasi-init`** chains scaffold + docs + review + project auto-invoke. **`/kasi-wiki-sync`** pushes `docs/wiki/` to the GitHub wiki (manual, dry-run default). Expanded default allow-list for Kasidit paths, hooks, and common read-only bash patterns.
 - `v0.9.1` — **Master Orchestrator Rule.** Master agent delegates strong work to specialists, never executes it. 7 new specialized agents added: `bug-hunter`, `architect-planner`, `perf-profiler`, `test-writer`, `refactor-surgeon`, `deep-researcher`, `migration-specialist`. Specialist Agent Registry + dispatch brief format.
 - `v0.9` — Claude Design Integration. New Design/Visual Mode. DESIGN_SYSTEM.md. `.kasidit/prototypes/` store. Mockup-to-code handoff + parity check. UI Override requires visual target (screenshot / values / Claude Design mockup). New commands: design / mockup / extract-system / parity / report visual. Haiku: no hand-coded mockups — always route to Claude Design.
 - `v0.8` — Tier Cascade orchestration (Opus plans, Sonnet works, Haiku greps). Local embedding knowledge layer (sentence-transformers).
