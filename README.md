@@ -3,6 +3,10 @@
 > Mindful AI coding framework. Discipline over cleverness.
 > Works on any model tier — compensates for weaker reasoning with external structure.
 
+**Site:** https://kasidit-wansudon.github.io/kasidit-site/
+**Wiki:** https://github.com/kasidit-wansudon/kasidit/wiki
+**Changelog:** [CHANGELOG.md](./CHANGELOG.md)
+
 Kasidit is a Claude Code plugin that forces AI coding assistants into disciplined, grounded workflows. It was built after watching senior-engineer-quality models still fabricate APIs, invent fixes, and loop on ghost bugs — not because the models were too small, but because they lacked **a grounded base**.
 
 The fix is not a bigger model. The fix is scaffolding: checklists, confidence labels, tier-aware rules, runtime verification, and right-tool routing.
@@ -23,13 +27,17 @@ AI searches, guesses, believes what it reads, and compounds errors. Senior engin
 ## What you get
 
 - **1 skill** (`kasidit`) — the core framework, auto-triggered on coding tasks.
-- **9 slash commands** — `/kasi-review`, `/kasi-security`, `/kasi-scaffold`, `/kasi-fix`, `/kasi-ui`, `/kasi-docs`, `/kasi-status`, `/kasi-search`, `/kasi-cascade`.
-- **3 agents** — `security-auditor`, `code-reviewer`, `legacy-specialist`.
-- **14 checklists** — mechanical audit lists for security, performance, and framework-specific work.
+- **15 slash commands** — mission (`/kasi-review`, `/kasi-security`, `/kasi-fix`, `/kasi-ui`, `/kasi-cascade`), project (`/kasi-init`, `/kasi-scaffold`, `/kasi-docs`, `/kasi-status`), Gravity (`/kasi-promote`, `/kasi-pull`, `/kasi-sync`), semantic (`/kasi-search`), meta (`/kasi-wiki-sync`), and fan-out (`/kasi-multi`).
+- **`sudo <mission>` shorthand** — parallel fan-out to 6 specialists with assumption-narrated pacing (v0.9.2).
+- **10 specialist agents** — `architect-planner`, `bug-hunter`, `code-reviewer`, `deep-researcher`, `legacy-specialist`, `migration-specialist`, `perf-profiler`, `refactor-surgeon`, `security-auditor`, `test-writer`.
+- **Master Orchestrator Rule** (v0.9.1) — main agent delegates strong work; never executes it itself.
+- **Gravity Pattern** (v0.9.2) — two-tier knowledge: Centerlite hub (`~/.claude/skills/kasidit/center/`) + Dcenterlite project (`.kasidit/`), with promote / pull / sync commands.
+- **Global prompt log** (v0.9.2) — `UserPromptSubmit` hook writes to `~/.claude/skills/kasidit/center/logs/*.jsonl`, 200-line trim.
+- **14 checklists** — mechanical audit lists for security, performance, framework-specific work.
 - **Tier-aware rules** — tighter discipline on Haiku, full framework on Opus.
-- **Claude Design integration (v0.9)** — routes mockup/wireframe/deck work to the right tool.
-- **Local embedding layer** — scoped knowledge at `.kasidit/knowledge/` (sentence-transformers).
-- **Tier Cascade orchestration** — Opus plans, Sonnet works, Haiku greps.
+- **Claude Design integration (v0.9)** — routes mockup / wireframe / deck work to the right tool.
+- **Local embedding layer** (v0.8) — scoped knowledge at `.kasidit/knowledge/` (sentence-transformers).
+- **Tier Cascade orchestration** (v0.8) — Opus plans, Sonnet works, Haiku greps.
 
 ## Install
 
@@ -102,17 +110,41 @@ See [`plugins/kasidit/skills/kasidit/SKILL.md`](./plugins/kasidit/skills/kasidit
 
 ## Commands
 
+### Mission
+
 | Command | Use |
 | :--- | :--- |
 | `/kasi-review` | Code review with confidence labels. |
 | `/kasi-security` | Security audit with checklist-driven scan. |
-| `/kasi-scaffold` | Scaffold `.kasidit/` structure (INDEX / RELATIONS / PATTERNS / CHECKLISTS). |
-| `/kasi-fix` | Mission-scoped bug fix with git log protocol. |
-| `/kasi-ui` | UI Override Mode (scoped class + !important). |
+| `/kasi-fix` | Mission-scoped bug fix with mandatory `git log --grep` / `-S` protocol. |
+| `/kasi-ui` | UI Override Mode (scoped class + `!important`). |
+| `/kasi-cascade` | Tier Cascade orchestration — Opus plans, Sonnet works, Haiku greps. |
+| `/kasi-multi [N] [mission]` | Fan-out to N specialists in parallel (default N=6). |
+| `sudo <mission>` | Shorthand for `/kasi-multi 6 <mission>` with skip-clarifying pacing. |
+
+### Project
+
+| Command | Use |
+| :--- | :--- |
+| `/kasi-init` | One-shot bootstrap: scaffold → pull → docs → MISSION → review → auto-invoke. |
+| `/kasi-scaffold` | Build `.kasidit/` (INDEX / RELATIONS / MEMORY / PATTERNS / CHECKLISTS / knowledge). |
 | `/kasi-docs` | Fetch + cache version-matched official docs. |
 | `/kasi-status` | Show current mission, counter, pending items. |
-| `/kasi-search` | Scope-limited grep inside `.kasidit/knowledge/`. |
-| `/kasi-cascade` | Tier Cascade orchestration — plan/work/grep split. |
+
+### Gravity (v0.9.2)
+
+| Command | Use |
+| :--- | :--- |
+| `/kasi-promote <type> <name>` | Lift pattern / checklist / knowledge from `.kasidit/` into Centerlite hub. |
+| `/kasi-pull <type> <name>` | Fetch item from Centerlite into current `.kasidit/`. |
+| `/kasi-sync` | Audit drift between local and hub. Read-only. |
+
+### Semantic + Meta
+
+| Command | Use |
+| :--- | :--- |
+| `/kasi-search "<query>"` | Semantic search over `.kasidit/knowledge/` via local embeddings. |
+| `/kasi-wiki-sync [apply]` | Push `docs/wiki/*` to the GitHub wiki (dry-run by default). |
 
 ## Claude Design integration (v0.9)
 
@@ -154,7 +186,7 @@ MIT. See [LICENSE](./LICENSE).
 ## Author
 
 Kasidit Wansudon — self-taught Thai engineer.
-Web: [kasidit.ai](https://kasidit.ai) (pending launch).
+Site: https://kasidit-wansudon.github.io/kasidit-site/
 Email: kasidit.wans@gmail.com
 
 ---
