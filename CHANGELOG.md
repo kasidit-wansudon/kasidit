@@ -4,6 +4,41 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.9.2] — 2026-04-23
+
+### Added
+
+- **Gravity Pattern** — canonical name for Kasidit's two-tier knowledge system.
+  - **Centerlite** (global hub): `~/.claude/skills/kasidit/center/` — shared patterns, checklists, knowledge, rules, mission history, prompt logs. Lightweight, append-only, user scope.
+  - **Dcenterlite** (project orbit): `<project>/.kasidit/` — full-fidelity project knowledge. Source of truth for each project.
+  - **Sync logic:** read = local with Centerlite fallback. Write = local only. Promote and pull are explicit user actions; nothing moves automatically. Logs flow one-way (prompt → Centerlite).
+  - Documented in new **Gravity Pattern** section of `SKILL.md`.
+
+- **Four new commands** (Gravity + workflow):
+  - `/kasi-promote <type> <name>` — lift pattern / checklist / knowledge / rule from `.kasidit/` into Centerlite. Always asks confirmation.
+  - `/kasi-pull <type> <name>` — fetch a shared item from Centerlite into current `.kasidit/`. Always diffs before overwrite.
+  - `/kasi-sync` — audit drift between local and hub. Read-only; prints per-item suggestions but does not mutate.
+  - `/kasi-wiki-sync` — push `docs/wiki/*.md` into the GitHub wiki repo (`kasidit.wiki.git`). Dry-run by default; `apply` flag required to push. Manual only — not wired to commit hooks.
+
+- **`/kasi-init`** — one-shot project bootstrap. Chains `/kasi-scaffold` → `/kasi-docs` → `.kasidit/MISSION.md` seed → optional `/kasi-review` → registers project-level auto-invoke (SessionStart hook in `.claude/settings.local.json` + pointer in project `CLAUDE.md`). Skip flags: `skip docs`, `skip review`, `no auto-invoke`, `dry-run`.
+
+- **Global prompt log** — new `UserPromptSubmit` hook (`~/.claude/hooks/kasidit-log.sh` + `kasidit-log.py`) writes every user prompt to `~/.claude/skills/kasidit/center/logs/YYYY-MM-DD.jsonl`. Prompts > 200 lines are trimmed to first 40 + last 20 lines with a `[trimmed N lines] ...` marker. Shared across all projects (user scope). Never blocks prompt; errors swallowed. Hook script + `README.md` bundled under `plugins/kasidit/hooks/` for install reference.
+
+- **Default allow-list** for Kasidit workflows — adds `Bash(kasidit-*:*)`, `Read/Write(.kasidit/**)`, `Read(~/.claude/skills/kasidit/**)`, `Read(~/.claude/plugins/marketplaces/kasidit/**)`, and common read-only patterns (`grep`, `rg`, `find`, `git log/status/diff/blame/show`, version checks) so `kasi-*` missions run with fewer permission prompts.
+
+- **Wiki source tree** — `docs/wiki/` with detailed per-version pages describing every release from `v0.1.0` to `v0.9.2` and the major subsystems (Gravity, Model Tiers, Multi-Agent Orchestration, Claude Design Integration, UI Override, Commands, FAQ). Intended to be pushed to the GitHub wiki via `/kasi-wiki-sync`.
+
+### Changed
+
+- `SKILL.md` — new sections **Gravity Pattern (v0.9.2)**, **Global Prompt Log (v0.9.2)**, **Project Init (v0.9.2)** inserted before User Commands. User Commands list gains five v0.9.2 entries (`/kasi-init`, `/kasi-promote`, `/kasi-pull`, `/kasi-sync`, `/kasi-wiki-sync`).
+- `~/.claude/skills/kasidit/logs/` path canonicalized under Centerlite (`center/logs/`). Old path kept as a symlink for backward compat.
+- `plugins/kasidit/hooks/kasidit-log.sh` default `LOG_DIR` points at the new Centerlite path.
+
+### Fixed
+
+- Haiku guidance on `/kasi-init`: skip the light review step during init unless user insists — Haiku needs checklists that scaffold has not finished producing yet.
+- Promote / pull flows explicitly refuse silent overwrite; conflict path surfaces a diff instead of guessing a winner.
+
 ## [0.9.1] — 2026-04-22
 
 ### Added
@@ -96,6 +131,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Mission counter** — retry budget + Wave 1 / Wave 2 escalation.
 - **สารบัญ system** — INDEX.md / RELATIONS.md / MEMORY.md for project-level knowledge.
 
+[0.9.2]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.9.2
 [0.9.1]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.9.1
 [0.9.0]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.9.0
 [0.8.0]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.8.0
