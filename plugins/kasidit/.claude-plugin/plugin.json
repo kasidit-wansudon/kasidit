@@ -1,7 +1,7 @@
 {
   "name": "kasidit",
   "description": "Mindful AI coding framework — discipline over cleverness. Skill + 9 slash commands + 3 agents. Works on any model tier (Opus/Sonnet/Haiku). Integrates Claude Design for visual work.",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "author": {
     "name": "Kasidit Wansudon",
     "email": "kasidit.wans@gmail.com"

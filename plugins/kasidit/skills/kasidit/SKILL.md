@@ -1,16 +1,101 @@
 ---
 name: kasidit
-description: Mindful AI coding framework that forces discipline to prevent hallucination. Works on any model tier — compensates for weaker reasoning with external structure, checklists, and verification loops. Use whenever the user is writing code, fixing bugs, debugging, integrating APIs, refactoring, working with databases, adjusting layouts, reviewing codebases, or asks the AI to "help fix this", "why is my code broken", "check the project", or complains the AI is guessing/hallucinating/going in circles. Also trigger when user mentions frameworks, libraries, or specific versions — partial recognition does not mean current knowledge. Apply this skill proactively on any coding task where there is a risk of the AI inventing APIs, chasing ghost bugs, or producing code divorced from the actual codebase. Especially important when running on Haiku or smaller models where reasoning capacity is limited. Also routes UI mockup, prototype, pitch deck, and visual design requests through Claude Design instead of hand-coding markup.
+description: Mindful AI coding discipline framework. Activate ONLY when user invokes /kasi-* command, explicitly requests code review / security audit / migration plan / legacy refactor, complains the AI is hallucinating or looping on ghost bugs, or asks for disciplined / checklist-driven work. Do NOT auto-trigger on routine coding edits, trivial bug fixes, or single-file changes — those should run without the framework loaded. Also routes UI mockup / prototype / pitch deck / visual design requests through Claude Design instead of hand-coding markup. Mode-gated: respects `/kasi off|router|lite|full|ultra` session state and project `.kasidit/config.json`.
 ---
 
 # Kasidit — Mindful AI Coding Framework
+
+## Router Mode (default)
+
+> Thin classifier. Keep guardrails on, escalate only when the work needs it.
+
+In router / lite mode, only this first section is "live". Everything below the Full Framework header should be skimmed for context but not applied rule-by-rule. Router does three things:
+
+1. Classify each user message into a mission kind.
+2. Recommend a mode (`off` / `router` / `lite` / `full` / `ultra`).
+3. Keep two always-on guardrails: **Rule 1 (mission-driven)** and **Rule 11 (confidence labels)**.
+
+### Rule 1 — Mission-driven (always on)
+
+Every session has **one mission**. If the user's request is vague or multi-part, narrow it first. Never start coding on "improve this" or "check the project".
+
+Vague keywords that must be refused with numbered options:
+
+- `check`, `review`, `audit`, `look at`
+- `ดูดี`, `สวย`, `เหมาะสม`, `ปรับ`, `เพี้ยน`, `แปลก`
+- `improve`, `better`, `fix`, `optimize`, `all`, `every`, `entire`
+
+On these, output numbered options (Rule 2.4 style) and wait for a number. Applies in every mode except `off`.
+
+### Rule 11 — Confidence labels (always on)
+
+Every non-trivial finding or code change must be tagged:
+
+- `[high]` — verified by running code, reading source, or official docs.
+- `[medium]` — strong pattern match from codebase, not yet runtime-verified.
+- `[low]` — inferred from naming/comments, not from actual behavior.
+- `[unsure]` — do not know.
+
+**Never silently guess.** `[unsure]` items go in a separate list for user decision. The `kasidit-verify.py` PostToolUse hook cross-checks `[high]` claims against actual Read/Bash tool calls and auto-downgrades claims without matching tool calls.
+
+### Router classification triggers
+
+Word-boundary match (first hit wins, dict-insert order). Keywords exactly as implemented in `kasidit-route.py:KEYWORDS`:
+
+| Keywords in message | kind | Recommended mode |
+|---|---|---|
+| `security`, `owasp`, `cve` | security-audit | `ultra` |
+| `migration` | migration | `ultra` |
+| `audit` | audit | `full` |
+| `review` | review | `full` |
+| `refactor` | refactor | `full` |
+| `perf`, `n+1` | perf | `full` |
+| `bug`, `fix`, `error` | bug-fix | `lite` |
+| `slow` | perf | `lite` |
+| `ui`, `css`, `layout` | ui | `lite` |
+| `rename` | refactor-rename | `router` |
+| `question`, `explain`, `what is` | question | `router` |
+| `how do i` | question | `lite` |
+| no match | unclassified | (silent — router stays default) |
+
+Thai / extended phrases (e.g. `auth boundary`, `เพี้ยน`, `check the project`) are **not** implemented in v0.10 — add them to `KEYWORDS` if needed.
+
+When `kasidit-route.py` runs on `UserPromptSubmit`, it prepends 1 line to the turn:
+
+```
+[kasidit] kind=<kind> mode=<recommended> history=<n_pass>/<n_total> avg_turns=<x>
+```
+
+If history shows a lighter mode succeeded for this kind, recommend the lighter mode.
+
+### When router escalates
+
+Router itself never writes code or reads source files beyond `.kasidit/` index files. It delegates:
+
+- `/kasi-*` heavy commands (init, scaffold, docs, review, security, fix, ui, multi, cascade) → treat the full framework below as active until the mission ends.
+- Explicit `/kasi full` / `/kasi ultra` → full framework active for the session.
+- Multi-file refactor / audit / review / mockup → escalate and load the full framework.
+
+### Stop phrases
+
+- `stop kasidit` — disable for rest of session.
+- `normal mode` — synonym.
+- `/kasi off` — explicit.
+
+---
+
+## Full Framework (loaded on /kasi full or heavy /kasi-* commands)
+
+> AI: treat everything below this header as inert until the current mode is full or ultra, or the current mission was invoked via a heavy /kasi-* command. In router / lite mode, skim for context only — do not apply the full rule set turn-by-turn.
+>
+> **Honest caveat:** this is a prompt-level gate, not a runtime gate. Claude Code's skill harness loads this whole file every time the skill activates — there is no loader that conditionally includes or excludes the section below. Adherence to the mode boundary is best-effort on the model's part, not enforced by tooling. Treat the gate as a strong convention, not a hard contract.
 
 > Visual is truth. Cascade is noise. Mission is one.
 > Override with scope, not elegance.
 > When reasoning is weak, scaffolding is strong.
 > Design with Claude Design. Code with discipline.
 
-## Why this skill exists
+### Why this skill exists
 
 AI coding fails for one root reason: **no grounded base**.
 
@@ -704,13 +789,13 @@ If the master catches itself doing any of the above → **stop, spawn a speciali
 |-------|---------------------|-------|
 | `bug-hunter` | error, crash, wrong output, regression | root-cause + minimal fix |
 | `architect-planner` | new feature, design, refactor > 2 files | plan only, no code |
-| `perf-profiler` | slow, N+1, high cost, before-scale | find bottleneck, rank impact |
+| `audit-specialist --focus=quality` | PR / diff / code review | multi-dimensional quality review (v0.10 — replaces `code-reviewer`) |
+| `audit-specialist --focus=security` | OWASP / CVE / auth boundary | security-focused deep audit (v0.10 — replaces `security-auditor`) |
+| `audit-specialist --focus=perf` | slow, N+1, high cost, before-scale | find bottleneck, rank impact (v0.10 — replaces `perf-profiler`) |
 | `test-writer` | add tests, regression after fix, backfill coverage | runnable tests + gap notes |
 | `refactor-surgeon` | named refactor (extract/rename/split/inline) | preserves behavior exactly |
 | `deep-researcher` | library/API/framework research, version-matched docs | findings + sources, cache to `.kasidit/knowledge/` |
 | `migration-specialist` | schema change, framework upgrade, backfill | backward-compat + zero-downtime plan |
-| `code-reviewer` | PR / diff / audit | multi-dimensional review |
-| `security-auditor` | OWASP / CVE / auth boundary | security-focused deep audit |
 | `legacy-specialist` | legacy PHP, old framework, no-test code | legacy-safe refactor |
 
 ### Dispatch brief format
@@ -1229,6 +1314,7 @@ This skill is the discipline.
 
 ## Version
 
+- `v0.10` — **Honesty cleanup.** `SKILL-full.md` split reverted — Full Framework merged back into `SKILL.md` behind a prompt-level mode gate (best-effort, not runtime-enforced). `audit-specialist` agent consolidates `code-reviewer` / `security-auditor` / `perf-profiler` via `--focus=` (old agents remain as name-recognition stubs — users must invoke `audit-specialist` explicitly; no automatic router mapping). `/kasi-init` install prompt clarified (digit-only input). `/kasi` state precedence marked as spec — no runtime resolver yet.
 - `v0.9.2` — **Gravity Pattern** (Centerlite + Dcenterlite): two-tier knowledge system with `/kasi-promote`, `/kasi-pull`, `/kasi-sync`. **Multi-Agent Mode** — `/kasi-multi [N]` fan-out + `sudo` shorthand for fast parallel specialist dispatch. **Global prompt log** via `UserPromptSubmit` hook into `~/.claude/skills/kasidit/center/logs/` (200-line trim, head/tail markers). **`/kasi-init`** chains scaffold + docs + review + project auto-invoke. **`/kasi-wiki-sync`** pushes `docs/wiki/` to the GitHub wiki (manual, dry-run default). Expanded default allow-list for Kasidit paths, hooks, and common read-only bash patterns.
 - `v0.9.1` — **Master Orchestrator Rule.** Master agent delegates strong work to specialists, never executes it. 7 new specialized agents added: `bug-hunter`, `architect-planner`, `perf-profiler`, `test-writer`, `refactor-surgeon`, `deep-researcher`, `migration-specialist`. Specialist Agent Registry + dispatch brief format.
 - `v0.9` — Claude Design Integration. New Design/Visual Mode. DESIGN_SYSTEM.md. `.kasidit/prototypes/` store. Mockup-to-code handoff + parity check. UI Override requires visual target (screenshot / values / Claude Design mockup). New commands: design / mockup / extract-system / parity / report visual. Haiku: no hand-coded mockups — always route to Claude Design.

@@ -27,13 +27,16 @@ AI searches, guesses, believes what it reads, and compounds errors. Senior engin
 ## What you get
 
 - **1 skill** (`kasidit`) — the core framework, auto-triggered on coding tasks.
+- **`/kasi` Mode command** (v0.10) — select framework intensity: `off` / `router` / `lite` / `full` / `ultra`. Default = `router`. Mode gating is a prompt-level convention — see the Honesty section below.
 - **15 slash commands** — mission (`/kasi-review`, `/kasi-security`, `/kasi-fix`, `/kasi-ui`, `/kasi-cascade`), project (`/kasi-init`, `/kasi-scaffold`, `/kasi-docs`, `/kasi-status`), Gravity (`/kasi-promote`, `/kasi-pull`, `/kasi-sync`), semantic (`/kasi-search`), meta (`/kasi-wiki-sync`), and fan-out (`/kasi-multi`).
-- **`sudo <mission>` shorthand** — parallel fan-out to 6 specialists with assumption-narrated pacing (v0.9.2).
-- **10 specialist agents** — `architect-planner`, `bug-hunter`, `code-reviewer`, `deep-researcher`, `legacy-specialist`, `migration-specialist`, `perf-profiler`, `refactor-surgeon`, `security-auditor`, `test-writer`.
+- **Backend hooks** (v0.10, runtime-enforced) — `kasidit-route.py` (prompt classifier + memory query on `UserPromptSubmit`), `kasidit-verify.py` (confidence-label + orchestrator-violation check on `PostToolUse` and `Stop`), `kasidit-record.py` (parses `[kasidit-log|pattern|memory|rule]` emit lines into JSONL on `Stop`), `kasidit-update-check.sh` (1×/day release-tag check on `SessionStart`), `kasidit-drift-check.sh` (Centerlite-sync reminder on `SessionStart`).
+- **Incremental backend save** (v0.10) — AI emits `[kasidit-log] kind=... mode=... turns=... outcome=...` lines at mission end; router learns shortest successful route per mission kind over time.
+- **`sudo <mission>` shorthand** — parallel fan-out, min 2 agents, assumption-narrated pacing. Session-only speed shortcut, **not** a permission escalation. `/kasi-multi --fast` is an equivalent alternative (v0.10).
+- **8 specialist agents** — `architect-planner`, `audit-specialist` (merged `code-reviewer` / `security-auditor` / `perf-profiler` via `--focus=quality|security|perf|all`, v0.10), `bug-hunter`, `deep-researcher`, `legacy-specialist`, `migration-specialist`, `refactor-surgeon`, `test-writer`. Old agent files kept as thin stubs for name resolution; removed in v0.11.
 - **Master Orchestrator Rule** (v0.9.1) — main agent delegates strong work; never executes it itself.
 - **Gravity Pattern** (v0.9.2) — two-tier knowledge: Centerlite hub (`~/.claude/skills/kasidit/center/`) + Dcenterlite project (`.kasidit/`), with promote / pull / sync commands.
 - **Global prompt log** (v0.9.2) — `UserPromptSubmit` hook writes to `~/.claude/skills/kasidit/center/logs/*.jsonl`, 200-line trim.
-- **14 checklists** — mechanical audit lists for security, performance, framework-specific work.
+- **12 default checklists** (v0.10) — `defaults/checklists/` ships security / code-review / perf lists for PHP, Node, Python, Go (4 stacks × 3 lenses). Seeded into `~/.claude/skills/kasidit/center/checklists/` at install time.
 - **Tier-aware rules** — tighter discipline on Haiku, full framework on Opus.
 - **Claude Design integration (v0.9)** — routes mockup / wireframe / deck work to the right tool.
 - **Local embedding layer** (v0.8) — scoped knowledge at `.kasidit/knowledge/` (sentence-transformers).
@@ -54,14 +57,36 @@ Update later with:
 /plugin marketplace update kasidit
 ```
 
-### Manual install (advanced)
+### Via `install.sh` (canonical for hooks + settings merge)
+
+`install.sh` is the recommended flow if you want the v0.10 backend hooks, the Gravity hub seed, and the permission allow-list merged into `~/.claude/settings.json`. Idempotent — safe to re-run.
+
+```bash
+git clone https://github.com/kasidit-wansudon/kasidit.git
+cd kasidit
+./install.sh
+```
+
+It will:
+
+- copy hooks into `~/.claude/hooks/`
+- merge `~/.claude/settings.json` (via `jq`, with `python3` stdlib fallback)
+- seed the Gravity hub under `~/.claude/skills/kasidit/center/` with 5 JSONL files
+- install default checklists for PHP / Node / Python / Go
+
+### Manual `cp` (debugging only)
+
+Use this if `install.sh` fails or you need to inspect individual pieces:
 
 ```bash
 git clone https://github.com/kasidit-wansudon/kasidit.git
 cp -r kasidit/plugins/kasidit/skills/kasidit ~/.claude/skills/kasidit
 cp -r kasidit/plugins/kasidit/commands/* ~/.claude/commands/
 cp -r kasidit/plugins/kasidit/agents/* ~/.claude/agents/
+cp -r kasidit/plugins/kasidit/hooks/* ~/.claude/hooks/
 ```
+
+Manual copy does **not** merge `settings.json` or seed the Gravity hub — hooks won't fire without those.
 
 ## Evidence (honest numbers)
 
@@ -86,7 +111,7 @@ Full run (remaining 244 tasks) is scheduled.
 
 ## Core rules
 
-Kasidit enforces 13 core rules plus 6 sub-rules. The most load-bearing:
+Kasidit enforces 11 core rules plus 4 sub-rules. The most load-bearing:
 
 1. **Mission-driven** — one mission per session, vague missions refused.
 2. **Minimal requirement** — narrowest interpretation. No uninvited refactor.
@@ -174,6 +199,16 @@ The fix is discipline:
 When AI follows discipline, it amplifies a senior engineer. Without discipline, it replaces them with hallucination.
 
 **On Opus, discipline unlocks depth. On Haiku, discipline IS the reasoning.**
+
+## Honesty — enforced vs. convention
+
+Kasidit is part runtime-enforced (hooks), part prompt-level convention (discipline the AI self-applies). Being clear about which is which:
+
+- **Runtime-enforced (hooks):** `kasidit-route.py` (`UserPromptSubmit`), `kasidit-verify.py` (`PostToolUse`), `kasidit-record.py` (`Stop`), and `kasidit-update-check.sh`. These run in the Claude Code harness regardless of what the model decides. They classify prompts, cross-check confidence labels, flag master-orchestrator violations, and append JSONL emit lines to the Gravity hub.
+- **Convention (prompt-level):** Mode gating (`off` / `router` / `lite` / `full` / `ultra`) is a section in `SKILL.md` the AI reads and self-applies. The harness does not enforce mode boundaries. A model can in principle ignore the declared mode — discipline comes from the prompt, not a runtime sandbox.
+- **Convention (prompt-level):** Master Orchestrator Rule, Tier Cascade routing, and the 11 core rules live in `SKILL.md`. `kasidit-verify.py` flags some orchestrator violations after the fact, but the rules themselves are AI-applied, not harness-applied.
+- **No auto-remap:** the router does not silently rewrite old agent names (`code-reviewer`, `security-auditor`, `perf-profiler`) to `audit-specialist`. They resolve to their own stub files until v0.11 removes them.
+- **No new benchmarks:** the 60.7% strict / 87.5% valid figure is still the v0.7.4 SWE-bench Lite sample (56/300). v0.10 has not been re-benchmarked. Numbers will be republished only after a real re-run.
 
 ## Changelog
 

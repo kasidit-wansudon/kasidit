@@ -4,7 +4,7 @@
 
 set -u
 
-CENTER="${KASIDIT_CENTER_DIR:-$HOME/.claude/skills/kasidit/center}"
+CENTER="${KASIDIT_CENTER:-${KASIDIT_CENTER_DIR:-$HOME/.claude/skills/kasidit/center}}"
 LAST_SYNC="$CENTER/.last_sync"
 THRESHOLD_DAYS=7
 
