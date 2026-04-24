@@ -4,6 +4,50 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.10.0] — 2026-04-24
+
+### Added
+
+- **`/kasi` Mode command** — selects framework intensity for the current session. Values: `off` / `router` / `lite` / `full` / `ultra`. Default = `router`.
+  - **Caveat (honest):** mode gating is a prompt-level convention. The AI reads the declared mode from `SKILL.md` sections and self-applies. The Claude Code harness does NOT enforce mode boundaries at runtime.
+- **`SKILL.md` restructure** — Router Mode default section + Full Framework section live in the **same file**. No lazy-loading. The file explicitly documents that mode gating is prompt-level, not harness-enforced.
+- **Backend hooks** (runtime-enforced, bundled under `plugins/kasidit/hooks/`):
+  - `kasidit-route.py` — `UserPromptSubmit` classifier + memory query. Routes prompts by mission-kind heuristic.
+  - `kasidit-verify.py` — `PostToolUse` + `Stop` cross-check. Flags missing confidence labels and detects master-orchestrator violations (main agent executing strong work instead of delegating).
+  - `kasidit-record.py` — `Stop` hook. Parses `[kasidit-log|pattern|memory|rule]` emit lines from the AI output and appends them to JSONL files.
+  - `kasidit-update-check.sh` — 1×/day GitHub release tag check. Soft-notifies on new versions.
+- **Incremental backend save ("ออม")** — AI emits `[kasidit-log] kind=<mission-kind> mode=<mode> turns=<n> outcome=<pass|fail>` lines at mission end. `kasidit-record.py` appends to JSONL. Router learns the shortest successful route per mission kind over successive sessions.
+- **`audit-specialist` agent** — merges `code-reviewer` / `security-auditor` / `perf-profiler` behind a single entry point with `--focus=quality|security|perf|all`. Old agent files kept as thin stubs for name resolution; scheduled for removal in v0.11.
+- **`sudo <mission>` keyword** — session-only speed shortcut. Minimum 2 parallel agents. **Not** a permission escalation, does not bypass destructive-op confirmation.
+- **`/kasi-multi --fast` flag** — alternative surface for the same speed shortcut as `sudo`.
+- **`install.sh`** — idempotent installer. Copies hooks, merges `~/.claude/settings.json` via `jq` with a `python3` stdlib fallback, seeds Gravity hub with 5 JSONL files and PHP / Node / Python / Go default checklists. Safe to re-run.
+- **`test_hooks.py`** — 10 isolated snapshot tests for the new hook scripts. No shared state between tests.
+
+### Changed
+
+- `SKILL.md` reorganized into Router Mode (default, minimal) + Full Framework (opt-in via `/kasi full` or `ultra`). Router Mode is intentionally thin so the framework does not inflate short missions.
+- Install path — `install.sh` is now the canonical install flow. Manual `cp` remains supported but is documented as a debugging path.
+
+### Fixed
+
+- Python 3.9 compatibility — added `from __future__ import annotations` to hook scripts so they run on macOS default Python without `TypeError` on PEP 604 unions.
+- Isolated test state — `test_hooks.py` no longer shares temp paths between cases; fixes flake when run in parallel.
+
+### Deprecated
+
+- `code-reviewer`, `security-auditor`, `perf-profiler` agent files — now thin stubs that forward to `audit-specialist`. Scheduled for removal in **v0.11**.
+
+### Removed
+
+- Nothing removed in v0.10. (Old agent files deprecated but retained for name-resolution back-compat.)
+
+### Honesty notes
+
+- Mode gating (`off` / `router` / `lite` / `full` / `ultra`) is a **prompt-level convention**. The AI reads the declared mode and self-applies. The Claude Code harness does not enforce mode boundaries.
+- Router does **not** auto-map old agent names to `audit-specialist` — old names still resolve to their stub files; no silent rerouting.
+- Session mode precedence is resolved by user or AI applying config files directly. There is no runtime resolver.
+- No new benchmark numbers. The v0.7.4 SWE-bench Lite sample (60.7% strict / 87.5% valid on 56/300) remains the published figure. A re-run on v0.10 has not been performed.
+
 ## [0.9.2] — 2026-04-23
 
 ### Added
@@ -133,6 +177,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Mission counter** — retry budget + Wave 1 / Wave 2 escalation.
 - **สารบัญ system** — INDEX.md / RELATIONS.md / MEMORY.md for project-level knowledge.
 
+[0.10.0]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.10.0
 [0.9.2]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.9.2
 [0.9.1]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.9.1
 [0.9.0]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.9.0
