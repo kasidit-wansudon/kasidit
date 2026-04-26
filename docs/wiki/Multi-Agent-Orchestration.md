@@ -41,18 +41,26 @@ If the master catches itself doing any of the above → stop, spawn a specialist
 
 ## Specialist registry
 
+**8 active + 3 deprecated stubs (v0.10).**
+
 | Agent | Trigger | Scope |
 |---|---|---|
-| `bug-hunter` | error / crash / wrong output / regression | root-cause + minimal fix; mandatory `git log --grep` / `-S` |
 | `architect-planner` | new feature / refactor > 2 files | plan only; trade-offs + open questions |
-| `perf-profiler` | slow / N+1 / high cost / pre-scale | measure first; top 5 by impact × confidence |
-| `test-writer` | add tests / regression / coverage | one target per call; regression after bug fix |
-| `refactor-surgeon` | named refactor | zero behavior change; test-parity |
+| `audit-specialist` (v0.10) | PR / OWASP / CVE / N+1 / pre-merge / pre-scale | unified audit via `--focus=quality\|security\|perf\|all` |
+| `bug-hunter` | error / crash / wrong output / regression | root-cause + minimal fix; mandatory `git log --grep` / `-S` |
 | `deep-researcher` | library / API / framework research | trust hierarchy; caches to `.kasidit/knowledge/` |
-| `migration-specialist` | schema / framework upgrade / backfill | expand-contract phases; rollback per phase |
-| `code-reviewer` | PR / diff / audit | multi-dimensional |
-| `security-auditor` | OWASP / CVE / auth boundary | security-focused deep audit |
 | `legacy-specialist` | legacy PHP / old framework / no-test | legacy-safe refactor |
+| `migration-specialist` | schema / framework upgrade / backfill | expand-contract phases; rollback per phase |
+| `refactor-surgeon` | named refactor | zero behavior change; test-parity |
+| `test-writer` | add tests / regression / coverage | one target per call; regression after bug fix |
+
+**Deprecated stubs (v0.10 — removed in v0.11):**
+
+| Stub | Use this instead |
+|---|---|
+| `code-reviewer` | `audit-specialist --focus=quality` |
+| `security-auditor` | `audit-specialist --focus=security` |
+| `perf-profiler` | `audit-specialist --focus=perf` |
 
 ## Dispatch brief format
 

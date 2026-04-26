@@ -61,7 +61,9 @@ What the specialist returns. Must match the agent's documented output block.
 
 - `bug-hunter` returns: root cause + minimal fix + regression test plan
 - `architect-planner` returns: file list + step sequence + trade-offs + open questions (no code)
-- `perf-profiler` returns: top 5 findings ranked by impact × confidence (does not optimize)
+- `audit-specialist --focus=perf` returns: top 5 findings ranked by impact × confidence (does not optimize) — pre-v0.10 was the standalone `perf-profiler` agent
+- `audit-specialist --focus=quality` returns: severity-bucketed findings with confidence labels — pre-v0.10 was `code-reviewer`
+- `audit-specialist --focus=security` returns: OWASP-aligned findings + verifier pass — pre-v0.10 was `security-auditor`
 - `test-writer` returns: runnable test file + gap notes
 
 Wrong shape = rejected output, re-dispatch.
