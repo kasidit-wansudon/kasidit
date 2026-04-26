@@ -6,27 +6,39 @@ All `/kasi-*` commands shipped with the plugin. Invoke with `/` from Claude Code
 
 ### `/kasi-review`
 
+**Deep page:** [[Kasi-Review]]
+
 Launch a code review mission with full Kasidit discipline: narrow scope → load or generate CHECKLISTS → dispatch per-file agents → synthesize findings with confidence labels + Top 5 priority.
 
 Tier behavior: on Haiku, 1 file per agent + mandatory verifier pass.
 
 ### `/kasi-security`
 
+**Deep page:** [[Kasi-Security]]
+
 Security audit variant of review. Runs through `CHECKLISTS/security-<stack>.md`. Flags injection, auth, file handling, output, session, crypto issues. Confidence-labeled.
 
 ### `/kasi-fix`
+
+**Deep page:** [[Kasi-Fix]]
 
 Bug-fix mission with conservative discipline. Runs mandatory `git log --grep=<term>` and `git log -S <symbol>` before any fix (Rule 2.6). Minimal-change fix with regression test.
 
 ### `/kasi-ui`
 
+**Deep page:** [[Kasi-Ui]]
+
 UI/CSS mission in UI Override Mode. Requires visual target (screenshot / CSS values / Claude Design mockup). One change per round. Cache-aware.
 
 ### `/kasi-cascade`
 
+**Deep page:** [[Kasi-Cascade]]
+
 Tier Cascade orchestration ([[v0.8.0]]): Opus plans → Sonnet writes → Haiku greps. Invoke for missions large enough to benefit from multi-tier routing.
 
 ### `/kasi-multi`
+
+**Deep page:** [[Kasi-Multi]]
 
 ```
 /kasi-multi                    # default: 6 agents, auto-selected
@@ -54,6 +66,8 @@ Introduced in [[v0.9.2]]. See [[Multi-Agent-Orchestration]].
 
 ### `/kasi-init`
 
+**Deep page:** [[Kasi-Init]]
+
 Bootstrap a new or existing project. Chains:
 
 ```
@@ -68,19 +82,27 @@ Haiku: skips the review step during init unless user insists.
 
 ### `/kasi-scaffold`
 
+**Deep page:** [[Kasi-Scaffold]]
+
 Build `.kasidit/` structure: INDEX, RELATIONS, MEMORY, PATTERNS, CHECKLISTS, knowledge. Detects stack from `composer.json` / `package.json` / etc. Asks to confirm detection before generating.
 
 ### `/kasi-docs`
 
+**Deep page:** [[Kasi-Docs]]
+
 Fetch version-matched official documentation for the detected stack. Caches to `.kasidit/knowledge/<stack>-<version>-<topic>.md`. Follows the Trust Hierarchy from [[v0.2.1]].
 
 ### `/kasi-status`
+
+**Deep page:** [[Kasi-Status]]
 
 Show current mission state, failure counter, context usage. Quick health check.
 
 ## Gravity commands
 
 ### `/kasi-promote`
+
+**Deep page:** [[Kasi-Promote]]
 
 ```
 /kasi-promote <type> <name>
@@ -100,6 +122,8 @@ Always asks confirmation. Never auto-promotes. See [[Gravity Pattern]].
 
 ### `/kasi-pull`
 
+**Deep page:** [[Kasi-Pull]]
+
 ```
 /kasi-pull <type> <name>
 /kasi-pull all-for <stack>
@@ -108,6 +132,8 @@ Always asks confirmation. Never auto-promotes. See [[Gravity Pattern]].
 Fetch item from Centerlite into project `.kasidit/`. Diffs before overwrite; `(o)verwrite / (m)erge-append / (s)kip` on conflict. See [[Gravity Pattern]].
 
 ### `/kasi-sync`
+
+**Deep page:** [[Kasi-Sync]]
 
 ```
 /kasi-sync              # everything
@@ -118,6 +144,8 @@ Fetch item from Centerlite into project `.kasidit/`. Diffs before overwrite; `(o
 Audit drift between dcenterlite and centerlite. Read-only. Prints per-item status: `up-to-date / local ahead / center ahead / conflict / local only / center only` with suggested command.
 
 ### `/kasi-search`
+
+**Deep page:** [[Kasi-Search]]
 
 ```
 /kasi-search "<query>"
@@ -150,6 +178,8 @@ Export last findings as a one-pager via Claude Design. Useful for non-technical 
 ## Meta commands
 
 ### `/kasi-wiki-sync`
+
+**Deep page:** [[Kasi-Wiki-Sync]]
 
 ```
 /kasi-wiki-sync          # dry-run (default)

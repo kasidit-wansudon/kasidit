@@ -4,6 +4,8 @@ Introduced in [[v0.3.0]], formalized in [[v0.9.1]] as the Master Orchestrator Ru
 
 > When the master both plans and executes, context pollution compounds. Isolation = clean handoffs = fewer hallucinations.
 
+**See also:** [[Master-Orchestrator]] for the master rule · [[Dispatch-Brief]] for the brief format
+
 ## The rule
 
 For any **strong-work mission** — multi-file change, migration, perf hunt, security audit, new feature, deep research — the main agent becomes an **orchestrator only**. It narrows, dispatches, synthesizes. It does not execute.
