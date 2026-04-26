@@ -125,11 +125,40 @@ Haiku also requires a **mandatory verifier pass** on review-style fan-outs — a
 - ❌ Forwarding raw agent outputs to the user without synthesis
 - ❌ Using `sudo` to bypass destructive-op confirmation
 
+## Mode-gated activation (v0.10)
+
+The Master Orchestrator rule applies fully under `/kasi full` and `/kasi ultra`. Lower modes relax it:
+
+| Mode | Master Orchestrator rule |
+|------|--------------------------|
+| `off`    | Inactive. Master may execute directly. |
+| `router` | Inactive for routine tasks; auto-escalates to `full` when message matches heavy-work keywords. |
+| `lite`   | Soft — master tries to delegate but may execute trivial single-file edits directly. |
+| `full`   | **Hard — full rule applies.** Strong-work missions must delegate. |
+| `ultra`  | **Hardest** — master self-checks every turn; specialist call requires complete dispatch brief. |
+
+See [[Kasi-Mode]] for switching modes and [[Backend-Hooks#kasidit-verify]] for runtime detection of master orchestrator violations (a `[high]` claim paired with direct `Edit` / `Write` / `Bash` triggers a downgrade notice in v0.10).
+
+## v0.10 agent registry update
+
+The audit roles consolidated:
+
+| Old agent (deprecated) | New invocation |
+|---|---|
+| `code-reviewer` | `audit-specialist --focus=quality` |
+| `security-auditor` | `audit-specialist --focus=security` |
+| `perf-profiler` | `audit-specialist --focus=perf` |
+
+Specialist registry is now **8 active + 3 stubs** (stubs delegate to `audit-specialist` and disappear in v0.11). Stubs exist only for name-resolution; **no automatic mapping** — master must invoke `audit-specialist --focus=<lens>` explicitly. See [[Agent-Audit-Specialist]].
+
 ## See also
 
 - [[Multi-Agent-Orchestration]] — how specialists run under the hood, sub-agent pattern, tier-specific rules
 - [[Dispatch-Brief]] — full template + per-agent variations
 - [[v0.9.1]] — release notes, why the rule exists, migration
+- [[v0.10.0]] — Mode gate + audit-specialist consolidation + runtime verifier hook
+- [[Kasi-Mode]] — `/kasi off|router|lite|full|ultra` toggle
+- [[Backend-Hooks]] — `kasidit-verify` runtime check for master orchestrator violations
 - [[Gravity-Pattern]] — Centerlite + Dcenterlite knowledge sync that specialists read from
 - [[Checklists]] — mechanical audit lists specialists run instead of reasoning
 - [[Kasi-Multi]] — `/kasi-multi` and `sudo` command flow

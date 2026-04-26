@@ -118,7 +118,7 @@ sudo <N> <mission>               # shorthand with N
 | 3 | `general-purpose` (secondary workstream) |
 | 4 | `general-purpose` (extract / glue) |
 | 5 | `test-writer` or `general-purpose` (verification) |
-| 6 | `code-reviewer` |
+| 6 | `audit-specialist --focus=quality` (review slot, v0.10 — replaces standalone `code-reviewer`) |
 
 **Tier caps:**
 
@@ -153,9 +153,25 @@ Invoke via `/kasi-cascade`.
 - ❌ Main agent loading file contents "just to check" — delegate
 - ❌ Running Haiku review without a verifier pass
 
+## v0.10 backend hooks integration
+
+Three hooks observe orchestration without entering AI context:
+
+| Hook | Event | Job |
+|------|-------|-----|
+| `kasidit-route.py` | `UserPromptSubmit` | Classifies mission `kind`, queries `route-memory.jsonl` for shortest successful mode, injects 1-line recommendation. |
+| `kasidit-verify.py` | `PostToolUse` + `Stop` | Detects master orchestrator violations — `[high]` claim paired with direct `Edit` / `Write` / `Bash` (master should have delegated). Prints downgrade notice. |
+| `kasidit-record.py` | `Stop` / `SubagentStop` | Parses `[kasidit-log]` emit lines from final output, appends to `route-memory.jsonl`. Router learns over time which roster size + mode succeeds for each kind. |
+
+Synthesis-cost optimization gets data-driven: if the router sees `kind=security-audit-php` succeeded 5/5 times at N=4 and 0/5 at N=8, it recommends N=4 going forward. See [[Backend-Hooks]] for full payload contracts.
+
 ## See also
 
 - [[v0.3.0]] — multi-agent orchestration introduced
 - [[v0.8.0]] — tier cascade
 - [[v0.9.1]] — master orchestrator rule formalized
+- [[v0.10.0]] — runtime hooks observe orchestration; audit-specialist consolidates 3 audit agents
+- [[Backend-Hooks]] — `kasidit-route`, `kasidit-verify`, `kasidit-record` payload contracts
+- [[Agent-Audit-Specialist]] — single-entry audit agent with `--focus=quality|security|perf|all`
+- [[Kasi-Mode]] — `/kasi` mode toggle
 - [[Model Tiers]]

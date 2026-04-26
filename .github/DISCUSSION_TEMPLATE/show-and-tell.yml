@@ -1,0 +1,37 @@
+title: "[show] "
+labels: ["show-and-tell"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share a `.kasidit/` config, a custom checklist that worked, a mission Kasidit handled well (or badly — also useful), or a war story from a real audit / refactor. The goal is patterns other users can borrow.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What you built / ran
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: Numbers if possible — turns to mission complete, files changed, bugs caught. "Kasidit found 3 SQL injections that the human reviewer missed" beats "it was helpful".
+
+  - type: textarea
+    id: artifacts
+    attributes:
+      label: Artifacts
+      description: Paste the relevant snippet of `.kasidit/PATTERNS.md`, the checklist, the agent brief, etc. Sanitize PII.
+      render: text
+
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Tier
+      options:
+        - Opus
+        - Sonnet
+        - Haiku
+        - mixed

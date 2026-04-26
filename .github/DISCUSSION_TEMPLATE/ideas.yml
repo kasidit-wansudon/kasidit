@@ -1,0 +1,44 @@
+title: "[idea] "
+labels: ["enhancement", "discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Pre-scope brainstorm space. Once the idea is concrete enough to scope, the maintainer (or you) opens a feature_request Issue.
+
+  - type: textarea
+    id: pain
+    attributes:
+      label: User pain
+      description: Whose workflow does this help? What does the friction look like today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+      description: Rough shape — does not need to be a final spec.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives / prior art
+      description: Existing tools, similar features in other plugins, things you tried that did not fit.
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Likely surface
+      multiple: true
+      options:
+        - SKILL.md (rule)
+        - command
+        - agent
+        - hook
+        - install.sh
+        - wiki
+        - site
+        - other

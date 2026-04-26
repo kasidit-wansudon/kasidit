@@ -318,7 +318,9 @@ v0.10.0 — introduced.
 
 - [[Kasi-Mode]]
 - [[Agent-Audit-Specialist]]
-- [[Gravity Pattern]]
+- [[Gravity-Pattern]]
 - [[Master-Orchestrator]]
+- [[Confidence-Labels]]
+- [[Multi-Agent-Orchestration]]
 - [[Checklists]]
-- [[v0.10]]
+- [[v0.10.0]]

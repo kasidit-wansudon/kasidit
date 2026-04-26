@@ -39,7 +39,7 @@ At the start of a message, `sudo` means:
 5. Synthesize — merge, deduplicate, rank by severity × confidence.
 6. Suggest next step; do not auto-apply destructive findings.
 
-## Default roster at N=6
+## Default roster at N=6 (v0.10)
 
 | Slot | Agent | Job |
 |---|---|---|
@@ -48,9 +48,11 @@ At the start of a message, `sudo` means:
 | 3 | `general-purpose` | secondary build step |
 | 4 | `general-purpose` | extract / data / glue |
 | 5 | `test-writer` / `general-purpose` | verification |
-| 6 | `code-reviewer` | review slot |
+| 6 | `audit-specialist --focus=quality` | review slot (v0.10 — was standalone `code-reviewer` pre-v0.10) |
 
-Main swaps in `bug-hunter`, `perf-profiler`, `security-auditor`, `refactor-surgeon`, `migration-specialist`, `legacy-specialist` based on mission kind.
+Main swaps in `bug-hunter`, `audit-specialist --focus=security`, `audit-specialist --focus=perf`, `refactor-surgeon`, `migration-specialist`, `legacy-specialist` based on mission kind.
+
+> Note: `code-reviewer`, `security-auditor`, `perf-profiler` are kept as **name-resolution stubs** in v0.10 — invoking them logs a deprecation notice. Use `audit-specialist --focus=quality|security|perf|all` going forward. Stubs disappear in v0.11.
 
 ## N selection
 
@@ -101,7 +103,7 @@ Review a PR fast:
 sudo review PR #42 in /Users/me/repo
 ```
 
-N=6, roster: `code-reviewer` (overall) + 2× `code-reviewer` (per-file) + `security-auditor` + `perf-profiler` + `test-writer`. Synthesis = ranked findings + go/no-go.
+N=6, roster: `audit-specialist --focus=quality` (overall) + 2× `audit-specialist --focus=quality` (per-file) + `audit-specialist --focus=security` + `audit-specialist --focus=perf` + `test-writer`. Synthesis = ranked findings + go/no-go. (Pre-v0.10 invoked separate `code-reviewer` / `security-auditor` / `perf-profiler` agents — those are now `--focus=` flags on `audit-specialist`.)
 
 Build a feature fast:
 

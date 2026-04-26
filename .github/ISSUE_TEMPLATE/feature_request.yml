@@ -1,0 +1,68 @@
+name: Feature request
+description: Propose a new feature, command, agent, hook, or rule.
+title: "[feat] "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > ⚠️ For open-ended ideas / "wouldn't it be nice if" / pre-design discussion, prefer [Discussions → Ideas](https://github.com/kasidit-wansudon/kasidit/discussions). Issues are for proposals concrete enough to scope.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is the user pain? Who has it? What workflow does it block today?
+      placeholder: "When I run /kasi-review on a multi-file PR with mixed languages, ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Concrete shape — command name, flag, file format, etc.
+      placeholder: |
+        Add `--lang=<list>` flag to /kasi-review:
+        - default: auto-detect
+        - explicit: /kasi-review --lang=php,vue
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      multiple: true
+      options:
+        - SKILL.md (rule)
+        - command
+        - agent
+        - hook
+        - install.sh
+        - checklist
+        - wiki
+        - site
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What else did you try / consider? Why is this the right shape?
+
+  - type: textarea
+    id: tier-impact
+    attributes:
+      label: Per-tier impact
+      description: Does this help Opus / Sonnet / Haiku differently? Anything Haiku-specific to consider?
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Pre-flight
+      options:
+        - label: I checked Issues + Discussions for similar proposals
+        - label: I read [CONTRIBUTING.md](https://github.com/kasidit-wansudon/kasidit/blob/main/CONTRIBUTING.md)
+        - label: I am willing to draft / test the implementation

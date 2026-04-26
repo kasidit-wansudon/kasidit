@@ -70,10 +70,24 @@ Upgrading requires new evidence (new test, new doc citation, runtime confirmatio
 - ❌ Silently dropping `[unsure]` items — user must see them to decide
 - ❌ On Haiku, producing any non-trivial finding without a label
 
+## v0.10 runtime verification
+
+`kasidit-verify.py` (PostToolUse + Stop hooks) cross-checks `[high]` claims against actual tool calls in the same turn:
+
+- A `[high]` finding pointing at `file:line` with **no `Read` of that file** in the turn → downgrade notice printed
+- A `[high]` claim with **no `Bash` / runtime confirmation** for "verified" wording → downgrade notice
+- "Delegating to specialist" claim paired with direct `Edit` / `Write` / `Bash` → master orchestrator violation flagged
+
+The hook does not modify the AI output — it logs and prints, the AI sees the flag in subsequent turns and adjusts. See [[Backend-Hooks#kasidit-verify]] for the payload contract.
+
+This is the first runtime layer enforcing label discipline. Prior versions relied entirely on prompt-level convention.
+
 ## See also
 
 - [[Checklists]] — the verifier pass enforces label discipline
 - [[Master-Orchestrator]] — synthesizes labeled findings from specialists
+- [[Backend-Hooks]] — `kasidit-verify` runtime check (v0.10)
 - [[Model-Tiers]] — which tier must tag
 - [[v0.3.0]] — introduction
+- [[v0.10.0]] — runtime verification added
 - [[v0.7.4]] — framework validation data

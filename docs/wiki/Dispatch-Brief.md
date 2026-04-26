@@ -127,11 +127,35 @@ Everything else → dispatch with a brief.
 - ❌ PRIOR CONTEXT forgotten on follow-up — specialist re-does earlier work
 - ❌ Brief longer than the work itself — scope is wrong, narrow first
 
+## v0.10 — invoking `audit-specialist`
+
+`audit-specialist` is the only audit agent in v0.10 (replaces `code-reviewer` / `security-auditor` / `perf-profiler`). Briefs must include the `--focus` flag:
+
+```
+MISSION: Pre-merge security gate on AuthService.php — only HIGH severity findings.
+INPUTS:
+  - app/Services/AuthService.php
+  - .kasidit/CHECKLISTS/security-php.md (or default seeded)
+CONSTRAINTS:
+  - HIGH severity only
+  - confidence labels mandatory
+EXPECTED OUTPUT:
+  - audit-specialist --focus=security <target>
+  - findings array: [{file, line, type, severity, confidence, fix_hint}]
+  - verifier pass note (which findings reproduced, which deferred to user)
+PRIOR CONTEXT:
+  - last audit found 2 SQL injection points in v1.4.x; patched in PR #1182
+```
+
+`--focus=quality` for code review, `--focus=perf` for profiling, `--focus=all` for the pre-merge full sweep.
+
 ## See also
 
 - [[Master-Orchestrator]] — the rule that requires briefs
 - [[Multi-Agent-Orchestration]] — fan-out dispatch mechanics
+- [[Agent-Audit-Specialist]] — single-entry audit agent (v0.10)
 - [[Kasi-Multi]] — the command that dispatches N briefs in parallel
 - [[Kasi-Cascade]] — tier-cascaded briefs (Opus → Sonnet → Haiku)
 - [[v0.9.1]] — introduction
 - [[v0.9.2]] — fan-out extension
+- [[v0.10.0]] — `--focus` flag for audit-specialist briefs

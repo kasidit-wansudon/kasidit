@@ -129,11 +129,32 @@ This is why CHECKLISTS/ was the [[v0.3.0]] change that made Haiku viable. Not ti
 - Using checklists as a report template instead of an audit tool. The file is a scanner, not a section header.
 - Hub checklists with project-specific details (table names, client names). Centerlite stays generic; customize in `.kasidit/` only.
 
+## v0.10 — 12 default checklists shipped
+
+`install.sh` seeds `~/.claude/skills/kasidit/center/checklists/` with 12 default lists at install time:
+
+| Stack | security | code-review | perf |
+|-------|:--------:|:-----------:|:----:|
+| **PHP**     | ✓ | ✓ | ✓ |
+| **Node.js** | ✓ | ✓ | ✓ |
+| **Python**  | ✓ | ✓ | ✓ |
+| **Go**      | ✓ | ✓ | ✓ |
+
+4 stacks × 3 lenses = 12 files. `audit-specialist --focus=<lens>` loads the matching default; project-level `.kasidit/CHECKLISTS/` may copy and customize.
+
+Pulled into project via:
+- `/kasi-init` (Gravity pull step) — auto on init
+- `/kasi-pull checklist <name>` — ad-hoc
+
+`audit-specialist` (v0.10) replaces the prior 3 audit agents (`code-reviewer`, `security-auditor`, `perf-profiler`) by routing the `--focus=` flag to the correct checklist family.
+
 ## See also
 
-- [[Kasi-Review]] — the command that loads and runs checklists
-- [[Kasi-Security]] — security-specific review flow
+- [[Kasi-Review]] — the command that loads and runs checklists (delegates to `audit-specialist --focus=quality`)
+- [[Kasi-Security]] — security review flow (delegates to `audit-specialist --focus=security`)
+- [[Agent-Audit-Specialist]] — single-entry audit agent (v0.10)
 - [[Model-Tiers]] — why Haiku depends on these
 - [[Gravity-Pattern]] — promote / pull / sync between project and hub
 - [[Confidence-Labels]] — tagging rules for findings
+- [[v0.10.0]] — 12 default checklists added
 - [[v0.3.0]] — release where CHECKLISTS/ was introduced

@@ -2,6 +2,30 @@
 
 All `/kasi-*` commands shipped with the plugin. Invoke with `/` from Claude Code.
 
+## Mode command (v0.10)
+
+### `/kasi`
+
+**Deep page:** [[Kasi-Mode]]
+
+Toggle Kasidit framework intensity. Controls how much of `SKILL.md` is brought into context.
+
+```
+/kasi                       # show current mode
+/kasi off                   # disable for this session
+/kasi router                # default — thin classifier (~20 line)
+/kasi lite                  # Rule 1 + Rule 11 only (~100 line)
+/kasi full                  # all 11 rules + 8 agents + Gravity (~650 line)
+/kasi ultra                 # full + verifier hook + master self-check
+/kasi save                  # persist current mode to .kasidit/config.json
+/kasi reset                 # drop session override
+/kasi status                # resolved config: session > project > global > default
+```
+
+Heavy commands (`/kasi-review`, `/kasi-security`, `/kasi-fix`, `/kasi-ui`, `/kasi-multi`, `/kasi-cascade`) auto-escalate to `full` for the duration, then revert.
+
+**State precedence is spec, not runtime.** No code currently merges the three configs into a single resolved value — the AI and the user apply the chain by reading the files. See [[Kasi-Mode]] for full details.
+
 ## Mission commands
 
 ### `/kasi-review`
@@ -50,7 +74,7 @@ sudo 8 <mission>               # shorthand + custom N
 
 Fan-out mode — dispatch N specialists in parallel, each with an isolated context and a dispatch brief. Main synthesizes the N reports into one user-facing answer.
 
-**Default roster at N=6:** `architect-planner` / `deep-researcher` (scope), 3× `general-purpose` (parallel workers), `test-writer` (verification), `code-reviewer` (review slot). Main swaps in `bug-hunter`, `perf-profiler`, `security-auditor`, `refactor-surgeon`, `migration-specialist`, `legacy-specialist` based on mission kind.
+**Default roster at N=6** (v0.10): `architect-planner` / `deep-researcher` (scope), 3× `general-purpose` (parallel workers), `test-writer` (verification), `audit-specialist --focus=quality` (review slot — replaces standalone `code-reviewer`). Main swaps in `bug-hunter`, `audit-specialist --focus=perf|security`, `refactor-surgeon`, `migration-specialist`, `legacy-specialist` based on mission kind.
 
 **`sudo` keyword** = fan-out by default + skip clarifying questions (narrate assumptions briefly) + still respect destructive-op confirmation.
 
