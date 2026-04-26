@@ -4,6 +4,7 @@ Side-by-side comparison. Detailed per-version notes live on each release page.
 
 | Version | Date | Theme | Headline change |
 |---|---|---|---|
+| [[v0.10.0]] | 2026-04-26 | **Honesty Cleanup** | SKILL-full split reverted (Mode-gated single file), `audit-specialist` merges 3 audit agents, runtime backend hooks (route/verify/record/update/drift), `install.sh`, 12 default checklists, incremental backend save (`route-memory.jsonl`) |
 | [[v0.9.2]] | 2026-04-23 | **Gravity Pattern** | Two-tier knowledge (Centerlite hub + Dcenterlite project), prompt log hook, `/kasi-init`, `/kasi-promote`, `/kasi-pull`, `/kasi-sync`, `/kasi-wiki-sync` |
 | [[v0.9.1]] | 2026-04-22 | **Master Orchestrator** | Master delegates all strong work to 10 specialist agents; dispatch brief format |
 | [[v0.9.0]] | 2026-04-20 | **Claude Design** | Design/Visual Mode, `.kasidit/prototypes/`, DESIGN_SYSTEM.md, mockup-to-code parity |

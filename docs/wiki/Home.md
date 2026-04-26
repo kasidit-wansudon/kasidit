@@ -17,6 +17,7 @@ Kasidit is a Claude Code plugin that makes AI coding grounded instead of halluci
 
 Deep per-release notes, in descending order:
 
+- [[v0.10.0]] — **Honesty Cleanup.** SKILL-full split reverted (Mode-gated single file), `audit-specialist` consolidates code-reviewer/security-auditor/perf-profiler, runtime backend hooks (route/verify/record/update/drift), `install.sh` canonical installer, 12 default checklists, incremental backend save (`route-memory.jsonl`).
 - [[v0.9.2]] — **Gravity Pattern.** Two-tier knowledge (Centerlite + Dcenterlite), global prompt log, `/kasi-init`, promote/pull/sync commands, wiki sync.
 - [[v0.9.1]] — **Master Orchestrator Rule.** 7 specialist agents; master delegates all strong work.
 - [[v0.9.0]] — **Claude Design Integration.** Route visual missions to Claude Design; stop hand-coding mockups.
