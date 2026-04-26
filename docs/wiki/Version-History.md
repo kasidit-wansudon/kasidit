@@ -17,7 +17,18 @@ Side-by-side comparison. Detailed per-version notes live on each release page.
 
 ## What changed between each pair
 
-### v0.9.1 → v0.9.2 (this release)
+### v0.9.2 → v0.10.0 (this release)
+
+- **Honesty Cleanup:** the prior `SKILL-full.md` split is reverted. Full Framework merges back into `SKILL.md` behind a prompt-level `/kasi off|router|lite|full|ultra` Mode gate. One file, mode-gated load depth.
+- **Backend hooks** (runtime-enforced for the first time): `kasidit-route.py` (UserPromptSubmit classifier + memory query), `kasidit-verify.py` (PostToolUse + Stop confidence + orchestrator check), `kasidit-record.py` (Stop emit-line parser → JSONL stores), `kasidit-update-check.sh` (1×/day release tag check), `kasidit-drift-check.sh` (SessionStart Centerlite-sync reminder).
+- **`audit-specialist`** consolidates `code-reviewer` + `security-auditor` + `perf-profiler` via `--focus=quality|security|perf|all`. Old agents kept as **name-resolution stubs** (no automatic mapping; users must invoke `audit-specialist --focus=` explicitly). Stubs disappear in v0.11. Active registry now **8 + 3 stubs**.
+- **`install.sh`** canonical installer — copies hooks, merges `~/.claude/settings.json` (jq primary / python3 fallback, idempotent), seeds Gravity hub with 5 JSONL stores + 12 default checklists + 2 knowledge templates, writes `config.json`, manages `.last_sync` / `.last_update_check` stamps.
+- **12 default checklists** seeded: PHP / Node / Python / Go × code-review / security / perf.
+- **Incremental backend save** ("ออม") — AI emits `[kasidit-log|pattern|memory|rule]` lines at mission end; `kasidit-record.py` appends to matching JSONL. Router learns shortest successful route per mission kind over time.
+- **`sudo <mission>`** clarified — parallel fan-out, **min 2 agents**, assumption-narrated pacing. **Not** a permission escalation. `/kasi-multi --fast` is an equivalent flag form.
+- **Docs honesty:** `/kasi` precedence chain marked **spec, not runtime**. No code currently merges the three configs into a resolved value — applied by user + AI reading the files.
+
+### v0.9.1 → v0.9.2
 
 - **New pattern:** Gravity — a formalized two-tier knowledge layout. `~/.claude/skills/kasidit/center/` (Centerlite) + `<project>/.kasidit/` (Dcenterlite). Before this, the split existed implicitly (per-project `.kasidit/` plus a vague "user scope") but had no name, no sync commands, and no discipline about what belonged where.
 - **New commands:** `/kasi-init`, `/kasi-promote`, `/kasi-pull`, `/kasi-sync`, `/kasi-wiki-sync`.
@@ -28,7 +39,7 @@ Side-by-side comparison. Detailed per-version notes live on each release page.
 ### v0.9.0 → v0.9.1
 
 - Added **Master Orchestrator Rule** — the main agent is forbidden from executing strong work (multi-file changes, migrations, perf hunts, security audits, new features, deep research). It only narrows, dispatches, synthesizes.
-- Added **7 specialist agents**: `bug-hunter`, `architect-planner`, `perf-profiler`, `test-writer`, `refactor-surgeon`, `deep-researcher`, `migration-specialist`. Plus the pre-existing `code-reviewer`, `security-auditor`, `legacy-specialist` = 10 total.
+- Added **7 specialist agents**: `bug-hunter`, `architect-planner`, `perf-profiler`, `test-writer`, `refactor-surgeon`, `deep-researcher`, `migration-specialist`. Plus the pre-existing `code-reviewer`, `security-auditor`, `legacy-specialist` = 10 total. *(In v0.10 this collapses to 8 + 3 stubs as the 3 audit agents merge into `audit-specialist`.)*
 - **Dispatch brief format** standardized: `MISSION / INPUTS / CONSTRAINTS / EXPECTED OUTPUT / PRIOR CONTEXT`.
 - The older Multi-Agent Orchestration section became an *implementation detail* of the master rule.
 
