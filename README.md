@@ -6,10 +6,94 @@
 **Site:** https://kasidit-wansudon.github.io/kasidit-site/
 **Wiki:** https://github.com/kasidit-wansudon/kasidit/wiki
 **Changelog:** [CHANGELOG.md](./CHANGELOG.md)
+**ภาษาไทย:** [อ่านสรุปภาษาไทย](#-สรุปภาษาไทย-thai-summary) ↓
 
 Kasidit is a Claude Code plugin that forces AI coding assistants into disciplined, grounded workflows. It was built after watching senior-engineer-quality models still fabricate APIs, invent fixes, and loop on ghost bugs — not because the models were too small, but because they lacked **a grounded base**.
 
 The fix is not a bigger model. The fix is scaffolding: checklists, confidence labels, tier-aware rules, runtime verification, and right-tool routing.
+
+---
+
+## 🇹🇭 สรุปภาษาไทย (Thai Summary)
+
+> **Kasidit** = framework สำหรับให้ AI โค้ดอย่างมีวินัย ใช้กับ Claude Code
+
+### ปัญหาที่แก้
+
+AI โค้ดเก่งแต่หลอก:
+- เรียก function ที่ไม่มีจริง
+- บอกว่า fix แล้วทั้งที่ยังพัง
+- วน loop debug bug เดิม
+- รุ่นเล็ก (Haiku) ยิ่งหลอกหนัก
+
+ปัญหาไม่ใช่ "AI โง่" — แต่ "AI ไม่มี discipline". Senior dev เก่งเพราะ process ไม่ใช่ IQ. Kasidit บังคับ process เดียวกันให้ AI
+
+### หลักการ 6 ข้อ
+
+- **1 mission, 1 focus, 1 step** — ห้ามทำหลายเรื่องพร้อมกัน
+- **Design ก่อน code** — ห้าม dive ตรง implementation
+- **Runtime is judge** — ไม่เชื่อที่ AI ว่าตัวเอง ต้องรันจริง
+- **Point ไม่ Explain** — Explanation บ่อย = hallucination เริ่ม
+- **Tier-aware** — รุ่นเล็กยิ่งใช้ scaffolding หนัก
+- **งาน visual ใช้ Claude Design** — ไม่ใช่ hand-code HTML
+
+### มีอะไรบ้าง (v0.10.0)
+
+- **1 skill** (`kasidit`) — auto-trigger ตอนโค้ด
+- **`/kasi` Mode command** (v0.10) — เลือกความเข้ม: `off` / `router` / `lite` / `full` / `ultra`
+- **15 slash commands** — mission, project, Gravity, semantic, meta, fan-out
+- **8 specialist agents** (v0.10 ลด: รวม code-reviewer + security-auditor + perf-profiler → audit-specialist)
+- **Backend hooks** (v0.10) — runtime classifier + verifier + recorder + update/drift checks
+- **12 default checklists** — security/code-review/perf สำหรับ PHP / Node / Python / Go
+- **Master Orchestrator** — main delegate ไม่ทำงานหนักเอง
+- **Gravity Pattern** — knowledge 2 ชั้น: hub กลาง + project orbit
+- **Tier Cascade** — Opus คิด → Sonnet ทำ → Haiku grep
+
+### ติดตั้ง
+
+**Plugin marketplace (แนะนำ):**
+```
+/plugin marketplace add kasidit-wansudon/kasidit
+/plugin install kasidit@kasidit
+```
+
+**install.sh (ครบสุด — มี hooks + Gravity hub seed + settings merge):**
+```
+git clone https://github.com/kasidit-wansudon/kasidit.git
+cd kasidit
+./install.sh
+```
+
+อัปเดต:
+```
+/plugin marketplace update kasidit
+```
+
+### ผลทดสอบ (ตรงไปตรงมา)
+
+SWE-bench Lite (sample 56/300):
+- PASS (line-match เข้ม): **60.7%** (34/56)
+- PARTIAL (fix ใช้ได้แต่ไม่ตรง line): **27%**
+- Valid fix rate รวม: **87.5%**
+
+**หมายเหตุ:** คนละ scoring กับเลขที่ Anthropic/GitHub โพสต์ ไม่ได้เปรียบเทียบกับ Copilot (GPT-4o) 72.5% SWE-bench Verified หรือ Claude Code Opus base 80.8%. ตัวเลขนี้แค่ baseline ของ framework — รายงานเพื่อโปร่งใส ไม่ใช่ marketing claim. Full run (244 task ที่เหลือ) scheduled อยู่
+
+### ใครเหมาะ
+
+- Solo dev / Freelance ที่ใช้ Claude Code อยู่แล้ว
+- ทีม dev ที่อยาก standardize การใช้ AI
+- คนที่ใช้ Haiku/Sonnet เพื่อประหยัด แต่อยากได้ output คุณภาพ
+- คนที่เบื่อ AI หลอก แล้วต้องตามแก้
+
+### License
+
+MIT — ใช้ฟรี fork ได้ ไม่ต้อง credit
+
+### Feedback
+
+เปิด issue ที่ https://github.com/kasidit-wansudon/kasidit/issues หรือ email kasidit.wans@gmail.com
+
+---
 
 ## Why it exists
 
