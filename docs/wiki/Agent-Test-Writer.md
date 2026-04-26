@@ -73,4 +73,4 @@ Introduced in [[v0.9.1]].
 - [[Multi-Agent-Orchestration]]
 - [[Agent-Bug-Hunter]]
 - [[Agent-Refactor-Surgeon]]
-- [[Agent-Code-Reviewer]]
+- [[Agent-Audit-Specialist]] — for `--focus=quality` review of test code itself (deprecated `[[Agent-Code-Reviewer]]` stub still works)

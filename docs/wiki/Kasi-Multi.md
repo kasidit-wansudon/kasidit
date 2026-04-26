@@ -84,7 +84,7 @@ Higher N is not always better. Default 6 has best cost / quality trade-off in ob
 
 - **Opus** — full fan-out allowed. Synthesis is where Opus earns its cost.
 - **Sonnet** — default workhorse. Fans out to 6, prefers 4 on large contexts.
-- **Haiku** — cap N at 4. Always include `code-reviewer` or `verifier`. `sudo` implicitly caps at 4 even if user says 8.
+- **Haiku** — cap N at 4. Always include `audit-specialist --focus=quality` (verifier slot) — pre-v0.10 this was a standalone `code-reviewer`; now invoked via the `--focus=` flag. `sudo` implicitly caps at 4 even if user says 8.
 
 ## Anti-patterns
 

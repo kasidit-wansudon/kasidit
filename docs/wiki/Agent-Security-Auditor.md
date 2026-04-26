@@ -60,7 +60,7 @@ When uncertain, tags `"confidence": "unsure"` with a note on what info would res
 
 ## Tier behavior
 
-Not tier-pinned. Designed to run in parallel as sibling auditors, so Sonnet is typical per-instance; Opus reserved for cross-cutting review via `code-reviewer`.
+Not tier-pinned. Designed to run in parallel as sibling auditors, so Sonnet is typical per-instance; Opus reserved for cross-cutting review via `audit-specialist --focus=quality` (in v0.10) or pre-v0.10 the standalone `code-reviewer` agent.
 
 ## Anti-patterns
 

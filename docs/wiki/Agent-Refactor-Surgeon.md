@@ -68,4 +68,4 @@ Introduced in [[v0.9.1]].
 - [[Multi-Agent-Orchestration]]
 - [[Agent-Test-Writer]]
 - [[Agent-Bug-Hunter]]
-- [[Agent-Code-Reviewer]]
+- [[Agent-Audit-Specialist]] — for `--focus=quality` post-refactor review (deprecated `[[Agent-Code-Reviewer]]` stub still works)

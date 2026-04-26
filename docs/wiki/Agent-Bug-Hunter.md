@@ -64,4 +64,4 @@ Introduced in [[v0.9.1]].
 - [[Multi-Agent-Orchestration]]
 - [[Kasi-Fix]]
 - [[Agent-Test-Writer]]
-- [[Agent-Perf-Profiler]]
+- [[Agent-Audit-Specialist]] — for `--focus=perf` after a fix exposes a bottleneck (deprecated `[[Agent-Perf-Profiler]]` stub still works)

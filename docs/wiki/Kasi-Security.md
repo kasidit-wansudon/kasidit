@@ -12,22 +12,26 @@
 
 ## What it does
 
-- Detects stack from project files and loads matching `CHECKLISTS/security-<stack>.md`.
+- Detects stack from project files and loads matching `CHECKLISTS/security-<stack>.md` (12 default checklists seeded by `install.sh` in v0.10 cover PHP / Node / Python / Go).
 - If no stack checklist exists, asks to build one before scanning.
-- Fans out a security scan subagent per scope item.
+- Auto-escalates Mode `router` → `ultra` for the duration; reverts on completion (v0.10).
+- Dispatches `audit-specialist --focus=security` (v0.10 — replaces standalone `security-auditor`) per scope item.
 - Collects findings across SQL injection, XSS, path traversal, CSRF, auth bypass, crypto, session, file handling.
-- Runs a mandatory verifier pass to strip false positives (required on Haiku).
+- Runs a mandatory verifier pass to strip false positives (required on Haiku, recommended elsewhere).
 - Emits findings by severity tier with exact `file:line` refs and confidence labels.
 
 ## Flow
 
-1. Detect stack (PHP / Node / Python / etc.) from project manifests.
+1. Detect stack (PHP / Node / Python / Go) from project manifests.
 2. Load matching `security-<stack>.md` checklist — build new if missing (ask user first).
 3. Narrow scope — which files / controllers / endpoints?
-4. Dispatch scan subagents, one per scope item.
-5. Collect findings from all checklist categories.
-6. Verifier pass — remove plausible-but-wrong matches.
-7. Print severity buckets with file:line and confidence.
+4. Auto-escalate Mode → `ultra` (v0.10).
+5. Dispatch `audit-specialist --focus=security`, one per scope item.
+6. Collect findings from all checklist categories.
+7. Verifier pass — remove plausible-but-wrong matches (mandatory on Haiku).
+8. Print severity buckets with file:line and confidence.
+9. Emit `[kasidit-log] kind=security-audit-<stack> mode=ultra turns=N outcome=...` for router memory.
+10. Revert to prior Mode.
 
 ## Output priority
 
@@ -69,5 +73,7 @@ Introduced in [[v0.3.0]].
 
 - [[Commands]] (aggregate)
 - [[Checklists]]
+- [[Agent-Audit-Specialist]] — the agent dispatched (`--focus=security`)
+- [[Kasi-Mode]] — `ultra` auto-escalation contract
 - [[Kasi-Review]]
 - [[Kasi-Fix]]

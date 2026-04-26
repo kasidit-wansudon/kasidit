@@ -73,4 +73,4 @@ Introduced in [[v0.9.1]].
 - [[Multi-Agent-Orchestration]]
 - [[Agent-Architect-Planner]]
 - [[Agent-Legacy-Specialist]]
-- [[Agent-Perf-Profiler]]
+- [[Agent-Audit-Specialist]] — for `--focus=perf` post-migration check (deprecated `[[Agent-Perf-Profiler]]` stub still works)

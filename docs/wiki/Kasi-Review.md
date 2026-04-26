@@ -14,7 +14,8 @@
 
 - Forces scope narrowing before any scan — no "review the whole repo".
 - Detects domain (backend / UI / security / performance) and loads the matching checklist from `.kasidit/CHECKLISTS/`.
-- Fans out per-file (Haiku) or per-module (Opus / Sonnet) subagents, each running the checklist mechanically.
+- Auto-escalates Mode `router` → `full` for the duration; reverts on completion (v0.10).
+- Dispatches `audit-specialist --focus=quality` (v0.10 — replaces standalone `code-reviewer`) per file (Haiku) or per module (Opus / Sonnet).
 - Main synthesizes findings with `[high | medium | low | unsure]` confidence labels.
 - Emits HIGH / MED / LOW severity buckets plus a Top-5 actionable list.
 
@@ -22,11 +23,14 @@
 
 1. Ask user which module / file / commits — refuse vague scope.
 2. Detect domain → load matching `CHECKLISTS/*.md`.
-3. Spawn subagents: 1 per file on Haiku, 1 per module on Opus / Sonnet.
-4. Each subagent scans mechanically against the checklist.
-5. Main aggregates + deduplicates + labels confidence.
-6. Output severity-bucketed findings + Top-5 priority.
-7. If counter hits 4 (Opus) / 2 (Haiku), escalate or hand back.
+3. Auto-escalate Mode → `full` (v0.10).
+4. Dispatch `audit-specialist --focus=quality`: 1 per file on Haiku, 1 per module on Opus / Sonnet.
+5. Each agent scans mechanically against the checklist.
+6. Main aggregates + deduplicates + labels confidence.
+7. Output severity-bucketed findings + Top-5 priority.
+8. Emit `[kasidit-log] kind=review-<stack> mode=full turns=N outcome=...` for router memory.
+9. If counter hits 4 (Opus) / 2 (Haiku), escalate or hand back.
+10. Revert to prior Mode.
 
 ## When to use
 
@@ -62,4 +66,6 @@ Introduced in [[v0.1.0]].
 - [[Commands]] (aggregate)
 - [[Checklists]]
 - [[Confidence-Labels]]
+- [[Agent-Audit-Specialist]] — the agent dispatched (`--focus=quality`)
+- [[Kasi-Mode]] — auto-escalation contract
 - [[Kasi-Security]]
