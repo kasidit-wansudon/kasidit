@@ -63,4 +63,5 @@ Introduced in [[v0.1.0]].
 
 - [[Commands]] (aggregate)
 - [[Model-Tiers]]
-- [[Mission-Counter]]
+- [[Kasi-Mode]] — current Mode is part of `/kasi-status` output
+- [[v0.1.0]] — where the mission counter was introduced

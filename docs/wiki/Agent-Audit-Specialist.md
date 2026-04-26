@@ -117,7 +117,7 @@ At mission end, emit a [kasidit-log] line for the backend router memory:
 [kasidit-log] kind=audit-<focus>-<stack> mode=full turns=N outcome=pass
 ```
 
-See [[Global-Prompt-Log]] and `kasidit-record.py` for how this feeds `route-memory.jsonl`.
+See [[Backend-Hooks]] for how `kasidit-record.py` parses these emit lines into `route-memory.jsonl`.
 
 ## Tier behavior
 
@@ -151,6 +151,8 @@ v0.10.0 — introduced; consolidates three prior agents.
 - [[Master-Orchestrator]]
 - [[Multi-Agent-Orchestration]]
 - [[Checklists]]
+- [[Backend-Hooks]] — `kasidit-record.py` consumes the `[kasidit-log]` emit
+- [[Dispatch-Brief]] — how to brief this agent with `--focus=`
 - [[Agent-Bug-Hunter]] (for fixes after audit)
 - [[Agent-Refactor-Surgeon]] (for cleanup after audit)
-- [[v0.10]] (release notes — pending)
+- [[v0.10.0]]

@@ -45,20 +45,26 @@ Everything else → delegate.
 
 ## Specialist Registry
 
-Ten specialists. Each has its own [[Agent-Name]] page for input shape, output block, and examples.
+**8 active + 3 deprecated stubs (v0.10).** Each agent has its own page (link below) for input shape, output block, and examples.
 
 | Agent | Trigger | Scope |
 |---|---|---|
-| [[Agent-Bug-Hunter]] | error / crash / wrong output / regression | root-cause + minimal fix; mandatory `git log --grep` / `git log -S` before patching |
 | [[Agent-Architect-Planner]] | new feature / refactor > 2 files | plan only; no code; trade-offs + open questions |
-| [[Agent-Perf-Profiler]] | slow / N+1 / high cost / pre-scale | measure first; rank by impact × confidence; top 5 only; does not optimize |
-| [[Agent-Test-Writer]] | add tests / regression after fix / coverage gap | one target per call; regression case mandatory after bug fix |
-| [[Agent-Refactor-Surgeon]] | extract / rename / split / inline | zero behavior change; test-parity verified |
+| [[Agent-Audit-Specialist]] (v0.10) | PR / OWASP / CVE / N+1 / pre-merge / pre-scale | unified audit via `--focus=quality\|security\|perf\|all` — replaces 3 prior agents |
+| [[Agent-Bug-Hunter]] | error / crash / wrong output / regression | root-cause + minimal fix; mandatory `git log --grep` / `git log -S` before patching |
 | [[Agent-Deep-Researcher]] | library / API / framework research | trust hierarchy source→docs→notes→blogs; caches to `.kasidit/knowledge/` |
-| [[Agent-Migration-Specialist]] | schema change / framework upgrade / backfill | expand-contract phases; rollback per phase; GREEN/YELLOW/RED risk class |
-| [[Agent-Code-Reviewer]] | PR / diff / audit | multi-dimensional review |
-| [[Agent-Security-Auditor]] | OWASP / CVE / auth boundary | security-focused deep audit |
 | [[Agent-Legacy-Specialist]] | legacy PHP / old framework / no-test code | legacy-safe refactor |
+| [[Agent-Migration-Specialist]] | schema change / framework upgrade / backfill | expand-contract phases; rollback per phase; GREEN/YELLOW/RED risk class |
+| [[Agent-Refactor-Surgeon]] | extract / rename / split / inline | zero behavior change; test-parity verified |
+| [[Agent-Test-Writer]] | add tests / regression after fix / coverage gap | one target per call; regression case mandatory after bug fix |
+
+**Deprecated stubs** (kept for name resolution only — removed in v0.11):
+
+| Stub | Use this instead |
+|---|---|
+| [[Agent-Code-Reviewer]] | `audit-specialist --focus=quality` |
+| [[Agent-Security-Auditor]] | `audit-specialist --focus=security` |
+| [[Agent-Perf-Profiler]] | `audit-specialist --focus=perf` |
 
 ## Dispatch brief format
 
@@ -80,7 +86,7 @@ Rules:
 
 - `MISSION` must be a **verifiable outcome**, not a directive. "Fix SQL injection in SalesController::exportCancelIMEI" — not "look at sales code".
 - `INPUTS` is literal: file paths, error messages, measured numbers, version strings. No prose hand-waving.
-- `EXPECTED OUTPUT` must match the agent's documented output block on its [[Agent-Name]] page.
+- `EXPECTED OUTPUT` must match the agent's documented output block on its individual `Agent-*` wiki page (e.g. [[Agent-Bug-Hunter]], [[Agent-Audit-Specialist]]).
 - `PRIOR CONTEXT` carries forward findings from earlier specialists in the same mission — the master is the only source of this continuity.
 
 "Do stuff" prompts reaching a specialist with ambiguous scope is a v0.9.1 anti-pattern. See [[Dispatch-Brief]] for the full template and per-agent variations.
