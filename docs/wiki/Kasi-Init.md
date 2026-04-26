@@ -25,15 +25,22 @@
 
 ## Flow
 
-1. Detect stack from `composer.json` / `package.json` / `requirements.txt` / `go.mod` / `Cargo.toml`. If ambiguous → ask.
-2. `/kasi-scaffold` — build `.kasidit/` structure.
-3. Gravity pull — if `~/.claude/skills/kasidit/center/checklists/` has stack matches, invoke `/kasi-pull all-for <stack>`. One batch confirm.
-4. `/kasi-docs` — fetch version-matched official docs, cache to `.kasidit/knowledge/`.
-5. Seed `.kasidit/MISSION.md`.
-6. Light `/kasi-review` on a user-picked module (skippable).
-7. Append privacy guard to `.gitignore` (skipped on `dry-run`).
-8. Register `SessionStart` hook + append guidance to `CLAUDE.md`.
-9. Print summary + suggest next mission.
+1. **(v0.10) Mode question** — type `1`, `2`, or `3`:
+   ```
+   1. router    — thin classifier (recommended)
+   2. lite      — Rule 1 + Rule 11 always-on
+   3. full      — full framework always-on
+   ```
+   Anything not `1`/`2`/`3` falls back to `1`. Saved to `.kasidit/config.json`. See [[Kasi-Mode]] for what each level loads.
+2. Detect stack from `composer.json` / `package.json` / `requirements.txt` / `go.mod` / `Cargo.toml`. If ambiguous → ask.
+3. `/kasi-scaffold` — build `.kasidit/` structure.
+4. Gravity pull — if `~/.claude/skills/kasidit/center/checklists/` has stack matches, invoke `/kasi-pull all-for <stack>`. One batch confirm.
+5. `/kasi-docs` — fetch version-matched official docs, cache to `.kasidit/knowledge/`.
+6. Seed `.kasidit/MISSION.md`.
+7. Light `/kasi-review` on a user-picked module (skippable).
+8. Append privacy guard to `.gitignore` (skipped on `dry-run`).
+9. Register `SessionStart` hook + append guidance to `CLAUDE.md`.
+10. Print summary + suggest next mission.
 
 ## When to use
 
@@ -69,11 +76,13 @@
 
 ## Since
 
-Introduced in [[v0.9.2]].
+Introduced in [[v0.9.2]]. v0.10 added the Mode question at step 1 (digit-only input, `1`=router default).
 
 ## See also
 
 - [[Commands]] (aggregate)
 - [[Gravity-Pattern]]
+- [[Kasi-Mode]]
 - [[Kasi-Scaffold]]
 - [[Kasi-Pull]]
+- [[v0.10.0]]
