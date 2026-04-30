@@ -6,15 +6,15 @@
   },
   "metadata": {
     "description": "Mindful AI coding framework — discipline over cleverness. Works on any model tier.",
-    "version": "0.10.0",
+    "version": "0.11.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
     {
       "name": "kasidit",
       "source": "./plugins/kasidit",
-      "description": "Mindful AI coding framework that forces discipline to prevent hallucination. Checklists, confidence labels, tier-aware rules, Claude Design integration for visual work.",
-      "version": "0.10.0",
+      "description": "Mindful AI coding framework that forces discipline to prevent hallucination. 21 slash commands, 8 specialist agents, 5 runtime hooks, 15 default checklists, Master Orchestrator + tier-aware rules + Gravity hub. Works on Opus, Sonnet, and Haiku.",
+      "version": "0.11.0",
       "author": {
         "name": "Kasidit Wansudon",
         "email": "kasidit.wans@gmail.com"
@@ -28,6 +28,10 @@
         "hallucination-prevention",
         "code-review",
         "security-audit",
+        "backend-audit",
+        "function-call-graph",
+        "runbook",
+        "devops",
         "claude-design",
         "multi-agent",
         "legacy-code",
@@ -41,7 +45,9 @@
         "agents",
         "framework",
         "review",
-        "debug"
+        "debug",
+        "backend",
+        "devops"
       ]
     }
   ]
