@@ -27,6 +27,7 @@ Kasidit is a Claude Code plugin that makes AI coding grounded instead of halluci
 
 Deep per-release notes, in descending order:
 
+- [[v0.11.0]] — **Backend Mission Router + Structure Bridge + Runbook Capture.** 6 new commands (`/kasi-backend`, `/kasi-graph`, `/kasi-struc`, `/kasi-devopt`, `/kasi-acknowledge`, `/kasi-knowledge-list`), 3 new backend checklists (Laravel · Node · API design), 4 helper scripts (function call graph + state cache writers). Hooks renamed `kasidit-*` → `kasi-*` (history preserved; emit-token protocol kept).
 - [[v0.10.0]] — **Honesty Cleanup.** SKILL-full split reverted (Mode-gated single file), `audit-specialist` consolidates code-reviewer/security-auditor/perf-profiler, runtime backend hooks (route/verify/record/update/drift), `install.sh` canonical installer, 12 default checklists, incremental backend save (`route-memory.jsonl`).
 - [[v0.9.2]] — **Gravity Pattern.** Two-tier knowledge (Centerlite + Dcenterlite), global prompt log, `/kasi-init`, promote/pull/sync commands, wiki sync.
 - [[v0.9.1]] — **Master Orchestrator Rule.** 7 specialist agents; master delegates all strong work.
