@@ -7,7 +7,7 @@
 [![stars](https://img.shields.io/github/stars/kasidit-wansudon/kasidit?style=flat-square&color=fbbf24)](https://github.com/kasidit-wansudon/kasidit/stargazers)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](./LICENSE)
 
-**Site:** https://kasidit-wansudon.github.io/kasidit-site/ · **Wiki:** [GitHub Wiki](https://github.com/kasidit-wansudon/kasidit/wiki) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md)
+**Site:** kasi.kasion.dev · **Wiki:** [GitHub Wiki](https://github.com/kasidit-wansudon/kasidit/wiki) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md)
 
 ---
 
