@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question — how do I use Kasidit?
+    url: https://github.com/kasidit-wansudon/kasidit/discussions/categories/q-a
+    about: Usage questions, best practices, "why does it do X". Q&A is the right place — not Issues.
+  - name: Idea — feature brainstorm / wishlist
+    url: https://github.com/kasidit-wansudon/kasidit/discussions/categories/ideas
+    about: Pre-scope ideas. Once an idea has a concrete shape, file a feature_request Issue.
+  - name: Show & Tell — share a config / checklist / war story
+    url: https://github.com/kasidit-wansudon/kasidit/discussions/categories/show-and-tell
+    about: Your `.kasidit/` setup, custom agents, how Kasidit handled a hairy mission.
+  - name: Security disclosure (private)
+    url: https://github.com/kasidit-wansudon/kasidit/blob/main/SECURITY.md
+    about: Email kasidit.wans@gmail.com — do not post in public Issues.

@@ -1,0 +1,10 @@
+# GitHub funding manifest — drives the ❤️ Sponsor button on every repo page.
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+
+github: [kasidit-wansudon]
+
+# Add other platforms here later if needed:
+# ko_fi: kasiditwans
+# buy_me_a_coffee: kasiditwans
+# patreon: kasiditwans
+# custom: ['https://kasidit-wans.com/sponsor']

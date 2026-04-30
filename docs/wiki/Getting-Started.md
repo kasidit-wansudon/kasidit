@@ -17,6 +17,19 @@ In any git repo (or plain directory):
 
 Answer the prompts. The agent detects your stack (Laravel / Vue / Go / Python / etc.), scaffolds `.kasidit/`, pulls stack-matched defaults from Centerlite if any, and offers a light review.
 
+The init flow asks **one Mode question** (v0.10) — pick `1` (router, default), `2` (lite), or `3` (full). Anything else falls back to router. See [[Kasi-Mode]] for what each level loads.
+
+## 1b. (Optional) Switch Mode later
+
+```
+/kasi router    # default — thin classifier, escalates only when needed
+/kasi lite      # always-on Rule 1 (mission narrowing) + Rule 11 (confidence labels)
+/kasi full      # full framework — for audits, refactors, new features
+/kasi save      # persist current Mode to .kasidit/config.json
+```
+
+Heavy commands (`/kasi-review`, `/kasi-security`, `/kasi-fix`, `/kasi-ui`, `/kasi-multi`, `/kasi-cascade`) auto-escalate to `full` for the duration of the mission, then revert. Casual chat stays in `router`.
+
 ## 2. State a mission
 
 Kasidit missions are **narrow and verifiable**. Compare:
@@ -110,13 +123,19 @@ Every non-trivial fact goes into:
 
 Across projects, the global hub (Centerlite) accumulates:
 
-- `~/.claude/skills/kasidit/center/rules.md` — your accumulated rules
+- `~/.claude/skills/kasidit/center/rules.jsonl` — accumulated user rules (v0.10 — emit-driven)
 - `~/.claude/skills/kasidit/center/patterns.jsonl` — cross-project patterns
-- `~/.claude/skills/kasidit/center/logs/*.jsonl` — every prompt you have typed
+- `~/.claude/skills/kasidit/center/route-memory.jsonl` — router learnings (v0.10)
+- `~/.claude/skills/kasidit/center/memory.jsonl` — cross-session facts (v0.10)
+- `~/.claude/skills/kasidit/center/logs/*.jsonl` — every prompt you have typed (PII — keep local)
+
+`kasidit-record.py` (Stop hook) parses the AI's emit lines (`[kasidit-log]`, `[kasidit-pattern]`, `[kasidit-memory]`, `[kasidit-rule]`) and appends to the matching store. See [[Backend-Hooks]] for the contract.
 
 ## 7. Next reads
 
 - [[Commands]] — full reference
+- [[Kasi-Mode]] — Mode levels (off / router / lite / full / ultra)
+- [[Backend-Hooks]] — runtime hooks (v0.10)
 - [[Model Tiers]] — what changes on Opus vs Sonnet vs Haiku
 - [[Gravity Pattern]] — the hub-and-orbit knowledge system
 - [[FAQ]]

@@ -1,0 +1,98 @@
+name: Bug report
+description: Something in Kasidit misbehaves — hook fails, install errors, command does the wrong thing.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug.
+
+        Before submitting:
+        - **Question**, not a bug? → use [Discussions Q&A](https://github.com/kasidit-wansudon/kasidit/discussions) instead
+        - **Security issue?** → see [SECURITY.md](https://github.com/kasidit-wansudon/kasidit/blob/main/SECURITY.md), do **not** post here
+
+  - type: input
+    id: version
+    attributes:
+      label: Kasidit version
+      description: Output of `cat ~/.claude/plugins/marketplaces/kasidit/plugins/kasidit/.claude-plugin/plugin.json | grep version`
+      placeholder: "0.10.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Claude model tier
+      options:
+        - Opus
+        - Sonnet
+        - Haiku
+        - mixed / unsure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      description: From `~/.claude/skills/kasidit/center/config.json`
+      options:
+        - "off"
+        - router
+        - lite
+        - full
+        - ultra
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: "macOS 14.5 / Ubuntu 22.04 / Windows 11 + WSL"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you do, what did Kasidit do, what did you expect.
+      placeholder: |
+        Mission: ...
+        I ran: /kasi-...
+        Expected: ...
+        Got: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Minimal steps to reproduce. If only on a specific repo, link it (or a sanitized snippet).
+      placeholder: |
+        1. /plugin install kasidit@kasidit
+        2. cd into a Laravel project
+        3. /kasi-fix N+1 query in SalesController
+        4. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Hook output / error trace
+      description: Relevant lines from `~/.claude/skills/kasidit/center/logs/` or any error in the terminal.
+      render: text
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Pre-flight
+      options:
+        - label: I ran `bash ~/.claude/plugins/marketplaces/kasidit/plugins/kasidit/install.sh --dry-run` to confirm the install state
+        - label: I checked Issues for duplicates
+        - label: I am willing to test a candidate fix

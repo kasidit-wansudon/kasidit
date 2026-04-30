@@ -22,11 +22,26 @@ Whatever you type, plus whatever files the agent loads. No Kasidit-specific tele
 
 ### How do I install?
 
-See [[Installation]]. Summary: install plugin → copy log hook → register `UserPromptSubmit` in `settings.json` → run `/kasi-init` in each project.
+See [[Installation]]. Summary (v0.10): install plugin → run `bash ~/.claude/plugins/marketplaces/kasidit/plugins/kasidit/install.sh` (handles all 5 backend hooks + `settings.json` merge + Gravity hub seed) → run `/kasi-init` per project.
 
-### Do I have to install the log hook?
+### Do I have to install the backend hooks?
 
-No — it is optional. Without it, the plugin still works; you just lose the cross-project prompt history that powers future analytics.
+No — the plugin still works without them. You lose:
+- **router** memory (`route-memory.jsonl`) — no learning from past missions
+- **runtime verifier** — no automatic downgrade of unverified `[high]` claims
+- **incremental backend save** — patterns / memory / rules emit lines have nowhere to go
+- **prompt log** — cross-session history not captured
+
+Hooks are stdlib-only (Python 3.9+, no extra deps). Recommended unless your environment blocks them.
+
+### What's new in v0.10?
+
+See [[v0.10.0]]. Five things:
+1. **Backend hooks** — runtime enforcement layer (route, verify, record, update-check, drift-check).
+2. **Mode gate** (`/kasi off|router|lite|full|ultra`) — control framework load depth per session.
+3. **`audit-specialist`** — single agent merges `code-reviewer` + `security-auditor` + `perf-profiler` via `--focus=`.
+4. **`install.sh`** — canonical installer replaces manual copy + settings edit.
+5. **12 default checklists** — PHP / Node / Python / Go × code-review / security / perf, seeded at install.
 
 ### Does `/kasi-init` modify my repo?
 
@@ -34,7 +49,31 @@ Yes — it creates `.kasidit/` in the project root and optionally adds a `.claud
 
 ### Can I uninstall cleanly?
 
-Yes. `/plugin uninstall kasidit`, remove the hook block from `settings.json`, `rm -rf ~/.claude/skills/kasidit/center/` and `.kasidit/` per project. See [[Installation#Uninstall]].
+Yes. `/plugin uninstall kasidit`, remove the hook block from `settings.json` (or restore from `settings.json.kasidit-backup-<ts>`), `rm -rf ~/.claude/skills/kasidit/center/` and `.kasidit/` per project. See [[Installation#Uninstall]].
+
+### How do I update from v0.9 to v0.10?
+
+```
+/plugin marketplace update kasidit
+/plugin install kasidit@kasidit
+bash ~/.claude/plugins/marketplaces/kasidit/plugins/kasidit/install.sh
+```
+
+The installer is idempotent — safe to re-run. It backs up `settings.json` before merging. Old `kasi-*` standalone command files at `~/.claude/commands/` (from earlier installs) coexist with the new `kasidit:*` namespaced commands; clean them manually if drift bothers you.
+
+`SKILL.md` at `~/.claude/skills/kasidit/SKILL.md` is **not auto-replaced** by `install.sh`. To pick up the v0.10 framework rules manually:
+```bash
+cp ~/.claude/plugins/marketplaces/kasidit/plugins/kasidit/skills/kasidit/SKILL.md \
+   ~/.claude/skills/kasidit/SKILL.md
+```
+
+### Where do I ask questions vs report bugs?
+
+- **Bugs** (the plugin misbehaves, hooks fail, install errors) → [Issues](https://github.com/kasidit-wansudon/kasidit/issues)
+- **Questions** (how do I X, why does it Y, best practice for Z) → [Discussions Q&A](https://github.com/kasidit-wansudon/kasidit/discussions)
+- **Ideas / feature requests** → [Discussions Ideas](https://github.com/kasidit-wansudon/kasidit/discussions)
+- **Show & tell** (your `.kasidit/` config, custom checklists, war stories) → [Discussions Show & Tell](https://github.com/kasidit-wansudon/kasidit/discussions)
+- **Security disclosures** → see [SECURITY.md](https://github.com/kasidit-wansudon/kasidit/blob/main/SECURITY.md) (do **not** post in public Issues)
 
 ## Behavior
 

@@ -1,0 +1,33 @@
+title: "[announcement] "
+labels: ["announcement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Maintainer-only category for releases, deprecation notices, breaking-change calls, roadmap updates.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: "v0.10.0"
+
+  - type: textarea
+    id: tldr
+    attributes:
+      label: TL;DR
+      description: Two or three lines. Most readers stop here — make them count.
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Headline changes, migration notes, links to wiki / changelog / release.
+
+  - type: textarea
+    id: action-required
+    attributes:
+      label: Action required (if any)
+      description: "Run install.sh", "remove old agent file", "update SKILL.md manually", etc. Empty if none.

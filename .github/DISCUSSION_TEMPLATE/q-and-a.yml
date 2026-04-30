@@ -1,0 +1,41 @@
+title: "[Q&A] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for usage questions: "how do I", "why does X happen", "what is the right Mode for".
+        For defects → use Issues with the bug template.
+        For brainstorming features → use the Ideas category.
+
+  - type: input
+    id: version
+    attributes:
+      label: Kasidit version
+      placeholder: "0.10.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Model tier (if relevant)
+      options:
+        - any / not specific
+        - Opus
+        - Sonnet
+        - Haiku
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: Be specific. "/kasi-fix on a Vue 3 single-file component falls into a loop after round 2 — what should I be doing differently?" beats "Kasidit is broken on Vue".
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you have already tried
+      description: Saves both of us time.

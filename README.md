@@ -7,7 +7,7 @@
 [![stars](https://img.shields.io/github/stars/kasidit-wansudon/kasidit?style=flat-square&color=fbbf24)](https://github.com/kasidit-wansudon/kasidit/stargazers)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](./LICENSE)
 
-**Site:** https://kasidit-wansudon.github.io/kasidit-site/ · **Wiki:** [GitHub Wiki](https://github.com/kasidit-wansudon/kasidit/wiki) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md)
+**Site:** [kasi web](https://kasi.kasion.dev/) · **Wiki:** [GitHub Wiki](https://github.com/kasidit-wansudon/kasidit/wiki) · **Changelog:** [CHANGELOG.md](./CHANGELOG.md)
 
 ---
 
@@ -52,7 +52,7 @@ The fix is not a bigger model. The fix is **scaffolding**: checklists, confidenc
 - **8 specialist agents** — `architect-planner`, `audit-specialist` (`--focus=quality|security|perf`), `bug-hunter`, `deep-researcher`, `legacy-specialist`, `migration-specialist`, `refactor-surgeon`, `test-writer`
 - **5 runtime hooks** — prompt classifier, confidence-label verifier, backend-save recorder, update + drift check
 - **Master Orchestrator** — main agent delegates; never executes strong work itself
-- **Gravity** — two-tier knowledge: Centerlite hub + per-project Dcenterlite
+- **Gravity** — two-tier knowledge: Centerlite hub + per-project Dcenterlite, with promote / pull / sync
 - **15 default checklists** — security · code-review · perf · backend across PHP / Node / Python / Go
 - **Tier-aware rules** — tighter discipline on Haiku, full framework on Opus
 
@@ -99,7 +99,7 @@ If you only want one thing from this repo, run `kasi-verify.py` — it catches `
 
 ## License
 
-MIT. Use freely, fork freely. Issues + PRs welcome.
+MIT. Use freely, fork freely. Issues + PRs welcome at [kasidit-wansudon/kasidit/issues](https://github.com/kasidit-wansudon/kasidit/issues).
 
 ## Author
 

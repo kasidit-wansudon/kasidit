@@ -1,19 +1,23 @@
 {
   "name": "kasidit",
-  "description": "Mindful AI coding framework — discipline over cleverness. Skill + 9 slash commands + 3 agents. Works on any model tier (Opus/Sonnet/Haiku). Integrates Claude Design for visual work.",
-  "version": "0.10.0",
+  "description": "Mindful AI coding framework — discipline over cleverness. Skill + 21 slash commands + 8 specialist agents + 5 runtime hooks + 15 default checklists + Master Orchestrator + Gravity hub. Works on any model tier (Opus/Sonnet/Haiku). Integrates Claude Design for visual work.",
+  "version": "0.11.0",
   "author": {
     "name": "Kasidit Wansudon",
     "email": "kasidit.wans@gmail.com"
   },
   "homepage": "https://kasidit.ai",
   "repository": "https://github.com/kasidit-wansudon/kasidit",
-  "license": "MIT",
+   "license": "MIT",
   "keywords": [
     "ai-coding",
     "discipline",
     "claude-design",
     "code-review",
-    "security-audit"
+    "security-audit",
+    "backend-audit",
+    "function-call-graph",
+    "runbook",
+    "devops"
   ]
 }

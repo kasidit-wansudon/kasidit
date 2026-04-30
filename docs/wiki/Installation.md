@@ -1,6 +1,6 @@
 # Installation
 
-Install the Kasidit plugin for Claude Code, install the global prompt-log hook, and initialize a project.
+Install the Kasidit plugin for Claude Code, run the v0.10 backend hooks installer, and initialize a project.
 
 ## 1. Install the plugin
 
@@ -8,7 +8,7 @@ Install the Kasidit plugin for Claude Code, install the global prompt-log hook, 
 
 ```
 /plugin marketplace add kasidit-wansudon/kasidit
-/plugin install kasidit
+/plugin install kasidit@kasidit
 ```
 
 Restart Claude Code (or reload the session). Verify:
@@ -25,7 +25,43 @@ git clone https://github.com/kasidit-wansudon/kasidit.git ~/path/to/kasidit-mark
 
 Register as a custom marketplace source in `~/.claude/settings.json` under `extraKnownMarketplaces`.
 
-## 2. Install the prompt-log hook (v0.9.2)
+## 2. Run `install.sh` (v0.10 — recommended)
+
+`install.sh` is the canonical installer. It copies all 5 backend hooks, merges your `~/.claude/settings.json` to register them, seeds the Gravity hub with default checklists and JSONL stores, and writes Mode config. **Idempotent** — safe to re-run.
+
+```bash
+bash ~/.claude/plugins/marketplaces/kasidit/plugins/kasidit/install.sh
+```
+
+What it does:
+
+- Copies hooks → `~/.claude/hooks/` (`kasidit-route.py`, `kasidit-verify.py`, `kasidit-record.py`, `kasidit-update-check.sh`, `kasidit-drift-check.sh`, plus legacy `kasidit-log.{sh,py}`)
+- Backs up `~/.claude/settings.json` to `settings.json.kasidit-backup-<ts>` (keeps last 3)
+- Merges hook registrations using `jq` (preferred) or `python3` stdlib (fallback) — idempotent
+- Seeds `~/.claude/skills/kasidit/center/` with 5 JSONL stores (`route-memory`, `patterns`, `memory`, `rules`, `missions`)
+- Seeds 12 default checklists (PHP / Node / Python / Go × code-review / security / perf)
+- Seeds 2 knowledge templates (patterns, design-system)
+- Writes `center/config.json` with the chosen Mode (default `router`)
+- Writes `.last_sync` and `.last_update_check` stamps
+
+Flags:
+
+```bash
+bash install.sh --dry-run            # preview the plan, write nothing
+bash install.sh --mode=lite          # set initial Mode (router | lite | full)
+KASIDIT_SKIP_SETTINGS=1 bash install.sh   # copy hooks but skip settings.json merge
+```
+
+Verify hooks registered:
+
+```bash
+jq '.hooks | keys' ~/.claude/settings.json
+# should show: ["PostToolUse","SessionStart","Stop","UserPromptSubmit"]
+```
+
+## 2b. Manual hook install (v0.9.2 fallback)
+
+If `install.sh` cannot run, the v0.9.2 prompt-log hook can still be installed manually for prompt logging only. Skip this if you ran `install.sh` above — it covers the same hook plus the v0.10 backend.
 
 The hook captures every user prompt to `~/.claude/skills/kasidit/center/logs/YYYY-MM-DD.jsonl`. Prompts longer than 200 lines are trimmed to head + tail with a marker.
 
