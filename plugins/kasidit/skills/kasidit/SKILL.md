@@ -36,11 +36,11 @@ Every non-trivial finding or code change must be tagged:
 - `[low]` — inferred from naming/comments, not from actual behavior.
 - `[unsure]` — do not know.
 
-**Never silently guess.** `[unsure]` items go in a separate list for user decision. The `kasidit-verify.py` PostToolUse hook cross-checks `[high]` claims against actual Read/Bash tool calls and auto-downgrades claims without matching tool calls.
+**Never silently guess.** `[unsure]` items go in a separate list for user decision. The `kasi-verify.py` PostToolUse hook cross-checks `[high]` claims against actual Read/Bash tool calls and auto-downgrades claims without matching tool calls.
 
 ### Router classification triggers
 
-Word-boundary match (first hit wins, dict-insert order). Keywords exactly as implemented in `kasidit-route.py:KEYWORDS`:
+Word-boundary match (first hit wins, dict-insert order). Keywords exactly as implemented in `kasi-route.py:KEYWORDS`:
 
 | Keywords in message | kind | Recommended mode |
 |---|---|---|
@@ -60,7 +60,7 @@ Word-boundary match (first hit wins, dict-insert order). Keywords exactly as imp
 
 Thai / extended phrases (e.g. `auth boundary`, `เพี้ยน`, `check the project`) are **not** implemented in v0.10 — add them to `KEYWORDS` if needed.
 
-When `kasidit-route.py` runs on `UserPromptSubmit`, it prepends 1 line to the turn:
+When `kasi-route.py` runs on `UserPromptSubmit`, it prepends 1 line to the turn:
 
 ```
 [kasidit] kind=<kind> mode=<recommended> history=<n_pass>/<n_total> avg_turns=<x>
@@ -1177,7 +1177,7 @@ Centerlite goes stale when patterns accumulate in `.kasidit/` but are never prom
 - This is a reminder, not a block. User may dismiss and continue.
 - If `center/.last_sync` does not exist (first run or pre-v0.9.3 install), skip the reminder and create the file silently on next sync.
 
-The `SessionStart` hook that fires this check lives at `~/.claude/hooks/kasidit-drift-check.sh`. It is registered by `/kasi-init` at user scope (one-time, not per project).
+The `SessionStart` hook that fires this check lives at `~/.claude/hooks/kasi-drift-check.sh`. It is registered by `/kasi-init` at user scope (one-time, not per project).
 
 ### Why Gravity matters per tier
 
@@ -1221,8 +1221,8 @@ A global `UserPromptSubmit` hook writes every user prompt to a date-partitioned 
 
 **Location:**
 ```
-~/.claude/hooks/kasidit-log.sh       # hook entry (registered in settings.json)
-~/.claude/hooks/kasidit-log.py       # trim + append JSONL
+~/.claude/hooks/kasi-log.sh       # hook entry (registered in settings.json)
+~/.claude/hooks/kasi-log.py       # trim + append JSONL
 ~/.claude/skills/kasidit/center/logs/       # global log store, all projects
 ```
 
@@ -1234,7 +1234,7 @@ A global `UserPromptSubmit` hook writes every user prompt to a date-partitioned 
 **Rules:**
 - Hook **never blocks** prompt submission. All errors swallowed; logging is best-effort.
 - Logs are global (user scope), not per-project — any Kasidit invocation, any project, feeds the same store.
-- Log path relocatable via `KASIDIT_LOG_DIR` env var. Trim threshold (200-line cap, 40 head / 20 tail) is hardcoded — edit `MAX_LINES` / `HEAD_LINES` / `TAIL_LINES` in `kasidit-log.py` to change.
+- Log path relocatable via `KASIDIT_LOG_DIR` env var. Trim threshold (200-line cap, 40 head / 20 tail) is hardcoded — edit `MAX_LINES` / `HEAD_LINES` / `TAIL_LINES` in `kasi-log.py` to change.
 - PII: prompts contain whatever user typed. Do not commit the `logs/` directory. `.gitignore` recommended.
 - Downstream tools (`kasi-search`, future analytics) may index this store.
 
@@ -1282,6 +1282,12 @@ Optional commands user may use to steer the skill:
 - **`/kasi-wiki-sync`** — push `docs/wiki/` to the GitHub wiki repo (v0.9.2, dry-run by default).
 - **`/kasi-multi [N] [mission]`** — fan out mission to N specialists in parallel (v0.9.2, default N=6).
 - **`sudo <mission>`** — shorthand for `/kasi-multi 6 <mission>` with "skip clarifying Qs" pacing (v0.9.2).
+- **`/kasi-backend <fix|audit|scaffold|design|perf|security> <scope>`** — backend mission router; counterpart to `/kasi-ui`. Auto-detects Laravel / Node stack (v0.11).
+- **`/kasi-graph <build|show|extract|impact|trace|cycles|dead>`** — function call graph build + subgraph extract; primitive consumed by `/kasi-backend audit|perf` (v0.11).
+- **`/kasi-struc <build|refresh|show|tree|module|path|bridge|verify>`** — project structure index + auto-bridge cache; commands read state instead of rescanning (v0.11).
+- **`/kasi-devopt <deploy|env|data|infra|secrets|runbook|health|connect>`** — DevOps mission (deploy plan, env diff, data flow map, secrets audit, runbooks). Never executes deploys — outputs plan, user runs (v0.11).
+- **`/kasi-acknowledge [capture|template|update|link]`** — capture the steps just performed as a replayable runbook in `.kasidit/knowledge/runbooks/` (v0.11).
+- **`/kasi-knowledge-list [list|show|recent|tag|kind|search|replay|stats|stale]`** — browse stored runbooks, replay step-by-step (v0.11).
 
 These are suggestions. Real commands depend on host environment (Claude Code, Cursor, Cowork, etc.).
 
@@ -1314,6 +1320,7 @@ This skill is the discipline.
 
 ## Version
 
+- `v0.11` — **Backend + structure bridge + runbook capture.** New commands `/kasi-backend` (multi-mode backend mission router for fix/audit/scaffold/design/perf/security with Laravel/Node auto-detect), `/kasi-graph` (function call graph build + subgraph extract), `/kasi-struc` (project structure state cache + auto-bridge so commands skip rescans), `/kasi-devopt` (DevOps mission — deploy plan / env diff / data flow / secrets / runbooks; never executes deploys), `/kasi-acknowledge` + `/kasi-knowledge-list` (capture and replay action runbooks). New checklists: `backend-laravel.md`, `backend-node.md`, `backend-api-design.md`. New scripts: `build_graph.{sh,py}` (regex MVP — ast-grep path stubbed). **File-path standardization** — `kasidit-{route,verify,record,log,update-check,drift-check}.{py,sh}` → `kasi-*` (settings.json, install.sh, docs updated). Skill `kasidit-default` → `kasi-default`. Internal emit-token protocol `[kasidit-X]` and brand prefix `[kasidit]` retained for protocol stability.
 - `v0.10` — **Honesty cleanup.** `SKILL-full.md` split reverted — Full Framework merged back into `SKILL.md` behind a prompt-level mode gate (best-effort, not runtime-enforced). `audit-specialist` agent consolidates `code-reviewer` / `security-auditor` / `perf-profiler` via `--focus=` (old agents remain as name-recognition stubs — users must invoke `audit-specialist` explicitly; no automatic router mapping). `/kasi-init` install prompt clarified (digit-only input). `/kasi` state precedence marked as spec — no runtime resolver yet.
 - `v0.9.2` — **Gravity Pattern** (Centerlite + Dcenterlite): two-tier knowledge system with `/kasi-promote`, `/kasi-pull`, `/kasi-sync`. **Multi-Agent Mode** — `/kasi-multi [N]` fan-out + `sudo` shorthand for fast parallel specialist dispatch. **Global prompt log** via `UserPromptSubmit` hook into `~/.claude/skills/kasidit/center/logs/` (200-line trim, head/tail markers). **`/kasi-init`** chains scaffold + docs + review + project auto-invoke. **`/kasi-wiki-sync`** pushes `docs/wiki/` to the GitHub wiki (manual, dry-run default). Expanded default allow-list for Kasidit paths, hooks, and common read-only bash patterns.
 - `v0.9.1` — **Master Orchestrator Rule.** Master agent delegates strong work to specialists, never executes it. 7 new specialized agents added: `bug-hunter`, `architect-planner`, `perf-profiler`, `test-writer`, `refactor-surgeon`, `deep-researcher`, `migration-specialist`. Specialist Agent Registry + dispatch brief format.

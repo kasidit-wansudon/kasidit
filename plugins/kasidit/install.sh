@@ -59,6 +59,7 @@ fi
 # -------- targets --------
 CLAUDE_HOME="${HOME}/.claude"
 HOOKS_DIR="${CLAUDE_HOME}/hooks"
+SCRIPTS_DIR="${CLAUDE_HOME}/skills/kasidit/scripts"
 SETTINGS="${CLAUDE_HOME}/settings.json"
 CENTER="${CLAUDE_HOME}/skills/kasidit/center"
 CHECKLISTS="${CENTER}/checklists"
@@ -143,6 +144,18 @@ if [ -d "$INC" ]; then
   done
 fi
 
+# -------- 5b. seed scripts (build_graph, build_struc) — overwrite OK, source of truth is plugin --------
+SCRIPTS_SRC="$PLUGIN_ROOT/skills/kasidit/scripts"
+if [ -d "$SCRIPTS_SRC" ]; then
+  run mkdir -p "$SCRIPTS_DIR"
+  for f in "$SCRIPTS_SRC"/*.sh "$SCRIPTS_SRC"/*.py; do
+    [ -e "$f" ] || continue
+    base="$(basename "$f")"
+    run cp "$f" "$SCRIPTS_DIR/$base"
+    run chmod +x "$SCRIPTS_DIR/$base"
+  done
+fi
+
 # -------- 6. config.json (mode) --------
 CONFIG_JSON="$CENTER/config.json"
 if [ ! -f "$CONFIG_JSON" ]; then
@@ -194,12 +207,12 @@ else
   # Hook registrations to ensure
   # format: EVENT|COMMAND
   ENTRIES="
-SessionStart|bash ~/.claude/hooks/kasidit-update-check.sh
-SessionStart|bash ~/.claude/hooks/kasidit-drift-check.sh
-UserPromptSubmit|python3 ~/.claude/hooks/kasidit-route.py
-PostToolUse|python3 ~/.claude/hooks/kasidit-verify.py
-Stop|python3 ~/.claude/hooks/kasidit-verify.py
-Stop|python3 ~/.claude/hooks/kasidit-record.py
+SessionStart|bash ~/.claude/hooks/kasi-update-check.sh
+SessionStart|bash ~/.claude/hooks/kasi-drift-check.sh
+UserPromptSubmit|python3 ~/.claude/hooks/kasi-route.py
+PostToolUse|python3 ~/.claude/hooks/kasi-verify.py
+Stop|python3 ~/.claude/hooks/kasi-verify.py
+Stop|python3 ~/.claude/hooks/kasi-record.py
 "
 
   if [ "$MERGER" = "jq" ]; then
@@ -255,12 +268,12 @@ Stop|python3 ~/.claude/hooks/kasidit-record.py
 import json, os, sys
 path = sys.argv[1]
 entries = [
-    ("SessionStart", "bash ~/.claude/hooks/kasidit-update-check.sh"),
-    ("SessionStart", "bash ~/.claude/hooks/kasidit-drift-check.sh"),
-    ("UserPromptSubmit", "python3 ~/.claude/hooks/kasidit-route.py"),
-    ("PostToolUse", "python3 ~/.claude/hooks/kasidit-verify.py"),
-    ("Stop", "python3 ~/.claude/hooks/kasidit-verify.py"),
-    ("Stop", "python3 ~/.claude/hooks/kasidit-record.py"),
+    ("SessionStart", "bash ~/.claude/hooks/kasi-update-check.sh"),
+    ("SessionStart", "bash ~/.claude/hooks/kasi-drift-check.sh"),
+    ("UserPromptSubmit", "python3 ~/.claude/hooks/kasi-route.py"),
+    ("PostToolUse", "python3 ~/.claude/hooks/kasi-verify.py"),
+    ("Stop", "python3 ~/.claude/hooks/kasi-verify.py"),
+    ("Stop", "python3 ~/.claude/hooks/kasi-record.py"),
 ]
 try:
     with open(path) as f:

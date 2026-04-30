@@ -4,6 +4,45 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.11.0] — 2026-04-30
+
+### Added
+
+- New mission commands:
+  - `/kasi-backend <fix|audit|scaffold|design|perf|security> <scope>` — backend counterpart of `/kasi-ui`. Auto-detects Laravel (composer.json) / Node (express|fastify|hono|nest|koa).
+  - `/kasi-graph <build|show|extract|impact|trace|cycles|dead>` — function call graph; consumed by `/kasi-backend audit|perf` to scope specialists to a subgraph.
+  - `/kasi-struc <build|refresh|show|tree|module|path|bridge|verify>` — project structure cache (`.kasidit/STATE/`); other kasi-* commands read state instead of rescanning.
+  - `/kasi-devopt <deploy|env|data|infra|secrets|runbook|health|connect>` — DevOps mission. Outputs deploy plan, never executes the deploy itself.
+  - `/kasi-acknowledge [capture|template|update|link]` — capture last-performed steps as a replayable runbook. Writes `.kasidit/knowledge/runbooks/<kind>/<slug>-<date>.md`.
+  - `/kasi-knowledge-list [list|show|recent|tag|kind|search|replay|stats|stale]` — browse + step-by-step replay of stored runbooks.
+- New checklists in `~/.claude/skills/kasidit/CHECKLISTS/`:
+  - `backend-laravel.md` (A–M sections + severity guide)
+  - `backend-node.md` (A–N sections)
+  - `backend-api-design.md` (stack-agnostic API rules)
+- New scripts in `~/.claude/skills/kasidit/scripts/`:
+  - `build_graph.sh` — entry script (delegates to Python).
+  - `build_graph.py` — regex MVP for PHP + JS/TS function call extraction. ast-grep AST path stubbed for future.
+
+### Changed
+
+- **File-path standardization** — all `kasidit-{route,verify,record,log,update-check,drift-check}.{py,sh}` hooks renamed to `kasi-*` in both `~/.claude/hooks/` and the plugin marketplace.
+- Skill `~/.claude/skills/kasidit-default/` → `kasi-default/`.
+- `~/.claude/settings.json` hook commands and permission glob updated to `kasi-*` paths.
+- `install.sh`, `test_hooks.py`, SKILL.md, README.md, this CHANGELOG.md updated to reference the new file paths.
+- Backward-compat symlinks (`kasidit-X` → `kasi-X`) added in `~/.claude/hooks/` so cached settings.json paths in running sessions keep working until the next Claude Code reload.
+
+### Retained (intentionally not renamed)
+
+- Internal emit-token protocol: `[kasidit-log]`, `[kasidit-pattern]`, `[kasidit-memory]`, `[kasidit-rule]`, `[kasidit-verify]`, `[kasidit-record]` — would break the AI-emit ↔ parser-regex contract and existing JSONL stores.
+- Brand prefix in route output: `[kasidit] kind=... mode=...`.
+- Env vars: `KASIDIT_CENTER`, `KASIDIT_PROJECT_DIR`, `KASIDIT_LOG_DIR`.
+- Top-level skill / plugin / GitHub names: `~/.claude/skills/kasidit/`, `~/.claude/plugins/marketplaces/kasidit/`, `kasidit-wansudon/kasidit`.
+
+### Notes
+
+- `/kasi-struc` and `/kasi-devopt` ship as command specs; their bridge-state writers (`.kasidit/STATE/*.json`, `.kasidit/STATE/changelog.jsonl`) are spec-only in v0.11. The state schema is documented in the command files; a Python builder analogous to `build_graph.py` will land in v0.12.
+- `/kasi-acknowledge` and `/kasi-knowledge-list` perform their work via the AI prompt + Read/Write tools; no separate runner script is required for v0.11.
+
 ## [0.10.0] — 2026-04-24
 
 ### Added
@@ -12,11 +51,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Caveat (honest):** mode gating is a prompt-level convention. The AI reads the declared mode from `SKILL.md` sections and self-applies. The Claude Code harness does NOT enforce mode boundaries at runtime.
 - **`SKILL.md` restructure** — Router Mode default section + Full Framework section live in the **same file**. No lazy-loading. The file explicitly documents that mode gating is prompt-level, not harness-enforced.
 - **Backend hooks** (runtime-enforced, bundled under `plugins/kasidit/hooks/`):
-  - `kasidit-route.py` — `UserPromptSubmit` classifier + memory query. Routes prompts by mission-kind heuristic.
-  - `kasidit-verify.py` — `PostToolUse` + `Stop` cross-check. Flags missing confidence labels and detects master-orchestrator violations (main agent executing strong work instead of delegating).
-  - `kasidit-record.py` — `Stop` hook. Parses `[kasidit-log|pattern|memory|rule]` emit lines from the AI output and appends them to JSONL files.
-  - `kasidit-update-check.sh` — 1×/day GitHub release tag check. Soft-notifies on new versions.
-- **Incremental backend save ("ออม")** — AI emits `[kasidit-log] kind=<mission-kind> mode=<mode> turns=<n> outcome=<pass|fail>` lines at mission end. `kasidit-record.py` appends to JSONL. Router learns the shortest successful route per mission kind over successive sessions.
+  - `kasi-route.py` — `UserPromptSubmit` classifier + memory query. Routes prompts by mission-kind heuristic.
+  - `kasi-verify.py` — `PostToolUse` + `Stop` cross-check. Flags missing confidence labels and detects master-orchestrator violations (main agent executing strong work instead of delegating).
+  - `kasi-record.py` — `Stop` hook. Parses `[kasidit-log|pattern|memory|rule]` emit lines from the AI output and appends them to JSONL files.
+  - `kasi-update-check.sh` — 1×/day GitHub release tag check. Soft-notifies on new versions.
+- **Incremental backend save ("ออม")** — AI emits `[kasidit-log] kind=<mission-kind> mode=<mode> turns=<n> outcome=<pass|fail>` lines at mission end. `kasi-record.py` appends to JSONL. Router learns the shortest successful route per mission kind over successive sessions.
 - **`audit-specialist` agent** — merges `code-reviewer` / `security-auditor` / `perf-profiler` behind a single entry point with `--focus=quality|security|perf|all`. Old agent files kept as thin stubs for name resolution; scheduled for removal in v0.11.
 - **`sudo <mission>` keyword** — session-only speed shortcut. Minimum 2 parallel agents. **Not** a permission escalation, does not bypass destructive-op confirmation.
 - **`/kasi-multi --fast` flag** — alternative surface for the same speed shortcut as `sudo`.
@@ -68,7 +107,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **`/kasi-init`** — one-shot project bootstrap. Chains `/kasi-scaffold` → `/kasi-docs` → `.kasidit/MISSION.md` seed → optional `/kasi-review` → registers project-level auto-invoke (SessionStart hook in `.claude/settings.local.json` + pointer in project `CLAUDE.md`). Skip flags: `skip docs`, `skip review`, `no auto-invoke`, `dry-run`.
 
-- **Global prompt log** — new `UserPromptSubmit` hook (`~/.claude/hooks/kasidit-log.sh` + `kasidit-log.py`) writes every user prompt to `~/.claude/skills/kasidit/center/logs/YYYY-MM-DD.jsonl`. Prompts > 200 lines are trimmed to first 40 + last 20 lines with a `[trimmed N lines] ...` marker. Shared across all projects (user scope). Never blocks prompt; errors swallowed. Hook script + `README.md` bundled under `plugins/kasidit/hooks/` for install reference.
+- **Global prompt log** — new `UserPromptSubmit` hook (`~/.claude/hooks/kasi-log.sh` + `kasi-log.py`) writes every user prompt to `~/.claude/skills/kasidit/center/logs/YYYY-MM-DD.jsonl`. Prompts > 200 lines are trimmed to first 40 + last 20 lines with a `[trimmed N lines] ...` marker. Shared across all projects (user scope). Never blocks prompt; errors swallowed. Hook script + `README.md` bundled under `plugins/kasidit/hooks/` for install reference.
 
 - **Default allow-list** for Kasidit workflows — adds `Bash(kasidit-*:*)`, `Read/Write(.kasidit/**)`, `Read(~/.claude/skills/kasidit/**)`, `Read(~/.claude/plugins/marketplaces/kasidit/**)`, and common read-only patterns (`grep`, `rg`, `find`, `git log/status/diff/blame/show`, version checks) so `kasi-*` missions run with fewer permission prompts.
 
@@ -78,7 +117,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - `SKILL.md` — new sections **Gravity Pattern (v0.9.2)**, **Global Prompt Log (v0.9.2)**, **Project Init (v0.9.2)** inserted before User Commands. User Commands list gains five v0.9.2 entries (`/kasi-init`, `/kasi-promote`, `/kasi-pull`, `/kasi-sync`, `/kasi-wiki-sync`).
 - `~/.claude/skills/kasidit/logs/` path canonicalized under Centerlite (`center/logs/`). Old path kept as a symlink for backward compat.
-- `plugins/kasidit/hooks/kasidit-log.sh` default `LOG_DIR` points at the new Centerlite path.
+- `plugins/kasidit/hooks/kasi-log.sh` default `LOG_DIR` points at the new Centerlite path.
 
 ### Fixed
 

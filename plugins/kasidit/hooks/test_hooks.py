@@ -67,7 +67,7 @@ def assert_empty(desc: str, actual: str) -> None:
 def test_route_security_keyword():
     center, cleanup = fresh_center()
     try:
-        _, out = run(center, "kasidit-route.py", {"prompt": "review security of AuthController.php"})
+        _, out = run(center, "kasi-route.py", {"prompt": "review security of AuthController.php"})
         assert_contains("route classifies security keyword", out, "kind=security-audit")
         assert_contains("route recommends ultra on security", out, "mode=ultra")
     finally:
@@ -77,7 +77,7 @@ def test_route_security_keyword():
 def test_route_bug_keyword():
     center, cleanup = fresh_center()
     try:
-        _, out = run(center, "kasidit-route.py", {"prompt": "fix this bug in login code"})
+        _, out = run(center, "kasi-route.py", {"prompt": "fix this bug in login code"})
         assert_contains("route classifies bug keyword", out, "kind=bug-fix")
         assert_contains("route recommends lite on bug-fix", out, "mode=lite")
     finally:
@@ -87,7 +87,7 @@ def test_route_bug_keyword():
 def test_route_unclassified_silent():
     center, cleanup = fresh_center()
     try:
-        _, out = run(center, "kasidit-route.py", {"prompt": "hello, how are you"})
+        _, out = run(center, "kasi-route.py", {"prompt": "hello, how are you"})
         assert_empty("route silent on unclassified greeting", out)
     finally:
         cleanup()
@@ -100,7 +100,7 @@ def test_verify_downgrade_high():
             "assistant_text": "[high] auth.php:42 SQL injection risk",
             "tool_uses": [],
         }
-        _, out = run(center, "kasidit-verify.py", payload)
+        _, out = run(center, "kasi-verify.py", payload)
         assert_contains("verify downgrades unverified [high]", out, "downgraded 1 [high]")
     finally:
         cleanup()
@@ -113,7 +113,7 @@ def test_verify_high_with_read_passes():
             "assistant_text": "[high] auth.php:42 SQL injection risk",
             "tool_uses": [{"tool_name": "Read", "tool_input": {"file_path": "/some/path/auth.php"}}],
         }
-        _, out = run(center, "kasidit-verify.py", payload)
+        _, out = run(center, "kasi-verify.py", payload)
         assert_empty("verify silent when [high] matches Read tool call", out)
     finally:
         cleanup()
@@ -126,7 +126,7 @@ def test_verify_master_violation():
             "assistant_text": "Delegating to audit-specialist for review.",
             "tool_uses": [{"tool_name": "Edit", "tool_input": {"file_path": "x.php"}}],
         }
-        _, out = run(center, "kasidit-verify.py", payload)
+        _, out = run(center, "kasi-verify.py", payload)
         assert_contains("verify flags master violation", out, "master violation")
     finally:
         cleanup()
@@ -138,7 +138,7 @@ def test_record_parses_log_emit():
         payload = {
             "assistant_text": "[kasidit-log] kind=bug-fix mode=lite turns=2 outcome=pass"
         }
-        _, out = run(center, "kasidit-record.py", payload)
+        _, out = run(center, "kasi-record.py", payload)
         assert_contains("record appends log emit", out, "backend entries saved")
 
         mem_file = Path(center) / "route-memory.jsonl"
@@ -162,7 +162,7 @@ def test_record_pattern_emit():
         payload = {
             "assistant_text": '[kasidit-pattern] name=bearer-auth file=x.php note="trust hierarchy"'
         }
-        run(center, "kasidit-record.py", payload)
+        run(center, "kasi-record.py", payload)
         pat_file = Path(center) / "patterns.jsonl"
         if not pat_file.exists():
             FAIL.append("FAIL [record pattern emit] — patterns.jsonl missing")
@@ -178,8 +178,8 @@ def test_route_reads_history():
         # Isolated center — seed 4 bug-fix pass records from scratch.
         payload = {"assistant_text": "[kasidit-log] kind=bug-fix mode=lite turns=2 outcome=pass"}
         for _ in range(4):
-            run(center, "kasidit-record.py", payload)
-        _, out = run(center, "kasidit-route.py", {"prompt": "fix the bug in login"})
+            run(center, "kasi-record.py", payload)
+        _, out = run(center, "kasi-route.py", {"prompt": "fix the bug in login"})
         assert_contains("route reads history after >=3 records", out, "history=")
     finally:
         cleanup()
@@ -198,7 +198,7 @@ def test_e2e_record_then_route_recommends_from_history():
             "assistant_text": "[kasidit-log] kind=ui mode=lite turns=1 outcome=pass"
         }
         for _ in range(4):
-            code, _ = run(center, "kasidit-record.py", record_payload)
+            code, _ = run(center, "kasi-record.py", record_payload)
             if code != 0:
                 FAIL.append(f"FAIL [e2e record step] — non-zero exit: {code}")
                 return
@@ -213,7 +213,7 @@ def test_e2e_record_then_route_recommends_from_history():
             FAIL.append(f"FAIL [e2e] — expected 4 memory lines, got {len(lines)}")
             return
 
-        _, out = run(center, "kasidit-route.py", {"prompt": "UI overflow on card layout"})
+        _, out = run(center, "kasi-route.py", {"prompt": "UI overflow on card layout"})
         assert_contains("e2e route recommends kind=ui from recorded history", out, "kind=ui")
         assert_contains("e2e route recommends mode=lite from recorded history", out, "mode=lite")
         assert_contains("e2e route emits history= after >=3 records", out, "history=")
