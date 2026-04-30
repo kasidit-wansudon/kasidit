@@ -80,6 +80,17 @@ Verify:     curl /api/users/export?on=2026-04-26 → expect 142 rows
 
 Or clone and run `bash plugins/kasidit/install.sh`.
 
+## Update
+
+Already installed? Pull the latest release:
+
+```bash
+# In Claude Code
+/plugin marketplace update kasidit
+```
+
+Then re-run `bash plugins/kasidit/install.sh` (idempotent — safe to run again) to refresh hooks, settings.json, checklists, and scripts.
+
 ## Core rules
 
 1. **One mission.** Refuse vague scope; demand narrowing.
