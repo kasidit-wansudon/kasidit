@@ -4,6 +4,7 @@ Side-by-side comparison. Detailed per-version notes live on each release page.
 
 | Version | Date | Theme | Headline change |
 |---|---|---|---|
+| [[v0.11.0]] | 2026-04-30 | **Backend + Bridge + Runbook** | 6 new commands: `/kasi-backend` (mission router), `/kasi-graph` (function call graph), `/kasi-struc` (project-state cache + auto-bridge), `/kasi-devopt` (DevOps mission, never executes), `/kasi-acknowledge` + `/kasi-knowledge-list` (runbook capture + replay). 3 new backend checklists. 4 helper scripts. Hooks renamed `kasidit-*` → `kasi-*`. |
 | [[v0.10.0]] | 2026-04-26 | **Honesty Cleanup** | SKILL-full split reverted (Mode-gated single file), `audit-specialist` merges 3 audit agents, runtime backend hooks (route/verify/record/update/drift), `install.sh`, 12 default checklists, incremental backend save (`route-memory.jsonl`) |
 | [[v0.9.2]] | 2026-04-23 | **Gravity Pattern** | Two-tier knowledge (Centerlite hub + Dcenterlite project), prompt log hook, `/kasi-init`, `/kasi-promote`, `/kasi-pull`, `/kasi-sync`, `/kasi-wiki-sync` |
 | [[v0.9.1]] | 2026-04-22 | **Master Orchestrator** | Master delegates all strong work to 10 specialist agents; dispatch brief format |
@@ -17,7 +18,15 @@ Side-by-side comparison. Detailed per-version notes live on each release page.
 
 ## What changed between each pair
 
-### v0.9.2 → v0.10.0 (this release)
+### v0.10.0 → v0.11.0 (this release)
+
+- **6 new mission commands.** `/kasi-backend` (multi-mode backend router: fix · audit · scaffold · design · perf · security; auto-detects Laravel / Node), `/kasi-graph` (function call graph build/show/extract/impact/trace/cycles/dead with subgraph extraction), `/kasi-struc` (project state cache `.kasidit/STATE/` + auto-bridge so kasi-* read state, never rescan; incremental refresh via `git diff`), `/kasi-devopt` (DevOps mission — outputs deploy plan, env diff, data flow map, secrets audit, runbook scaffold; **never executes a deploy**), `/kasi-acknowledge` + `/kasi-knowledge-list` (capture last-performed steps as a structured runbook with auto-redaction; browse + step-by-step replay).
+- **3 new default checklists.** `backend-laravel.md` (sections A–M + severity guide), `backend-node.md` (sections A–N), `backend-api-design.md` (stack-agnostic API rules). Total 12 → **15**.
+- **4 new helper scripts.** `build_graph.{sh,py}` (regex MVP function call graph for PHP + JS/TS; ast-grep AST path stubbed for v0.12), `build_struc.{sh,py}` (state cache writer with full + incremental modes). `install.sh` extended (section 5b) to seed scripts dir.
+- **File-path standardisation.** `kasidit-{route,verify,record,log,update-check,drift-check}.{py,sh}` → `kasi-*` via `git mv` (history preserved). Skill `kasidit-default` → `kasi-default`. `install.sh`, `test_hooks.py`, SKILL.md, README.md updated. **Retained intentionally** (would break protocol or existing JSONL stores): emit tokens `[kasidit-log|pattern|memory|rule|verify|record]`, brand prefix `[kasidit]`, env vars `KASIDIT_CENTER` / `KASIDIT_PROJECT_DIR` / `KASIDIT_LOG_DIR`, top-level skill/plugin/GitHub names. The parser regex in `kasi-record.py` accepts both `[kasi-X]` and `[kasidit-X]` for backward compatibility.
+- **Honesty:** function call graph is regex-MVP (file-level call attribution shared across all fns in a file); per-fn-body extraction requires brace-tracking, deferred to ast-grep AST path in v0.12. Most kasi-* commands do not yet read `STATE/` — wiring is progressive. `/kasi-devopt` is AI-driven (no separate Python runner) — the command file documents the flow; the AI executes it via Read / Write / Bash tools.
+
+### v0.9.2 → v0.10.0
 
 - **Honesty Cleanup:** the prior `SKILL-full.md` split is reverted. Full Framework merges back into `SKILL.md` behind a prompt-level `/kasi off|router|lite|full|ultra` Mode gate. One file, mode-gated load depth.
 - **Backend hooks** (runtime-enforced for the first time): `kasidit-route.py` (UserPromptSubmit classifier + memory query), `kasidit-verify.py` (PostToolUse + Stop confidence + orchestrator check), `kasidit-record.py` (Stop emit-line parser → JSONL stores), `kasidit-update-check.sh` (1×/day release tag check), `kasidit-drift-check.sh` (SessionStart Centerlite-sync reminder).
