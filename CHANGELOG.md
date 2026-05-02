@@ -4,6 +4,38 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.12.1] — 2026-05-02
+
+### Fixed
+
+- **`install-thclaws.sh` now installs Kasidit's SKILL.md, commands, and agents into thClaws skill directories.** v0.12.0 install only seeded the Gravity hub + scripts + hooks, leaving thClaws's skill loader unable to discover Kasidit (running `thclaws --cli` showed only thClaws builtins, no `kasi-*` commands). Fixed:
+  - `~/.config/thclaws/skills/kasidit/SKILL.md` — main framework spec
+  - `~/.config/thclaws/skills/kasidit/includes/` — patterns + design-system templates
+  - `~/.config/thclaws/commands/kasi-*.md` — 22 slash commands (kasi-* + /kasi mode toggle)
+  - `~/.config/thclaws/agents/*.md` — 11 specialist agents (8 active + 3 deprecated stubs)
+
+### Verified
+
+- Real-mode smoke install on isolated `$HOME=/tmp/thclaws-test` succeeds and produces:
+  - 4 hooks
+  - 15 default checklists
+  - 22 commands
+  - 11 agents
+  - SKILL.md + includes/
+  - 4 scripts
+  - Settings.json with 3 thClaws hook entries
+
+### Migration
+
+For thClaws users who installed v0.12.0:
+
+```bash
+cd kasidit && git pull
+bash plugins/kasidit/install-thclaws.sh
+```
+
+Idempotent — only adds the missing SKILL.md / commands / agents files.
+
 ## [0.12.0] — 2026-05-02
 
 ### Added

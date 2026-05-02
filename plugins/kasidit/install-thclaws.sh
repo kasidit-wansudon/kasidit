@@ -57,9 +57,12 @@ fi
 # -------- targets (thClaws layout) --------
 THCLAWS_HOME="${HOME}/.config/thclaws"
 HOOKS_DIR="${THCLAWS_HOME}/hooks"
-SCRIPTS_DIR="${THCLAWS_HOME}/skills/kasidit/scripts"
+SKILL_DIR="${THCLAWS_HOME}/skills/kasidit"
+SCRIPTS_DIR="${SKILL_DIR}/scripts"
+COMMANDS_DIR="${THCLAWS_HOME}/commands"
+AGENTS_DIR="${THCLAWS_HOME}/agents"
 SETTINGS="${THCLAWS_HOME}/settings.json"
-CENTER="${THCLAWS_HOME}/skills/kasidit/center"
+CENTER="${SKILL_DIR}/center"
 CHECKLISTS="${CENTER}/checklists"
 KNOWLEDGE="${CENTER}/knowledge"
 LOGS_DIR="${CENTER}/logs"
@@ -94,7 +97,8 @@ fi
 # -------- 1. dirs --------
 log "plugin root: $PLUGIN_ROOT"
 log "thclaws home: $THCLAWS_HOME"
-run mkdir -p "$HOOKS_DIR" "$CENTER" "$CHECKLISTS" "$KNOWLEDGE" "$LOGS_DIR"
+run mkdir -p "$HOOKS_DIR" "$CENTER" "$CHECKLISTS" "$KNOWLEDGE" "$LOGS_DIR" \
+  "$SKILL_DIR" "$COMMANDS_DIR" "$AGENTS_DIR"
 
 # -------- 2. copy hooks (thClaws-supported events only) --------
 log "copying hooks → $HOOKS_DIR"
@@ -166,6 +170,59 @@ if [ -d "$SCRIPTS_SRC" ]; then
     base="$(basename "$f")"
     run cp "$f" "$SCRIPTS_DIR/$base"
     run chmod +x "$SCRIPTS_DIR/$base"
+  done
+fi
+
+# -------- 5c. seed SKILL.md + includes (so thClaws skill loader finds Kasidit) --------
+SKILL_SRC="$PLUGIN_ROOT/skills/kasidit/SKILL.md"
+if [ -f "$SKILL_SRC" ]; then
+  run cp "$SKILL_SRC" "$SKILL_DIR/SKILL.md"
+fi
+INCLUDES_SRC="$PLUGIN_ROOT/skills/kasidit/includes"
+if [ -d "$INCLUDES_SRC" ]; then
+  run mkdir -p "$SKILL_DIR/includes"
+  for f in "$INCLUDES_SRC"/*; do
+    [ -e "$f" ] || continue
+    base="$(basename "$f")"
+    run cp "$f" "$SKILL_DIR/includes/$base"
+  done
+fi
+SKILL_COUNT=0
+[ -f "$SKILL_DIR/SKILL.md" ] && SKILL_COUNT=1
+log "skill files seeded: SKILL.md=$SKILL_COUNT, includes/"
+
+# -------- 5d. seed slash commands (so /kasi-* are discoverable) --------
+COMMANDS_SRC="$PLUGIN_ROOT/commands"
+COMMANDS_COPIED=0
+if [ -d "$COMMANDS_SRC" ]; then
+  for f in "$COMMANDS_SRC"/*.md; do
+    [ -e "$f" ] || continue
+    base="$(basename "$f")"
+    dst="$COMMANDS_DIR/$base"
+    if [ -f "$dst" ] && cmp -s "$f" "$dst"; then
+      :
+    else
+      run cp "$f" "$dst"
+      COMMANDS_COPIED=$((COMMANDS_COPIED + 1))
+    fi
+  done
+fi
+log "slash commands copied: $COMMANDS_COPIED → $COMMANDS_DIR"
+
+# -------- 5e. seed specialist agents --------
+AGENTS_SRC="$PLUGIN_ROOT/agents"
+AGENTS_COPIED=0
+if [ -d "$AGENTS_SRC" ]; then
+  for f in "$AGENTS_SRC"/*.md; do
+    [ -e "$f" ] || continue
+    base="$(basename "$f")"
+    dst="$AGENTS_DIR/$base"
+    if [ -f "$dst" ] && cmp -s "$f" "$dst"; then
+      :
+    else
+      run cp "$f" "$dst"
+      AGENTS_COPIED=$((AGENTS_COPIED + 1))
+    fi
   done
 fi
 
