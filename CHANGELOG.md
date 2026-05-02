@@ -4,6 +4,16 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.13.1] — 2026-05-02
+
+### Fixed
+
+- **`SKILL.md` Version section now reflects v0.12 + v0.13.** Prior release-pipeline updates only bumped `marketplace.json` / `plugin.json` and `CHANGELOG.md`, leaving the in-skill `## Version` block stuck at v0.11. Result: when users asked Kasidit "what version", the framework reported v0.11 even though the marketplace was at v0.13.0. Added v0.13 + v0.12 entries to `plugins/kasidit/skills/kasidit/SKILL.md`.
+
+### Pipeline note
+
+The release pipeline checklist now includes "update SKILL.md Version section" alongside the existing manifest + CHANGELOG bumps. See `~/.claude/projects/.../memory/feedback_release_pipeline_full_loop.md`.
+
 ## [0.13.0] — 2026-05-02
 
 ### Added

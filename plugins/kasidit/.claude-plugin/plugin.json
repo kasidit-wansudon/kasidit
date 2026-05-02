@@ -1,7 +1,7 @@
 {
   "name": "kasidit",
   "description": "Mindful AI coding framework \u2014 discipline over cleverness. Skill + 21 slash commands + 8 specialist agents + 5 runtime hooks + 15 default checklists + Master Orchestrator + Gravity hub. Works on any model tier (Opus/Sonnet/Haiku). Integrates Claude Design for visual work.",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "author": {
     "name": "Kasidit Wansudon",
     "email": "kasidit.wans@gmail.com"
