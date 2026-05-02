@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Mindful AI coding framework \u2014 discipline over cleverness. Works on any model tier.",
-    "version": "0.12.1",
+    "version": "0.13.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -14,7 +14,7 @@
       "name": "kasidit",
       "source": "./plugins/kasidit",
       "description": "Mindful AI coding framework that forces discipline to prevent hallucination. 21 slash commands, 8 specialist agents, 5 runtime hooks, 15 default checklists, Master Orchestrator + tier-aware rules + Gravity hub. Works on Opus, Sonnet, and Haiku.",
-      "version": "0.12.1",
+      "version": "0.13.0",
       "author": {
         "name": "Kasidit Wansudon",
         "email": "kasidit.wans@gmail.com"
