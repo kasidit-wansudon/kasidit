@@ -93,7 +93,7 @@ run mkdir -p "$HOOKS_DIR" "$CENTER" "$CHECKLISTS" "$KNOWLEDGE" "$LOGS_DIR"
 
 # -------- 2. copy hooks --------
 log "copying hooks → $HOOKS_DIR"
-for f in "$PLUGIN_ROOT"/hooks/kasidit-*.py "$PLUGIN_ROOT"/hooks/kasidit-*.sh; do
+for f in "$PLUGIN_ROOT"/hooks/kasi-*.py "$PLUGIN_ROOT"/hooks/kasi-*.sh; do
   [ -e "$f" ] || continue
   base="$(basename "$f")"
   dst="$HOOKS_DIR/$base"

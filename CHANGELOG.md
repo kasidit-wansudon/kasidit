@@ -4,6 +4,34 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.12.0] — 2026-05-02
+
+### Added
+
+- **thClaws runtime support.** Kasidit now installs on [thClaws](https://github.com/thClaws/thClaws) (native Rust agent harness from ThaiGPT Co.) alongside Claude Code.
+  - New installer: `plugins/kasidit/install-thclaws.sh` — copies hooks to `~/.config/thclaws/hooks/`, seeds Gravity hub at `~/.config/thclaws/skills/kasidit/center/`, registers hooks in `~/.config/thclaws/settings.json`.
+  - Mirrored manifests: `.thclaws-plugin/marketplace.json` + `plugins/kasidit/.thclaws-plugin/plugin.json` (parallel to existing `.claude-plugin/` layout).
+  - New docs: `docs/thclaws-setup.md` — full guide including hook event mapping, install/uninstall, and limitations.
+- Hook event mapping for thClaws:
+  - `kasi-update-check.sh` → `session_start` (direct port)
+  - `kasi-drift-check.sh` → `session_start` (direct port)
+  - `kasi-verify.py` → `post_tool_use` (per-tool, no per-turn aggregation)
+  - `kasi-record.py` → `session_end` (per-session aggregation; emit-token protocol still works)
+  - `kasi-route.py` and `kasi-log.{sh,py}` are SKIPPED on thClaws — no `UserPromptSubmit` equivalent
+- New keywords on plugin manifest: `thclaws`, `multi-runtime`.
+
+### Changed
+
+- Plugin metadata bumped 0.11.0 → 0.12.0 across `marketplace.json` + `plugin.json` files (4 manifests total).
+- `install.sh` (Claude Code installer) — fixed leftover glob bug `kasidit-*` → `kasi-*` (was preventing fresh-install hook copy after the v0.11 file rename).
+- README.md — added thClaws install section + link to `docs/thclaws-setup.md`.
+
+### Notes
+
+- Kasidit on thClaws runs in **degraded mode** for 2 hooks (route + log) — discipline framework, commands, agents, checklists, scripts all work fully. The framework's prompt-level rules (Master Orchestrator, tier-aware, confidence labels, mission-driven) are runtime-agnostic and apply identically on both runtimes.
+- Gravity hub paths split per runtime: Claude Code `~/.claude/skills/kasidit/center/` vs thClaws `~/.config/thclaws/skills/kasidit/center/`. Cross-runtime sync is deferred to v0.13.
+- No breaking changes for existing Claude Code installs.
+
 ## [0.11.0] — 2026-04-30
 
 ### Added

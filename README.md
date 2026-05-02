@@ -80,6 +80,18 @@ Verify:     curl /api/users/export?on=2026-04-26 → expect 142 rows
 
 Or clone and run `bash plugins/kasidit/install.sh`.
 
+### thClaws (v0.12+)
+
+Kasidit also runs on [thClaws](https://github.com/thClaws/thClaws) — the native Rust agent harness:
+
+```bash
+git clone https://github.com/kasidit-wansudon/kasidit.git
+cd kasidit
+bash plugins/kasidit/install-thclaws.sh
+```
+
+~85% feature parity (4/5 hooks adapted to thClaws events; full SKILL.md + 21 commands + 8 agents + 15 checklists). See [docs/thclaws-setup.md](./docs/thclaws-setup.md) for hook event mapping and limitations.
+
 ## Update
 
 Already installed? Pull the latest release:
