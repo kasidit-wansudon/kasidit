@@ -4,37 +4,61 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [0.12.1] — 2026-05-02
+## [0.13.0] — 2026-05-02
 
-### Fixed
+### Added
 
-- **`install-thclaws.sh` now installs Kasidit's SKILL.md, commands, and agents into thClaws skill directories.** v0.12.0 install only seeded the Gravity hub + scripts + hooks, leaving thClaws's skill loader unable to discover Kasidit (running `thclaws --cli` showed only thClaws builtins, no `kasi-*` commands). Fixed:
+Consolidated **thClaws Runtime Support** release — supersedes the partial v0.12.0/v0.12.1 sequence. Single complete install path; no migration steps required.
+
+- **`plugins/kasidit/install-thclaws.sh`** — full installer for [thClaws](https://github.com/thClaws/thClaws). Targets `~/.config/thclaws/` paths and uses thClaws's shell-snippet hook config format. On a fresh install, produces:
   - `~/.config/thclaws/skills/kasidit/SKILL.md` — main framework spec
   - `~/.config/thclaws/skills/kasidit/includes/` — patterns + design-system templates
-  - `~/.config/thclaws/commands/kasi-*.md` — 22 slash commands (kasi-* + /kasi mode toggle)
+  - `~/.config/thclaws/skills/kasidit/center/` — Gravity hub (route-memory, patterns, memory, rules, missions JSONL × 5)
+  - `~/.config/thclaws/skills/kasidit/scripts/` — `build_graph.{sh,py}` + `build_struc.{sh,py}`
+  - `~/.config/thclaws/commands/kasi-*.md` — 22 slash commands
   - `~/.config/thclaws/agents/*.md` — 11 specialist agents (8 active + 3 deprecated stubs)
+  - `~/.config/thclaws/hooks/kasi-{update-check,drift-check,verify,record}.{sh,py}` — 4 hooks
+  - `~/.config/thclaws/settings.json` — 3 hook entries (`session_start`, `post_tool_use`, `session_end`)
+- **Mirrored plugin manifests** under `.thclaws-plugin/marketplace.json` + `plugins/kasidit/.thclaws-plugin/plugin.json` (parallel to existing `.claude-plugin/`).
+- **`docs/thclaws-setup.md`** — full guide for thClaws users.
+
+### Hook event mapping
+
+| Kasidit hook | Claude Code event | thClaws event | Status |
+|---|---|---|---|
+| `kasi-update-check.sh` | `SessionStart` | `session_start` | ✅ direct port |
+| `kasi-drift-check.sh` | `SessionStart` | `session_start` | ✅ direct port |
+| `kasi-verify.py` | `PostToolUse` + `Stop` | `post_tool_use` | ⚠️ per-tool only |
+| `kasi-record.py` | `Stop` | `session_end` | ⚠️ per-session aggregation |
+| `kasi-route.py` | `UserPromptSubmit` | — | ❌ skipped (no equivalent event) |
+| `kasi-log.{sh,py}` | `UserPromptSubmit` | — | ❌ skipped (same reason) |
+
+Net: ~85% feature parity. The 2 skipped hooks are the global prompt classifier and prompt log — useful but not load-bearing for the discipline framework.
 
 ### Verified
 
-- Real-mode smoke install on isolated `$HOME=/tmp/thclaws-test` succeeds and produces:
-  - 4 hooks
-  - 15 default checklists
-  - 22 commands
-  - 11 agents
-  - SKILL.md + includes/
-  - 4 scripts
-  - Settings.json with 3 thClaws hook entries
+Real install on `~/.config/thclaws/` confirmed via `thclaws --cli` + `/skills`:
 
-### Migration
-
-For thClaws users who installed v0.12.0:
-
-```bash
-cd kasidit && git pull
-bash plugins/kasidit/install-thclaws.sh
+```
+[commands] 22 command(s) loaded
+[skills] 2 skill(s) loaded
+  kasidit [+scripts] (user)
+  kasidit-default (claude)
 ```
 
-Idempotent — only adds the missing SKILL.md / commands / agents files.
+### Bug fix
+
+`install.sh` (Claude Code installer) — leftover glob `kasidit-*` from before the v0.11 hook rename was preventing fresh installs from copying `kasi-*` hooks. Fixed.
+
+### Notes
+
+- v0.12.0 and v0.12.1 are superseded by this release. Both are kept on the GitHub release page for historical reference, but new installs should use v0.13.0.
+- No breaking changes for Claude Code users.
+- Cross-runtime Gravity hub sync is deferred to v0.14.
+
+## [0.12.1] — 2026-05-02
+
+Patch release. Fixed `install-thclaws.sh` missing copy of SKILL.md / commands / agents. Superseded by v0.13.0.
 
 ## [0.12.0] — 2026-05-02
 
