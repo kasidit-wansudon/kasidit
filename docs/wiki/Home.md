@@ -27,6 +27,7 @@ Kasidit is a Claude Code plugin that makes AI coding grounded instead of halluci
 
 Deep per-release notes, in descending order:
 
+- [[v0.13.0]] — **thClaws Runtime Support (Consolidated).** Supersedes v0.12.0/v0.12.1. Single clean install path. Kasidit now runs on both Claude Code and [thClaws](https://github.com/thClaws/thClaws). Same SKILL.md, 21 commands, 8 agents, 15 checklists. ~85% feature parity on thClaws.
 - [[v0.12.0]] — **thClaws Runtime Support.** Kasidit now runs on both Claude Code and [thClaws](https://github.com/thClaws/thClaws). New `install-thclaws.sh`, mirrored `.thclaws-plugin/` manifests, hook event mapping (4/5 hooks adapted), `docs/thclaws-setup.md`. ~85% feature parity on thClaws.
 - [[v0.11.0]] — **Backend Mission Router + Structure Bridge + Runbook Capture.** 6 new commands (`/kasi-backend`, `/kasi-graph`, `/kasi-struc`, `/kasi-devopt`, `/kasi-acknowledge`, `/kasi-knowledge-list`), 3 new backend checklists (Laravel · Node · API design), 4 helper scripts (function call graph + state cache writers). Hooks renamed `kasidit-*` → `kasi-*` (history preserved; emit-token protocol kept).
 - [[v0.10.0]] — **Honesty Cleanup.** SKILL-full split reverted (Mode-gated single file), `audit-specialist` consolidates code-reviewer/security-auditor/perf-profiler, runtime backend hooks (route/verify/record/update/drift), `install.sh` canonical installer, 12 default checklists, incremental backend save (`route-memory.jsonl`).

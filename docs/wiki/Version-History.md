@@ -4,6 +4,7 @@ Side-by-side comparison. Detailed per-version notes live on each release page.
 
 | Version | Date | Theme | Headline change |
 |---|---|---|---|
+| [[v0.13.0]] | 2026-05-02 | **thClaws Runtime Support (Consolidated)** | Supersedes v0.12.0/v0.12.1. Single clean install path. New `install-thclaws.sh` (full file install: SKILL.md + 22 commands + 11 agents + 4 hooks + 15 checklists + scripts). ~85% feature parity. Hook event mapping (4/5 hooks adapted). |
 | [[v0.12.0]] | 2026-05-02 | **thClaws Runtime Support** | Kasidit now runs on Claude Code **and** [thClaws](https://github.com/thClaws/thClaws). New `install-thclaws.sh`, mirrored `.thclaws-plugin/` manifests, hook event mapping (4/5 hooks adapted, 1 skipped), `docs/thclaws-setup.md`. ~85% feature parity. Bug fix: leftover `kasidit-*` glob in `install.sh`. |
 | [[v0.11.0]] | 2026-04-30 | **Backend + Bridge + Runbook** | 6 new commands: `/kasi-backend` (mission router), `/kasi-graph` (function call graph), `/kasi-struc` (project-state cache + auto-bridge), `/kasi-devopt` (DevOps mission, never executes), `/kasi-acknowledge` + `/kasi-knowledge-list` (runbook capture + replay). 3 new backend checklists. 4 helper scripts. Hooks renamed `kasidit-*` → `kasi-*`. |
 | [[v0.10.0]] | 2026-04-26 | **Honesty Cleanup** | SKILL-full split reverted (Mode-gated single file), `audit-specialist` merges 3 audit agents, runtime backend hooks (route/verify/record/update/drift), `install.sh`, 12 default checklists, incremental backend save (`route-memory.jsonl`) |
@@ -19,7 +20,14 @@ Side-by-side comparison. Detailed per-version notes live on each release page.
 
 ## What changed between each pair
 
-### v0.11.0 → v0.12.0 (this release)
+### v0.12.0 → v0.13.0 (this release)
+
+- **Consolidates v0.12.0 + v0.12.1 into a single clean release.** v0.12.0 install was partial (missed copying SKILL.md / commands / agents to thClaws skill dirs). v0.12.1 patched it. v0.13.0 ships the full `install-thclaws.sh` as the canonical install path; v0.12.x are superseded.
+- **Same install-thclaws.sh as v0.12.1** — full file copy (SKILL.md + includes/ + 22 commands + 11 agents + 4 hooks + 15 checklists + 4 scripts + Gravity hub + settings.json hook entries).
+- **CHANGELOG narrative cleaned** — no migration steps required. New users install v0.13.0; existing v0.12.x users `git pull` + re-run installer (idempotent).
+- **No breaking changes** for Claude Code users.
+
+### v0.11.0 → v0.12.0
 
 - **thClaws runtime support.** Kasidit now installs on [thClaws](https://github.com/thClaws/thClaws) (native Rust agent harness from ThaiGPT Co.) alongside Claude Code. New `plugins/kasidit/install-thclaws.sh` handles thClaws's `~/.config/thclaws/` directory layout and shell-snippet hook config format (distinct from Claude Code's array-of-objects format).
 - **Hook event mapping.** Claude Code → thClaws: `SessionStart` → `session_start` (direct: kasi-update-check, kasi-drift-check), `PostToolUse`+`Stop` → `post_tool_use` (per-tool, no per-turn aggregation: kasi-verify), `Stop` → `session_end` (per-session aggregation: kasi-record). Skipped on thClaws: `kasi-route.py` and `kasi-log.{sh,py}` (no `UserPromptSubmit` equivalent event yet). Net ~85% feature parity.
