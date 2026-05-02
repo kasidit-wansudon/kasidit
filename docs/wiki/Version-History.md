@@ -4,6 +4,7 @@ Side-by-side comparison. Detailed per-version notes live on each release page.
 
 | Version | Date | Theme | Headline change |
 |---|---|---|---|
+| [[v0.12.0]] | 2026-05-02 | **thClaws Runtime Support** | Kasidit now runs on Claude Code **and** [thClaws](https://github.com/thClaws/thClaws). New `install-thclaws.sh`, mirrored `.thclaws-plugin/` manifests, hook event mapping (4/5 hooks adapted, 1 skipped), `docs/thclaws-setup.md`. ~85% feature parity. Bug fix: leftover `kasidit-*` glob in `install.sh`. |
 | [[v0.11.0]] | 2026-04-30 | **Backend + Bridge + Runbook** | 6 new commands: `/kasi-backend` (mission router), `/kasi-graph` (function call graph), `/kasi-struc` (project-state cache + auto-bridge), `/kasi-devopt` (DevOps mission, never executes), `/kasi-acknowledge` + `/kasi-knowledge-list` (runbook capture + replay). 3 new backend checklists. 4 helper scripts. Hooks renamed `kasidit-*` → `kasi-*`. |
 | [[v0.10.0]] | 2026-04-26 | **Honesty Cleanup** | SKILL-full split reverted (Mode-gated single file), `audit-specialist` merges 3 audit agents, runtime backend hooks (route/verify/record/update/drift), `install.sh`, 12 default checklists, incremental backend save (`route-memory.jsonl`) |
 | [[v0.9.2]] | 2026-04-23 | **Gravity Pattern** | Two-tier knowledge (Centerlite hub + Dcenterlite project), prompt log hook, `/kasi-init`, `/kasi-promote`, `/kasi-pull`, `/kasi-sync`, `/kasi-wiki-sync` |
@@ -17,6 +18,17 @@ Side-by-side comparison. Detailed per-version notes live on each release page.
 | [[v0.1.0]] | 2026-01 | **Core** | Core principles, mission counter, สารบัญ (INDEX/RELATIONS/MEMORY) |
 
 ## What changed between each pair
+
+### v0.11.0 → v0.12.0 (this release)
+
+- **thClaws runtime support.** Kasidit now installs on [thClaws](https://github.com/thClaws/thClaws) (native Rust agent harness from ThaiGPT Co.) alongside Claude Code. New `plugins/kasidit/install-thclaws.sh` handles thClaws's `~/.config/thclaws/` directory layout and shell-snippet hook config format (distinct from Claude Code's array-of-objects format).
+- **Hook event mapping.** Claude Code → thClaws: `SessionStart` → `session_start` (direct: kasi-update-check, kasi-drift-check), `PostToolUse`+`Stop` → `post_tool_use` (per-tool, no per-turn aggregation: kasi-verify), `Stop` → `session_end` (per-session aggregation: kasi-record). Skipped on thClaws: `kasi-route.py` and `kasi-log.{sh,py}` (no `UserPromptSubmit` equivalent event yet). Net ~85% feature parity.
+- **Mirrored plugin manifests** under `.thclaws-plugin/` (parallel to `.claude-plugin/`). Same metadata + version (0.12.0) + keywords.
+- **`docs/thclaws-setup.md`** — full guide for thClaws users: install/uninstall, hook event mapping, behavior differences vs Claude Code, recommended workflow.
+- **README.md** adds thClaws install section between Claude Code install and Update section.
+- **Bug fix:** `install.sh` (Claude Code installer) had a leftover glob `kasidit-*` from before the v0.11 hook rename to `kasi-*`. Fresh installs were silently failing to copy hooks. Fixed.
+- **No breaking changes** for existing Claude Code installs.
+- **Cross-runtime Gravity hub sync** is deferred to v0.13. Today the two hubs (Claude Code at `~/.claude/skills/kasidit/center/`, thClaws at `~/.config/thclaws/skills/kasidit/center/`) are independent.
 
 ### v0.10.0 → v0.11.0 (this release)
 
