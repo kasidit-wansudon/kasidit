@@ -986,6 +986,7 @@ Do not auto-commit. Ask first.
 - **Ask, do not assume**. One targeted question > three wrong paragraphs.
 - **Confidence-tagged** for Haiku: every non-trivial claim has `[high|medium|low|unsure]`.
 - **Number all options** (Rule 2.4): `1. foo / 2. bar / 3. baz`.
+- **No emoji in generated code (v0.13.2).** When writing HTML / JSX / Vue / Blade / template / any source file that ships to a user-facing UI, do NOT use emoji characters (🚀, ✓, 🦞, etc.). Use **FontAwesome icons** instead: `<i class="fa fa-rocket"></i>`, `<i class="fa fa-check"></i>`, etc. Emojis still allowed in chat replies, commit messages, markdown docs (CHANGELOG, READMEs, wiki) — restriction is generated-code only. Reason: emoji renders inconsistently across browsers/OS/screen-readers; FontAwesome is deterministic and themeable.
 
 ---
 
@@ -1009,6 +1010,7 @@ Quick reference (patterns to copy):
 
 ## Anti-patterns (do not do these)
 
+- ❌ Emoji characters in generated code (HTML/JSX/Vue/Blade/template) — use FontAwesome icons (`<i class="fa fa-...">`) instead. Chat replies + markdown docs are fine; this rule applies to code that ships to a UI (v0.13.2).
 - ❌ Generate code before confirming design.
 - ❌ Hand-code HTML mockup when Claude Design is the right tool (v0.9).
 - ❌ Audit entire CSS cascade before a simple visual fix.
@@ -1320,6 +1322,10 @@ This skill is the discipline.
 
 ## Version
 
+- `v0.13.2` — **No emoji in generated code rule.** Communication Style + Anti-patterns now explicitly forbid emoji characters in HTML/JSX/Vue/Blade/template output; FontAwesome icons are the standard (`<i class="fa fa-...">`). Emojis still allowed in chat replies, commit messages, and markdown docs. Reason: emoji renders inconsistently across browsers/OS/screen-readers; FontAwesome is deterministic and themeable.
+- `v0.13.1` — **Patch** — bumped SKILL.md Version section + manifests to keep `/kasidit version` in sync with marketplace cache. (Earlier commit accidentally only updated manifests; this is the catch-up.)
+- `v0.13` — **thClaws runtime support (consolidated).** Single clean release replacing the v0.12.0 + v0.12.1 sequence. New `plugins/kasidit/install-thclaws.sh` for [thClaws](https://github.com/thClaws/thClaws). Mirrored `.thclaws-plugin/` manifests parallel to `.claude-plugin/`. Hook event mapping: `session_start` (direct), `post_tool_use` + `session_end` (adapted), `UserPromptSubmit`-bound hooks skipped (no equivalent event). 4/5 hooks adapted, ~85% feature parity. Install seeds SKILL.md + 22 commands + 11 agents + 4 scripts + 15 default checklists. New `docs/thclaws-setup.md` covers install/uninstall + hook event mapping. README adds thClaws section. `install.sh` (Claude Code) bug fix — leftover `kasidit-*` glob → `kasi-*` after v0.11 hook rename.
+- `v0.12` — Initial thClaws runtime port (partial install — superseded by v0.13.0 which adds the missing SKILL.md / commands / agents copy step).
 - `v0.11` — **Backend + structure bridge + runbook capture.** New commands `/kasi-backend` (multi-mode backend mission router for fix/audit/scaffold/design/perf/security with Laravel/Node auto-detect), `/kasi-graph` (function call graph build + subgraph extract), `/kasi-struc` (project structure state cache + auto-bridge so commands skip rescans), `/kasi-devopt` (DevOps mission — deploy plan / env diff / data flow / secrets / runbooks; never executes deploys), `/kasi-acknowledge` + `/kasi-knowledge-list` (capture and replay action runbooks). New checklists: `backend-laravel.md`, `backend-node.md`, `backend-api-design.md`. New scripts: `build_graph.{sh,py}` (regex MVP — ast-grep path stubbed). **File-path standardization** — `kasidit-{route,verify,record,log,update-check,drift-check}.{py,sh}` → `kasi-*` (settings.json, install.sh, docs updated). Skill `kasidit-default` → `kasi-default`. Internal emit-token protocol `[kasidit-X]` and brand prefix `[kasidit]` retained for protocol stability.
 - `v0.10` — **Honesty cleanup.** `SKILL-full.md` split reverted — Full Framework merged back into `SKILL.md` behind a prompt-level mode gate (best-effort, not runtime-enforced). `audit-specialist` agent consolidates `code-reviewer` / `security-auditor` / `perf-profiler` via `--focus=` (old agents remain as name-recognition stubs — users must invoke `audit-specialist` explicitly; no automatic router mapping). `/kasi-init` install prompt clarified (digit-only input). `/kasi` state precedence marked as spec — no runtime resolver yet.
 - `v0.9.2` — **Gravity Pattern** (Centerlite + Dcenterlite): two-tier knowledge system with `/kasi-promote`, `/kasi-pull`, `/kasi-sync`. **Multi-Agent Mode** — `/kasi-multi [N]` fan-out + `sudo` shorthand for fast parallel specialist dispatch. **Global prompt log** via `UserPromptSubmit` hook into `~/.claude/skills/kasidit/center/logs/` (200-line trim, head/tail markers). **`/kasi-init`** chains scaffold + docs + review + project auto-invoke. **`/kasi-wiki-sync`** pushes `docs/wiki/` to the GitHub wiki (manual, dry-run default). Expanded default allow-list for Kasidit paths, hooks, and common read-only bash patterns.
