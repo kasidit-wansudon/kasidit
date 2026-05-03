@@ -4,6 +4,16 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.13.2] — 2026-05-03
+
+### Added
+
+- **"No emoji in generated code" rule.** `SKILL.md` Communication Style + Anti-patterns now explicitly forbid emoji characters in HTML / JSX / Vue / Blade / any UI-shipping source code. The standard is **FontAwesome icons** (`<i class="fa fa-rocket"></i>`, `<i class="fa fa-check"></i>`, etc.) — deterministic, themeable, and accessible. Emojis remain allowed in chat replies, commit messages, and markdown docs (CHANGELOG, READMEs, wiki).
+
+### Fixed
+
+- **`SKILL.md` Version section now actually contains v0.12 + v0.13 + v0.13.1 entries.** v0.13.1 release was supposed to add these but the SKILL.md edit didn't make it into the commit (only manifests were bumped). v0.13.2 catches up — Version section now reflects the full release timeline.
+
 ## [0.13.1] — 2026-05-02
 
 ### Fixed
