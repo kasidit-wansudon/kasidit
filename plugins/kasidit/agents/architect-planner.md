@@ -2,7 +2,7 @@
 name: architect-planner
 description: Plan BEFORE code for new features, significant refactors, or changes touching more than 2 files. Returns step-by-step plan, file list, data flow, trade-offs. Does NOT write code.
 tools: ["Read", "Grep", "Glob", "Bash"]
-model: opus
+model: sonnet
 ---
 
 # Architect Planner Agent

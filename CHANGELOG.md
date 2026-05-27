@@ -4,6 +4,32 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.14.0] — 2026-05-26
+
+### Added
+
+- **Dispatch brief — `DONE WHEN:` field.** Specialist briefs now must declare measurable completion signals (tests pass, no lint, curl returns expected shape, etc.). Addresses MAST taxonomy (arXiv 2503.13657, NeurIPS 2025) failure mode FM-1.5 "unaware of termination conditions" — 12.4% of multi-agent failures in 1,600+ production traces.
+- **Dispatch brief — `PRIOR CONTEXT` split into `COMPLETED:` + `OPEN:` with `[agent-name]` attribution.** Addresses MAST FM-1.3 step repetition (15.7%, #1 multi-agent failure mode) by making progress state explicit and preventing specialists from re-executing finished work.
+- **Specialist Agent Registry — `Default Tier` column.** Each agent now has an explicit model tier assignment: read-only research = Haiku, analytical/synthesis = Sonnet, creative/high-stakes = Opus. Includes 20% correction-rate watch to escalate Haiku → Sonnet when re-prompt cost negates savings.
+- **Refinement Counter** (separate from Failure Counter). Caps same-hypothesis polish at 3 rounds; halts on confidence-same-or-lower across iterations. Prevents the "coherence trap" (Reflexion ICLR 2024 + Zylos 2026-05) — increasingly polished but still-wrong reasoning.
+
+### Changed
+
+- **Rule 8 reframed positive.** "Output direct, reserve explanation" replaces "Explain = Hallucinate" per Pink Elephant Problem evidence (arXiv 2503.22395, 2025) — LLMs systematically underperform under negation. Behavior identical; framing is now actionable rather than prohibitive.
+- **Agent model tier defaults:**
+  - `deep-researcher`: sonnet → **haiku** (3× cheaper for read-only paths)
+  - `architect-planner`: opus → **sonnet** (was over-provisioned; Sonnet handles plan-only fine)
+  - `legacy-specialist`: (inherited) → **haiku** explicit (read-only paths)
+- Other 8 agents already aligned with the new tier spec; no edit needed.
+
+### Performance
+
+- Projected cost reduction on read-heavy multi-agent runs: **50-80%**. Example: `/kasi-multi 6` typical dispatch drops from ~$0.45 to ~$0.23.
+
+### Sources
+
+Evidence base: 80+ verified URLs from Anthropic official docs (Claude Code Best Practices, Effective Context Engineering, Building Agents with Agent SDK), arXiv 2025-2026 (MAST taxonomy, Pink Elephant, Reflexion, Constitutional AI, CoVe), production retrospectives (Shopify/Stripe/Airbnb/GitHub Copilot/Cursor), and 2026 framework guides (LangGraph, Microsoft Agent Framework, Claude Agent SDK).
+
 ## [0.13.2] — 2026-05-03
 
 ### Added

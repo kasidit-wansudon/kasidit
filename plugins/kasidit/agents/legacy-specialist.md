@@ -1,6 +1,7 @@
 ---
 name: legacy-specialist
 description: Navigate and modify legacy codebases (ZF1, old Rails, Vue 2, etc.) without breaking them
+model: haiku
 ---
 
 # Legacy Specialist Agent

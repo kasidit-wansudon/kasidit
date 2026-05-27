@@ -303,15 +303,17 @@ When working on step N, evict context for unrelated steps. Do not keep stale cod
 
 If a past attempt failed and is no longer relevant, drop it. Carrying failed attempts forward poisons reasoning.
 
-### 8. Explain = Hallucinate
+### 8. Output direct, reserve explanation (formerly "Explain = Hallucinate")
 
-The longer AI explains, the more it fabricates. Rule:
+Long explanations fabricate. Output direct instead:
 - Reply in **points**, not paragraphs.
-- State what was done, not why (unless asked).
+- State what was done. Add **why** only when user asks.
 - Use tables, file:line references, short commands.
-- No preamble. No postamble. No recap of what the user just said.
+- Start with action. Close with result.
 
-Exception: user explicitly asks "explain why" — then explain with citations to file:line or docs.
+When user types "explain why" — explain with citations to file:line or docs.
+
+**v0.14.0 note:** Rule renamed from negative "Explain = Hallucinate" to positive "Output direct" per Pink Elephant Problem evidence (arXiv 2503.22395, 2025 — LLMs systematically underperform under negation; positive framing has higher compliance). The behavior is identical; the framing is now actionable rather than prohibitive.
 
 ### 9. Runtime is the judge
 
@@ -482,6 +484,22 @@ When in doubt, **ask** whether last round's fix was reloaded, rather than increm
 Counter resets per mission. When user changes mission, counter returns to 0.
 
 Code from failed attempts is **forgotten** unless user says "remember this part". Conversation remembered; failed code dropped.
+
+### Refinement Counter (v0.14.0)
+
+Separate from the Failure Counter. Tracks how many times the agent has refined the **same approach** with minor tweaks (vs. trying a fundamentally different hypothesis).
+
+- **max_refinement_rounds = 3** (configurable per mission)
+- **Confidence-halt rule:** if the agent's self-reported confidence label on iteration N+1 is **same or lower** than iteration N, halt and escalate to user instead of continuing. This prevents the "coherence trap" — increasingly polished but still-wrong reasoning.
+- Failure Counter measures *cross-hypothesis* failure (different fix didn't work). Refinement Counter measures *same-hypothesis* polish (same fix tweaked repeatedly). Different signals require different caps.
+
+**Why (v0.14.0):** ICLR 2024 + Zylos 2026-05 — intrinsic self-correction (no external grounding signal) does not reliably improve, and "sometimes degrades." Without a halt signal, agents enter unbounded polish loops on wrong answers, burning tokens with no convergence.
+
+**How to apply:**
+- On each refinement, log `{round, hypothesis_hash, confidence_label, fix_summary}`.
+- If `hypothesis_hash` matches the previous round AND `confidence_label` is same-or-lower → halt.
+- Surface to user: "refinement loop detected (round N), confidence stuck at [medium]. Escalate?"
+- User chooses: (1) different hypothesis, (2) Wave 1 escalation, (3) abandon.
 
 ---
 
@@ -785,22 +803,28 @@ If the master catches itself doing any of the above → **stop, spawn a speciali
 
 ### Specialist Agent Registry
 
-| Agent | Strong-task trigger | Scope |
-|-------|---------------------|-------|
-| `bug-hunter` | error, crash, wrong output, regression | root-cause + minimal fix |
-| `architect-planner` | new feature, design, refactor > 2 files | plan only, no code |
-| `audit-specialist --focus=quality` | PR / diff / code review | multi-dimensional quality review (v0.10 — replaces `code-reviewer`) |
-| `audit-specialist --focus=security` | OWASP / CVE / auth boundary | security-focused deep audit (v0.10 — replaces `security-auditor`) |
-| `audit-specialist --focus=perf` | slow, N+1, high cost, before-scale | find bottleneck, rank impact (v0.10 — replaces `perf-profiler`) |
-| `test-writer` | add tests, regression after fix, backfill coverage | runnable tests + gap notes |
-| `refactor-surgeon` | named refactor (extract/rename/split/inline) | preserves behavior exactly |
-| `deep-researcher` | library/API/framework research, version-matched docs | findings + sources, cache to `.kasidit/knowledge/` |
-| `migration-specialist` | schema change, framework upgrade, backfill | backward-compat + zero-downtime plan |
-| `legacy-specialist` | legacy PHP, old framework, no-test code | legacy-safe refactor |
+> Model tier column added in v0.14.0 — read-only research = Haiku, analytical/synthesis = Sonnet, creative/high-stakes = Opus. Routes cost 3-5× cheaper while preserving quality on its native tasks.
+
+| Agent | Strong-task trigger | Default Tier | Scope |
+|-------|---------------------|--------------|-------|
+| `bug-hunter` | error, crash, wrong output, regression | **Sonnet** | root-cause + minimal fix |
+| `architect-planner` | new feature, design, refactor > 2 files | **Sonnet** (Opus if multi-system) | plan only, no code |
+| `audit-specialist --focus=quality` | PR / diff / code review | **Sonnet** | multi-dimensional quality review (v0.10 — replaces `code-reviewer`) |
+| `audit-specialist --focus=security` | OWASP / CVE / auth boundary | **Opus** | security-focused deep audit (high-stakes — Opus 4.7 effort=xhigh) |
+| `audit-specialist --focus=perf` | slow, N+1, high cost, before-scale | **Sonnet** | find bottleneck, rank impact (v0.10 — replaces `perf-profiler`) |
+| `test-writer` | add tests, regression after fix, backfill coverage | **Sonnet** | runnable tests + gap notes |
+| `refactor-surgeon` | named refactor (extract/rename/split/inline) | **Sonnet** | preserves behavior exactly |
+| `deep-researcher` | library/API/framework research, version-matched docs | **Haiku** | findings + sources, cache to `.kasidit/knowledge/` |
+| `migration-specialist` | schema change, framework upgrade, backfill | **Opus** | backward-compat + zero-downtime plan |
+| `legacy-specialist` | legacy PHP, old framework, no-test code | **Haiku** (read) / **Sonnet** (modify) | legacy-safe refactor |
+
+**Correction-rate watch (v0.14.0):** if a Haiku-tier specialist's output requires substantive Sonnet/Opus correction more than 20% of the time on a given task type, escalate the default tier for that agent. The 3× cost advantage of Haiku is negated by re-prompt cost above this threshold.
+
+**Override:** any dispatch may override with `model: <tier>` in the brief if the task warrants. Default tier is the starting point, not a ceiling.
 
 ### Dispatch brief format
 
-Every specialist invocation must pass:
+Every specialist invocation must pass (v0.14.0 — added `DONE WHEN` + split `PRIOR CONTEXT`):
 
 ```
 MISSION: <one sentence, verifiable outcome>
@@ -810,9 +834,22 @@ CONSTRAINTS:
   - <deadline, compat, perf budget>
 EXPECTED OUTPUT:
   - <matches the agent's documented output block>
+DONE WHEN:
+  - <measurable completion signals — tests pass, no lint errors,
+     curl returns expected shape, screenshot matches mockup>
 PRIOR CONTEXT:
-  - <findings from earlier specialists, if any>
+  COMPLETED:
+    - [<agent-name>] <finding with file path or cache reference>
+    - [<agent-name>] <another completed step>
+  OPEN:
+    - <current task scope — does NOT repeat already-done work>
 ```
+
+**Why DONE WHEN (v0.14.0):** MAST 2025 taxonomy (arXiv 2503.13657) identifies "unaware of termination conditions" as 12.4% of multi-agent failures (#3 root cause). Without explicit completion signals, specialists over-run or under-deliver.
+
+**Why COMPLETED/OPEN split (v0.14.0):** Step repetition is the #1 multi-agent failure mode (15.7% per MAST). A monolithic PRIOR CONTEXT lets the specialist re-execute finished work because progress state is not explicit. Separating into `COMPLETED:` (don't redo) and `OPEN:` (current scope) makes the boundary unambiguous.
+
+**Why agent-name attribution (v0.14.0):** FM-2.6 reasoning-action mismatch (13.2%) is caused by un-attributed shared state. Tag each prior finding with `[agent-name]` so downstream specialists know who produced what and can weight accordingly.
 
 ### When master may do work itself (narrow exceptions)
 
@@ -1322,6 +1359,7 @@ This skill is the discipline.
 
 ## Version
 
+- `v0.14.0` — **Evidence-based discipline tightening.** Five Tier-A changes applied from a parallel 5-specialist deep-research run (80+ sources from Anthropic official docs, arXiv 2025-2026, production retrospectives Shopify/Stripe/Airbnb/GitHub Copilot/Cursor): **(A1)** Dispatch brief gains `DONE WHEN:` field — addresses MAST FM-1.5 "unaware of termination" (12.4% of multi-agent failures, arXiv 2503.13657). **(A2)** `PRIOR CONTEXT` split into `COMPLETED:` + `OPEN:` with `[agent-name]` attribution — addresses MAST FM-1.3 step repetition (15.7%, #1 multi-agent failure mode). **(A3)** Rule 8 reframed positive ("Output direct, reserve explanation" replaces "Explain = Hallucinate") per Pink Elephant Problem evidence (arXiv 2503.22395) — LLMs underperform under negation; positive framing has higher compliance. **(A4)** Specialist Agent Registry gains explicit **Default Tier** column: `deep-researcher` and `legacy-specialist` (read paths) → **Haiku** (3× cheaper); analytical/synthesis specialists stay on **Sonnet**; `audit-specialist --focus=security` + `migration-specialist` on **Opus** (high-stakes). Includes 20% correction-rate watch to escalate if Haiku misroutes. Agent .md files updated accordingly. Projected cost reduction: 50-80% on read-heavy multi-agent runs (e.g., `/kasi-multi 6` typical drops from ~$0.45 to ~$0.23). **(A5)** Refinement Counter added separate from Failure Counter — caps same-hypothesis polish at 3 rounds, halts on confidence-same-or-lower (prevents the "coherence trap" per Reflexion ICLR 2024 + Zylos 2026-05).
 - `v0.13.2` — **No emoji in generated code rule.** Communication Style + Anti-patterns now explicitly forbid emoji characters in HTML/JSX/Vue/Blade/template output; FontAwesome icons are the standard (`<i class="fa fa-...">`). Emojis still allowed in chat replies, commit messages, and markdown docs. Reason: emoji renders inconsistently across browsers/OS/screen-readers; FontAwesome is deterministic and themeable.
 - `v0.13.1` — **Patch** — bumped SKILL.md Version section + manifests to keep `/kasidit version` in sync with marketplace cache. (Earlier commit accidentally only updated manifests; this is the catch-up.)
 - `v0.13` — **thClaws runtime support (consolidated).** Single clean release replacing the v0.12.0 + v0.12.1 sequence. New `plugins/kasidit/install-thclaws.sh` for [thClaws](https://github.com/thClaws/thClaws). Mirrored `.thclaws-plugin/` manifests parallel to `.claude-plugin/`. Hook event mapping: `session_start` (direct), `post_tool_use` + `session_end` (adapted), `UserPromptSubmit`-bound hooks skipped (no equivalent event). 4/5 hooks adapted, ~85% feature parity. Install seeds SKILL.md + 22 commands + 11 agents + 4 scripts + 15 default checklists. New `docs/thclaws-setup.md` covers install/uninstall + hook event mapping. README adds thClaws section. `install.sh` (Claude Code) bug fix — leftover `kasidit-*` glob → `kasi-*` after v0.11 hook rename.

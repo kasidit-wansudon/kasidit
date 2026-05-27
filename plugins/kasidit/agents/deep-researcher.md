@@ -2,7 +2,7 @@
 name: deep-researcher
 description: Deep investigation across docs, source, web for library/API/framework questions. Use when task needs version-matched docs, competitor analysis, or codebase survey before deciding. Returns findings + sources, never writes final code.
 tools: ["Read", "Grep", "Glob", "WebFetch", "WebSearch", "Bash"]
-model: sonnet
+model: haiku
 ---
 
 # Deep Researcher Agent
