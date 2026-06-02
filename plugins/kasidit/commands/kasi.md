@@ -62,6 +62,7 @@ session override  (/kasi <level> this turn)
 | `/kasi-fix` | `full` | mission ends |
 | `/kasi-ui` | `full` | mission ends |
 | `/kasi-multi` / `/kasi-cascade` | `full` | command completes |
+| `/kasi-team` | `full` | command completes |
 | `/kasi-promote` / `/kasi-pull` / `/kasi-sync` | `lite` | command completes |
 | `/kasi-search` / `/kasi-status` | no change | — |
 | casual chat, `/kasi`, `/kasi status` | stay router | — |
@@ -85,7 +86,7 @@ Rationale: synthesis cost on 2 agents is negligible; latency win is the point.
 
 ## Update check (1× per UTC day)
 
-`kasidit-update-check.sh` runs on SessionStart. Hits GitHub releases endpoint (gh CLI or curl fallback), compares against installed `marketplace.json` version. Prints one line if newer:
+`kasi-update-check.sh` runs on SessionStart. Hits GitHub releases endpoint (gh CLI or curl fallback), compares against installed `marketplace.json` version. Prints one line if newer:
 
 ```
 [kasidit] update available: v0.9.3 → v0.10.0 — run: /plugin marketplace update kasidit
@@ -177,17 +178,17 @@ Heavy lifting runs in Python hooks, not LLM context. AI sees 1-line results only
 
 | Hook | Trigger | Job | Token cost to AI |
 |---|---|---|---|
-| `kasidit-route.py` | UserPromptSubmit | classify message, query memory, inject 1-line recommendation | ~15 tokens |
-| `kasidit-verify.py` | PostToolUse / Stop | cross-check `[high]` labels vs Read/Bash calls, auto-downgrade | ~20 tokens if mismatch |
-| `kasidit-record.py` | Stop / SubagentStop | parse AI emit lines → append to backend stores | ~0 (hook output stays local) |
-| `kasidit-log.py` | UserPromptSubmit (opt-in) | prompt log, trim >200 line | ~0 |
-| `kasidit-drift-check.sh` | SessionStart | stale center/.last_sync warning | ~0 if fresh |
+| `kasi-route.py` | UserPromptSubmit | classify message, query memory, inject 1-line recommendation | ~15 tokens |
+| `kasi-verify.py` | PostToolUse / Stop | cross-check `[high]` labels vs Read/Bash calls, auto-downgrade | ~20 tokens if mismatch |
+| `kasi-record.py` | Stop / SubagentStop | parse AI emit lines → append to backend stores | ~0 (hook output stays local) |
+| `kasi-log.py` | UserPromptSubmit (opt-in) | prompt log, trim >200 line | ~0 |
+| `kasi-drift-check.sh` | SessionStart | stale center/.last_sync warning | ~0 if fresh |
 
 All hooks stdlib-only Python 3. No extra deps. Run locally.
 
 ## Incremental backend save ("ออม")
 
-At mission end or when AI notices a new pattern, it emits tiny structured lines (~20 tokens each). `kasidit-record.py` parses them and appends to the right backend store. AI pays a little per mission; router memory compounds over months.
+At mission end or when AI notices a new pattern, it emits tiny structured lines (~20 tokens each). `kasi-record.py` parses them and appends to the right backend store. AI pays a little per mission; router memory compounds over months.
 
 **AI emit contract** (print in final output):
 

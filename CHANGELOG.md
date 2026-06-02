@@ -4,6 +4,32 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.15.0] — 2026-06-02
+
+### Added
+
+- **Team Mode — `/kasi-team` command.** A HYBRID dev-team workflow: Main spawns a brainstorm **panel** (default N=3) whose role-agents each propose an approach + top-3 risks, synthesizes their input into 2–3 options with trade-offs, and presents them to the **user for a decision** (mandatory gate). After the pick, Main **dispatches** implementation specialists in parallel (reusing `/kasi-multi` fan-out mechanics) and runs a mandatory **QA pass** (`audit-specialist --focus=quality`) before the final synthesis. Distinct from `/kasi-multi`/`sudo` (which execute a known approach) — Team Mode decides the approach first.
+- **Team composition: CORE + DYNAMIC.** Core roles (Lead = `architect-planner`, QA = `audit-specialist --focus=quality`) are always present; dynamic lenses (security/perf/migration) and implementation specialists are picked per mission from the Specialist Agent Registry. **No new agent files** — core roles are dispatch personas over existing registry agents.
+- **`Team Mode` section** in `SKILL.md` (after the Master Orchestrator Rule) + a `/kasi-team` row in the `kasi.md` auto-escalate table (→ `full`, revert on command complete).
+
+### Notes
+
+- **Refinement Counter capped at 1 round** for the brainstorm phase (vs the framework default of 3) to prevent option proliferation. `--fast` skips the refinement round only — the QA pass is never skipped.
+- **Haiku tier**: panel reduced to N=2, 0 refinement rounds, dispatch cap N=4; refuses missions that require a security/migration lens (directs to Sonnet/Opus).
+- **No routing-logic change** — Team Mode adds no hook `KEYWORDS`; "team"/"brainstorm" route at the LLM layer per Rule 1. (`kasi-route.py`'s docstring header is renamed in the cleanup batch below, but its `KEYWORDS` dict and routing logic are unchanged.)
+
+### Changed
+
+- **`sudo` shorthand now defaults to N=6, matching `/kasi-multi`.** Previously bare `sudo <mission>` fanned out to only N=2; it now spawns the full default roster (N=6) unless an explicit number follows (`sudo 4 ...`). `sudo` remains a pacing signal, not a permission escalation. Haiku tier cap (N=4) unchanged. (`commands/kasi-multi.md`)
+- **Hook internal references renamed `kasidit-*` → `kasi-*`.** Docstrings, comment headers, the `kasi-log.sh` → `kasi-log.py` cross-call, `hooks/README.md` install instructions, and the `/kasi-init` `settings.json` snippet now use the `kasi-*` filenames that ship in `hooks/`. JSONL log-marker tokens (`[kasidit-log]`, `[kasidit-pattern]`, …) are intentionally left unchanged so the `kasi-record.py` parser and its producers stay in sync.
+- **Counter / tier specs made Sonnet-explicit.** `kasi-review.md` and `kasi-status.md` now show the Sonnet escalation threshold (4 Opus / 3 Sonnet / 2 Haiku) instead of omitting the Sonnet row. `kasi-devopt.md` `infra` row now recommends `audit-specialist --focus=security`; `kasi-multi.md` Haiku verifier slot pinned to `audit-specialist --focus=quality`.
+- **Command-doc path corrections.** `kasi-cascade.md` orchestrator paths are now absolute (`~/.claude/skills/kasidit/orchestration/...`); `kasi-search.md` flags that embeddings are optional and not wired into `/kasi-init` (grep fallback is the working path).
+- **Deprecated-agent stubs reworded to match reality.** `code-reviewer`, `perf-profiler`, `security-auditor`, and the `audit-specialist` deprecated list no longer claim "removed in v0.11" — they are **kept indefinitely** for name resolution. Added per-focus model-override notes to `audit-specialist` (security → opus) and `legacy-specialist` (read = Haiku frontmatter; modify path requires orchestrator override).
+
+### Removed
+
+- **Legacy `KASIDIT_CENTER_DIR` fallback** dropped from `kasi-drift-check.sh`; it now uses `KASIDIT_CENTER` only, consistent with the other four hooks. The var was a read-side fallback never seeded by `install.sh`, so no runtime path breaks.
+
 ## [0.14.0] — 2026-05-26
 
 ### Added
@@ -346,6 +372,14 @@ Patch release. Fixed `install-thclaws.sh` missing copy of SKILL.md / commands / 
 - **Mission counter** — retry budget + Wave 1 / Wave 2 escalation.
 - **สารบัญ system** — INDEX.md / RELATIONS.md / MEMORY.md for project-level knowledge.
 
+[0.15.0]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.15.0
+[0.14.0]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.14.0
+[0.13.2]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.13.2
+[0.13.1]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.13.1
+[0.13.0]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.13.0
+[0.12.1]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.12.1
+[0.12.0]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.12.0
+[0.11.0]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.11.0
 [0.10.0]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.10.0
 [0.9.2]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.9.2
 [0.9.1]: https://github.com/kasidit-wansudon/kasidit/releases/tag/v0.9.1
