@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# kasidit-update-check.sh — SessionStart hook, runs once per UTC day.
+# kasi-update-check.sh — SessionStart hook, runs once per UTC day.
 #
 # Compares local installed version (from plugin.json) against the latest
 # GitHub tag via `gh api`. Prints a 1-line notice if newer version exists.

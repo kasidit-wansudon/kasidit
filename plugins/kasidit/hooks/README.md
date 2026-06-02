@@ -19,7 +19,7 @@ bash ~/.claude/plugins/marketplaces/kasidit-wansudon/plugins/kasidit/install.sh
 
 `install.sh`:
 
-- copies every `kasidit-*.{py,sh}` in this directory to `~/.claude/hooks/` (chmod +x),
+- copies every `kasi-*.{py,sh}` in this directory to `~/.claude/hooks/` (chmod +x),
 - backs up `~/.claude/settings.json` to `settings.json.kasidit-backup-<ts>` before editing,
 - merges hook registrations idempotently (re-run is safe; duplicate commands are skipped),
 - seeds the Gravity hub under `~/.claude/skills/kasidit/center/` (JSONL files, checklists, knowledge templates),
@@ -36,14 +36,14 @@ Requires `jq` or `python3` for the settings merge. macOS ships `python3` via the
 
 If `install.sh` cannot run (e.g. locked-down environment, auditing every step) use the manual procedure below. This is the same work the installer does, but as discrete commands.
 
-### `kasidit-log.sh` + `kasidit-log.py`
+### `kasi-log.sh` + `kasi-log.py`
 
 Captures every user prompt to `~/.claude/skills/kasidit/center/logs/YYYY-MM-DD.jsonl`. Trims prompts > 200 lines to head (40) + tail (20) + `[trimmed N lines] ...` marker.
 
 ```bash
 mkdir -p ~/.claude/hooks ~/.claude/skills/kasidit/center/logs
-cp kasidit-log.sh kasidit-log.py ~/.claude/hooks/
-chmod +x ~/.claude/hooks/kasidit-log.sh ~/.claude/hooks/kasidit-log.py
+cp kasi-log.sh kasi-log.py ~/.claude/hooks/
+chmod +x ~/.claude/hooks/kasi-log.sh ~/.claude/hooks/kasi-log.py
 ```
 
 ### Register manually (edit `~/.claude/settings.json`)
@@ -56,7 +56,7 @@ Add under the `hooks` object:
     "hooks": [
       {
         "type": "command",
-        "command": "bash /Users/<you>/.claude/hooks/kasidit-log.sh"
+        "command": "bash /Users/<you>/.claude/hooks/kasi-log.sh"
       }
     ]
   }
@@ -66,7 +66,7 @@ Add under the `hooks` object:
 ### Verify
 
 ```bash
-echo '{"prompt":"hi","session_id":"x","cwd":"/tmp"}' | bash ~/.claude/hooks/kasidit-log.sh
+echo '{"prompt":"hi","session_id":"x","cwd":"/tmp"}' | bash ~/.claude/hooks/kasi-log.sh
 ls ~/.claude/skills/kasidit/center/logs/
 tail -1 ~/.claude/skills/kasidit/center/logs/*.jsonl
 ```
@@ -74,7 +74,7 @@ tail -1 ~/.claude/skills/kasidit/center/logs/*.jsonl
 ### Customize
 
 - **Log location:** export `KASIDIT_LOG_DIR=/path/to/elsewhere` before Claude Code starts.
-- **Trim threshold:** edit `MAX_LINES`, `HEAD_LINES`, `TAIL_LINES` in `kasidit-log.py`.
+- **Trim threshold:** edit `MAX_LINES`, `HEAD_LINES`, `TAIL_LINES` in `kasi-log.py`.
 - **Opt out:** remove the `UserPromptSubmit` block from `settings.json`.
 
 ### Privacy note

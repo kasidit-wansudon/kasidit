@@ -16,5 +16,5 @@ Start a code review mission using Kasidit framework.
 **Rules:**
 - Refuse vague scope ("all code", "check everything")
 - Demand specific files/modules/commits
-- Use mission counter — escalate at 4 rounds (Opus) / 2 rounds (Haiku)
+- Use mission counter — escalate at 4 rounds (Opus) / 3 rounds (Sonnet) / 2 rounds (Haiku)
 - Never declare victory without runtime evidence

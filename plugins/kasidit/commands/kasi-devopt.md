@@ -11,7 +11,7 @@ Run a DevOps-focused Kasidit mission. Counterpart to `/kasi-backend` for the dep
 | `deploy <env>` | walk through deploy flow for env, dry-run preflight | `architect-planner` |
 | `pipeline <name>` | inspect/edit CI pipeline (GH Actions / GitLab CI / etc) | `migration-specialist` |
 | `env diff` | diff env vars across `.env.example` / `.env.staging` / prod | `audit-specialist --focus=quality` |
-| `infra <kind>` | review infra-as-code (Terraform / wrangler / docker / k8s) | `audit-specialist` |
+| `infra <kind>` | review infra-as-code (Terraform / wrangler / docker / k8s) | `audit-specialist --focus=security` |
 | `data <action>` | data flow — connections, ETL, backup, retention | `migration-specialist` |
 | `runbook <topic>` | generate or update runbook in `.kasidit/runbooks/` | `architect-planner` |
 | `health <env>` | check `/healthz`, queue depth, error rate, deploy state | `bug-hunter` |

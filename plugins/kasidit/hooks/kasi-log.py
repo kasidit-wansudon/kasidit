@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Kasidit log ingester — called by kasidit-log.sh.
+"""Kasidit log ingester — called by kasi-log.sh.
 
 Reads UserPromptSubmit JSON payload from stdin.
 Trims prompts longer than 200 lines (head 40 + tail 20 + marker).

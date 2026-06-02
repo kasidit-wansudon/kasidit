@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kasidit-record.py — Stop / SubagentStop / PostToolUse hook
+kasi-record.py — Stop / SubagentStop / PostToolUse hook
 
 Incremental backend save. AI emits tiny structured lines at mission end or
 pattern discovery; this hook parses them out of assistant text and appends

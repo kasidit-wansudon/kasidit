@@ -1,6 +1,6 @@
 ---
 name: perf-profiler
-description: Deprecated stub (v0.10). Delegated to audit-specialist --focus=perf. Kept for name resolution only; removed in v0.11.
+description: Deprecated stub (v0.10). Delegated to audit-specialist --focus=perf. Kept indefinitely for name resolution only.
 tools: []
 model: sonnet
 ---

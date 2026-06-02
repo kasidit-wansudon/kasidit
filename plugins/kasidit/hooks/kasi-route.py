@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kasidit-route.py — UserPromptSubmit hook
+kasi-route.py — UserPromptSubmit hook
 
 Classify incoming user message + query route-memory → inject 1-line recommendation
 into context. Keeps LLM side dumb and thin. All logic runs here.

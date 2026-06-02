@@ -27,8 +27,8 @@ Launch Kasidit tier cascade for complex mission.
 
 **Execution paths:**
 - **A. In Claude Code (simulated):** explain cascade plan to user, they run subtasks manually via `claude --model X`
-- **B. Bash orchestrator:** `./orchestration/tier_cascade.sh "mission"`
-- **C. Python API:** `python orchestration/python/orchestrator.py "mission"` (requires ANTHROPIC_API_KEY)
+- **B. Bash orchestrator:** `~/.claude/skills/kasidit/orchestration/tier_cascade.sh "mission"`
+- **C. Python API:** `python ~/.claude/skills/kasidit/orchestration/python/orchestrator.py "mission"` (requires ANTHROPIC_API_KEY)
 
 **Cost (Path B/C):**
 - Typical: $0.20-0.50 per mission

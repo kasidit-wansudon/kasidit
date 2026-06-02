@@ -9,6 +9,8 @@ model: sonnet
 
 Single agent, three lenses. Replaces three overlapping agents merged in v0.10.
 
+> **Model tier.** Frontmatter `model: sonnet` is the default (quality / perf paths). `--focus=security` is high-stakes — the dispatching orchestrator MUST override to `model: opus` in the dispatch brief (per Specialist Agent Registry, SKILL.md). The frontmatter cannot encode a per-focus model, so the override is the caller's responsibility.
+
 ## Why merged
 
 `code-reviewer`, `security-auditor`, `perf-profiler` overlapped heavily — same file reads, same checklist mechanics, different focus areas. Router recommendation needed one entry point, not three. One agent + `--focus` flag = cleaner.
@@ -112,7 +114,7 @@ Always include:
 
 ## Deprecated agents
 
-Agents superseded by this one. Kept in `agents/` as name-recognition stubs only, will be removed in v0.11:
+Agents superseded by this one. Kept in `agents/` as name-recognition stubs only (retained indefinitely so legacy dispatch names still resolve):
 
 - `code-reviewer` → `audit-specialist --focus=quality`
 - `security-auditor` → `audit-specialist --focus=security`

@@ -22,8 +22,8 @@ Every session has **one mission**. If the user's request is vague or multi-part,
 Vague keywords that must be refused with numbered options:
 
 - `check`, `review`, `audit`, `look at`
-- `ดูดี`, `สวย`, `เหมาะสม`, `ปรับ`, `เพี้ยน`, `แปลก`
-- `improve`, `better`, `fix`, `optimize`, `all`, `every`, `entire`
+- `ดูดี`, `สวย`, `เหมาะสม`, `ปรับ`, `เพี้ยน`, `แปลก`, `ไม่ตรง`
+- `improve`, `better`, `fix`, `optimize`, `all`, `every`, `entire`, `whole`
 
 On these, output numbered options (Rule 2.4 style) and wait for a number. Applies in every mode except `off`.
 
@@ -58,7 +58,7 @@ Word-boundary match (first hit wins, dict-insert order). Keywords exactly as imp
 | `how do i` | question | `lite` |
 | no match | unclassified | (silent — router stays default) |
 
-Thai / extended phrases (e.g. `auth boundary`, `เพี้ยน`, `check the project`) are **not** implemented in v0.10 — add them to `KEYWORDS` if needed.
+Thai / extended phrases (e.g. `auth boundary`, `เพี้ยน`, `check the project`) are **not** matched by the `kasi-route.py` `KEYWORDS` dict as of v0.14.0 — add them there if you want hook-level routing (the LLM still narrows them per Rule 1).
 
 When `kasi-route.py` runs on `UserPromptSubmit`, it prepends 1 line to the turn:
 
@@ -72,7 +72,7 @@ If history shows a lighter mode succeeded for this kind, recommend the lighter m
 
 Router itself never writes code or reads source files beyond `.kasidit/` index files. It delegates:
 
-- `/kasi-*` heavy commands (init, scaffold, docs, review, security, fix, ui, multi, cascade) → treat the full framework below as active until the mission ends.
+- `/kasi-*` heavy commands (init, scaffold, docs, review, security, fix, ui, multi, cascade, team) → treat the full framework below as active until the mission ends.
 - Explicit `/kasi full` / `/kasi ultra` → full framework active for the session.
 - Multi-file refactor / audit / review / mockup → escalate and load the full framework.
 
@@ -443,7 +443,7 @@ Visual counterpart to PATTERNS.md. Records visual rules extracted from the codeb
 
 ### CHECKLISTS/ — v3 addition
 
-Pre-built audit lists AI runs through mechanically, not via reasoning. Starter checklist (PHP): `includes/checklist-security-php.md`.
+Pre-built audit lists AI runs through mechanically, not via reasoning. Starter checklist (PHP): `defaults/checklists/security-php.md`.
 
 AI reads this, scans files mechanically, reports findings. No "reasoning" needed — **checklist does the thinking**.
 
@@ -891,6 +891,41 @@ When the master both plans and executes, context pollution compounds: half-loade
 
 ---
 
+## Team Mode (v0.15.0)
+
+> Panel informs. User decides. Specialists build. QA verifies.
+
+Activated by `/kasi-team`. Differs from `/kasi-multi` and `sudo` in one critical way: those dispatch specialists to **execute** a known approach in parallel; Team Mode first runs a **panel** to **propose** approaches, presents **options to the user** for a decision, then dispatches. Structured decision before implementation.
+
+### Three phases
+
+1. **Brainstorm panel** — Main spawns a small panel (default N=3) in parallel: Lead (`architect-planner`), a Domain lens picked by mission (`audit-specialist --focus=security|perf` / `migration-specialist`, or skipped), and a Pragmatist (`general-purpose`). Each returns one approach + top 3 risks — **no code** (`DONE WHEN` enforces).
+2. **Synthesis + user gate** — Main merges panel output into 2–3 options with trade-offs and asks the user to pick. The gate is **mandatory**. The **Refinement Counter is capped at 1 round** here (tighter than the default 3 — avoids option proliferation).
+3. **Dispatch + QA** — after the pick, Main dispatches implementation specialists in parallel, **reusing `/kasi-multi` mechanics** (N selection, dispatch brief format, Haiku cap, parallel rule). A mandatory **QA pass** (`audit-specialist --focus=quality`) runs last, then Main synthesizes the final report.
+
+### Team roles
+
+**Core** (always present): Lead = `architect-planner`, QA = `audit-specialist --focus=quality`. **Dynamic** (per mission): domain/pragmatist lenses + implementation specialists from the Specialist Agent Registry. No new agent files — core roles are dispatch personas over existing agents.
+
+### Tier behavior
+
+- **Opus** — panel up to N=4, full fan-out dispatch.
+- **Sonnet** (default) — panel N=3, 1 refinement round.
+- **Haiku** — panel N=2 (Lead + Pragmatist only), 0 refinement rounds, dispatch cap N=4. **Refuses** missions needing a security/migration lens — directs to Sonnet/Opus.
+
+### When to use Team Mode vs alternatives
+
+| Situation | Command |
+|---|---|
+| Unsure of approach — want structured options before building | `/kasi-team` |
+| Know the approach — want fast parallel build | `/kasi-multi` or `sudo` |
+| Know the approach — complex cross-tier mission | `/kasi-cascade` |
+| One-file fix | `/kasi-fix` |
+
+Full spec — phases, briefs, examples, anti-patterns — in `commands/kasi-team.md`.
+
+---
+
 ## Multi-Agent Orchestration (v3)
 
 For large missions (code review, large refactor), use subagents for context isolation and parallelism.
@@ -1047,7 +1082,7 @@ Quick reference (patterns to copy):
 
 ## Anti-patterns (do not do these)
 
-- ❌ Emoji characters in generated code (HTML/JSX/Vue/Blade/template) — use FontAwesome icons (`<i class="fa fa-...">`) instead. Chat replies + markdown docs are fine; this rule applies to code that ships to a UI (v0.13.2).
+- ❌ Emoji characters in generated code — use FontAwesome icons instead (see "No emoji in generated code" under Communication Style for the full rule).
 - ❌ Generate code before confirming design.
 - ❌ Hand-code HTML mockup when Claude Design is the right tool (v0.9).
 - ❌ Audit entire CSS cascade before a simple visual fix.
@@ -1359,6 +1394,7 @@ This skill is the discipline.
 
 ## Version
 
+- `v0.15.0` — **Team Mode.** New `/kasi-team` command: HYBRID panel brainstorm → user decision gate → parallel dispatch → mandatory QA synthesis. Assembles a CORE team (Lead via `architect-planner`, QA via `audit-specialist --focus=quality`) plus DYNAMIC specialists per mission — no new agent files (core roles are dispatch personas over existing registry agents). Refinement Counter capped at 1 round for the brainstorm phase (vs default 3) to prevent option proliferation. Phase 3 reuses `/kasi-multi` fan-out mechanics. Adds a "Team Mode" section to SKILL.md after the Master Orchestrator Rule and a `/kasi-team` row to the `kasi.md` auto-escalate table. No routing-logic change — `kasi-route.py` `KEYWORDS` dict + routing behavior unchanged (natural-language "team"/"brainstorm" routes at the LLM layer per Rule 1); its docstring header was renamed `kasidit-*`→`kasi-*` in the v0.15.0 cleanup batch.
 - `v0.14.0` — **Evidence-based discipline tightening.** Five Tier-A changes applied from a parallel 5-specialist deep-research run (80+ sources from Anthropic official docs, arXiv 2025-2026, production retrospectives Shopify/Stripe/Airbnb/GitHub Copilot/Cursor): **(A1)** Dispatch brief gains `DONE WHEN:` field — addresses MAST FM-1.5 "unaware of termination" (12.4% of multi-agent failures, arXiv 2503.13657). **(A2)** `PRIOR CONTEXT` split into `COMPLETED:` + `OPEN:` with `[agent-name]` attribution — addresses MAST FM-1.3 step repetition (15.7%, #1 multi-agent failure mode). **(A3)** Rule 8 reframed positive ("Output direct, reserve explanation" replaces "Explain = Hallucinate") per Pink Elephant Problem evidence (arXiv 2503.22395) — LLMs underperform under negation; positive framing has higher compliance. **(A4)** Specialist Agent Registry gains explicit **Default Tier** column: `deep-researcher` and `legacy-specialist` (read paths) → **Haiku** (3× cheaper); analytical/synthesis specialists stay on **Sonnet**; `audit-specialist --focus=security` + `migration-specialist` on **Opus** (high-stakes). Includes 20% correction-rate watch to escalate if Haiku misroutes. Agent .md files updated accordingly. Projected cost reduction: 50-80% on read-heavy multi-agent runs (e.g., `/kasi-multi 6` typical drops from ~$0.45 to ~$0.23). **(A5)** Refinement Counter added separate from Failure Counter — caps same-hypothesis polish at 3 rounds, halts on confidence-same-or-lower (prevents the "coherence trap" per Reflexion ICLR 2024 + Zylos 2026-05).
 - `v0.13.2` — **No emoji in generated code rule.** Communication Style + Anti-patterns now explicitly forbid emoji characters in HTML/JSX/Vue/Blade/template output; FontAwesome icons are the standard (`<i class="fa fa-...">`). Emojis still allowed in chat replies, commit messages, and markdown docs. Reason: emoji renders inconsistently across browsers/OS/screen-readers; FontAwesome is deterministic and themeable.
 - `v0.13.1` — **Patch** — bumped SKILL.md Version section + manifests to keep `/kasidit version` in sync with marketplace cache. (Earlier commit accidentally only updated manifests; this is the catch-up.)
@@ -1367,7 +1403,7 @@ This skill is the discipline.
 - `v0.11` — **Backend + structure bridge + runbook capture.** New commands `/kasi-backend` (multi-mode backend mission router for fix/audit/scaffold/design/perf/security with Laravel/Node auto-detect), `/kasi-graph` (function call graph build + subgraph extract), `/kasi-struc` (project structure state cache + auto-bridge so commands skip rescans), `/kasi-devopt` (DevOps mission — deploy plan / env diff / data flow / secrets / runbooks; never executes deploys), `/kasi-acknowledge` + `/kasi-knowledge-list` (capture and replay action runbooks). New checklists: `backend-laravel.md`, `backend-node.md`, `backend-api-design.md`. New scripts: `build_graph.{sh,py}` (regex MVP — ast-grep path stubbed). **File-path standardization** — `kasidit-{route,verify,record,log,update-check,drift-check}.{py,sh}` → `kasi-*` (settings.json, install.sh, docs updated). Skill `kasidit-default` → `kasi-default`. Internal emit-token protocol `[kasidit-X]` and brand prefix `[kasidit]` retained for protocol stability.
 - `v0.10` — **Honesty cleanup.** `SKILL-full.md` split reverted — Full Framework merged back into `SKILL.md` behind a prompt-level mode gate (best-effort, not runtime-enforced). `audit-specialist` agent consolidates `code-reviewer` / `security-auditor` / `perf-profiler` via `--focus=` (old agents remain as name-recognition stubs — users must invoke `audit-specialist` explicitly; no automatic router mapping). `/kasi-init` install prompt clarified (digit-only input). `/kasi` state precedence marked as spec — no runtime resolver yet.
 - `v0.9.2` — **Gravity Pattern** (Centerlite + Dcenterlite): two-tier knowledge system with `/kasi-promote`, `/kasi-pull`, `/kasi-sync`. **Multi-Agent Mode** — `/kasi-multi [N]` fan-out + `sudo` shorthand for fast parallel specialist dispatch. **Global prompt log** via `UserPromptSubmit` hook into `~/.claude/skills/kasidit/center/logs/` (200-line trim, head/tail markers). **`/kasi-init`** chains scaffold + docs + review + project auto-invoke. **`/kasi-wiki-sync`** pushes `docs/wiki/` to the GitHub wiki (manual, dry-run default). Expanded default allow-list for Kasidit paths, hooks, and common read-only bash patterns.
-- `v0.9.1` — **Master Orchestrator Rule.** Master agent delegates strong work to specialists, never executes it. 7 new specialized agents added: `bug-hunter`, `architect-planner`, `perf-profiler`, `test-writer`, `refactor-surgeon`, `deep-researcher`, `migration-specialist`. Specialist Agent Registry + dispatch brief format.
+- `v0.9.1` — **Master Orchestrator Rule.** Master agent delegates strong work to specialists, never executes it. 7 new specialized agents added: `bug-hunter`, `architect-planner`, `perf-profiler` (deprecated v0.10 → `audit-specialist --focus=perf`), `test-writer`, `refactor-surgeon`, `deep-researcher`, `migration-specialist`. Specialist Agent Registry + dispatch brief format.
 - `v0.9` — Claude Design Integration. New Design/Visual Mode. DESIGN_SYSTEM.md. `.kasidit/prototypes/` store. Mockup-to-code handoff + parity check. UI Override requires visual target (screenshot / values / Claude Design mockup). New commands: design / mockup / extract-system / parity / report visual. Haiku: no hand-coded mockups — always route to Claude Design.
 - `v0.8` — Tier Cascade orchestration (Opus plans, Sonnet works, Haiku greps). Local embedding knowledge layer (sentence-transformers).
 - `v0.7.4` — SWE-bench validation runs (56/300 tasks, 60.7% strict PASS / 87.5% valid). Rule 2.3 no fake metrics. Rule 2.4 numbered options. Rule 2.5 native language. Rule 2.6 mandatory git log --grep + git log -S before bug fixes.

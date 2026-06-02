@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kasidit-verify.py — PostToolUse / Stop hook
+kasi-verify.py — PostToolUse / Stop hook
 
 Scan assistant output for confidence labels ([high]/[medium]/[low]/[unsure])
 and cross-check against the tool calls made in the same turn.
