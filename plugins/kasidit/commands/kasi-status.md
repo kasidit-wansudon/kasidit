@@ -21,7 +21,7 @@ Mission: <narrow goal>
 Domain: <detected>
 Tier: <model>
 Mode: interactive | batch
-Counter: N/4 (N/2 Haiku)
+Counter: N/4 Opus (N/3 Sonnet | N/2 Haiku)
 
 .kasidit/ status:
   - INDEX.md: exists | missing

@@ -1,5 +1,5 @@
 ---
-description: Fan-out mode — dispatch N specialist agents in parallel for the current mission. `/kasi-multi` default N=6; `sudo` shorthand uses min 2 for speed. Max per tier cap.
+description: Fan-out mode — dispatch N specialist agents in parallel for the current mission. `/kasi-multi` default N=6; `sudo` shorthand expands to `/kasi-multi 6` with clarifying questions skipped. Max per tier cap.
 ---
 
 Fan out the current mission across **N parallel specialist agents**. Each agent gets an isolated context and a narrow dispatch brief. Main synthesizes the N reports into one user-facing answer.
@@ -10,7 +10,7 @@ Fan out the current mission across **N parallel specialist agents**. Each agent 
 /kasi-multi                       # default: N=6, auto-selected roster
 /kasi-multi 4                     # 4 agents
 /kasi-multi 6 <mission>           # 6 agents + explicit mission
-sudo <mission>                    # session-only speed mode — min 2 parallel, skip clarifying Qs
+sudo <mission>                    # session-only speed mode — N=6 default, skip clarifying Qs
 sudo 6 <mission>                  # sudo with explicit N
 /kasi-multi --fast                # synonym for sudo flag on this invocation only
 ```
@@ -19,14 +19,14 @@ sudo 6 <mission>                  # sudo with explicit N
 
 Typing `sudo <mission>` at the start of a message means:
 
-1. **Spawn min 2 specialists in parallel** — never serial on sudo. Default N=2 unless number follows.
+1. **Spawn the default roster (N=6) in parallel** — never serial on sudo. N=6 unless a number follows (`sudo 4 ...`).
 2. **Skip clarifying questions** — proceed on reasonable assumptions; narrate them briefly.
 3. **Session-only pacing** — does not persist. Next session reverts to config defaults.
 4. **Stay inside safety rails** — no destructive ops without confirm (hard rule applies).
 
 `sudo` is **not** a permission escalation. It is a pacing signal: "trust defaults, go fast, use parallel."
 
-Mnemonic: think `sudo` = "speed mode, 2 up" — a signal to the orchestrator, not a security claim.
+Mnemonic: think `sudo` = "skip questions, fan out" — a pacing signal to the orchestrator, not a security claim.
 
 ## `--fast` flag
 
@@ -65,6 +65,8 @@ When no mission-specific signal is given, the default roster is:
 
 The mix is a heuristic; the master may swap in `bug-hunter`, `audit-specialist --focus=perf|security`, `refactor-surgeon`, `migration-specialist`, `legacy-specialist` as the mission demands.
 
+> `general-purpose` is the built-in Claude Code runtime worker (resolved by the Agent tool, no plugin spec file). Use it only for generic build/glue slots; prefer a named registry specialist whenever one fits the slot, and always give it a full dispatch brief so its scope stays bounded.
+
 ## N selection rules
 
 | N | When |
@@ -82,7 +84,7 @@ Higher N is not always better. More agents = more synthesis cost + more redundan
 
 - **Opus** — full fan-out allowed. Synthesis step is where Opus earns its cost.
 - **Sonnet** — default. Can fan out to 6, prefers 4 on large contexts.
-- **Haiku** — cap N at 4. Haiku synthesis is weak; prefer fewer-but-focused dispatches. Always include `audit-specialist --focus=quality` or `verifier` in the roster. On Haiku, `sudo` implicitly caps at N=4 even if user says N=8.
+- **Haiku** — cap N at 4. Haiku synthesis is weak; prefer fewer-but-focused dispatches. Always include `audit-specialist --focus=quality` in the roster as the verification slot. On Haiku, `sudo` implicitly caps at N=4 even if user says N=8.
 
 ## Rules
 
@@ -131,4 +133,5 @@ sudo 4 build /kasi-search as a mini semantic search over .kasidit/knowledge/
 
 - [[Multi-Agent-Orchestration]] — the underlying framework
 - `/kasi-cascade` — tier-routed orchestration (Opus plans → Sonnet works → Haiku greps) as an alternative to fan-out
+- `/kasi-team` — decision-first alternative: structured team formation before fan-out, use when mission scope is unclear
 - Dispatch brief format in SKILL.md

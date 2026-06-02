@@ -16,5 +16,5 @@ mkdir -p "$LOG_DIR" 2>/dev/null || exit 0
 LOG_FILE="$LOG_DIR/$(date +%Y-%m-%d).jsonl"
 
 # Pipe stdin JSON → python; python writes to LOG_FILE.
-python3 "$HOME/.claude/hooks/kasidit-log.py" "$LOG_FILE" 2>/dev/null || true
+python3 "$HOME/.claude/hooks/kasi-log.py" "$LOG_FILE" 2>/dev/null || true
 exit 0

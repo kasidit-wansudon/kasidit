@@ -24,7 +24,7 @@ One-shot bootstrap. Runs once per machine (global) and once per project (local).
    bash ~/.claude/plugins/marketplaces/kasidit-wansudon/plugins/kasidit/install.sh
    ```
    Use `--dry-run` first if you want to preview. The installer:
-   - copies `hooks/kasidit-*.{py,sh}` → `~/.claude/hooks/` (chmod +x),
+   - copies `hooks/kasi-*.{py,sh}` → `~/.claude/hooks/` (chmod +x),
    - seeds `~/.claude/skills/kasidit/center/` (5 JSONL + checklists + knowledge templates),
    - writes `.last_sync` + `.last_update_check` stamps.
 
@@ -41,18 +41,18 @@ One-shot bootstrap. Runs once per machine (global) and once per project (local).
    {
      "hooks": {
        "SessionStart": [
-         {"hooks": [{"type": "command", "command": "bash ~/.claude/hooks/kasidit-update-check.sh"}]},
-         {"hooks": [{"type": "command", "command": "bash ~/.claude/hooks/kasidit-drift-check.sh"}]}
+         {"hooks": [{"type": "command", "command": "bash ~/.claude/hooks/kasi-update-check.sh"}]},
+         {"hooks": [{"type": "command", "command": "bash ~/.claude/hooks/kasi-drift-check.sh"}]}
        ],
        "UserPromptSubmit": [
-         {"hooks": [{"type": "command", "command": "python3 ~/.claude/hooks/kasidit-route.py"}]}
+         {"hooks": [{"type": "command", "command": "python3 ~/.claude/hooks/kasi-route.py"}]}
        ],
        "PostToolUse": [
-         {"hooks": [{"type": "command", "command": "python3 ~/.claude/hooks/kasidit-verify.py"}]}
+         {"hooks": [{"type": "command", "command": "python3 ~/.claude/hooks/kasi-verify.py"}]}
        ],
        "Stop": [
-         {"hooks": [{"type": "command", "command": "python3 ~/.claude/hooks/kasidit-verify.py"}]},
-         {"hooks": [{"type": "command", "command": "python3 ~/.claude/hooks/kasidit-record.py"}]}
+         {"hooks": [{"type": "command", "command": "python3 ~/.claude/hooks/kasi-verify.py"}]},
+         {"hooks": [{"type": "command", "command": "python3 ~/.claude/hooks/kasi-record.py"}]}
        ]
      }
    }

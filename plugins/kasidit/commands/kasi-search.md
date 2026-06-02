@@ -5,6 +5,7 @@ description: Semantic search over .kasidit/knowledge/ using local embeddings
 Semantic search through project knowledge notes.
 
 **Setup (one-time):**
+> Optional, not wired into `/kasi-init` or `install.sh`. The `embedding/` scripts require `sentence-transformers` and must be set up separately; until then the **grep fallback** below is the working path. Skip this whole command if you have not built embeddings.
 ```bash
 python3 ~/.claude/skills/kasidit/embedding/embed_build.py
 ```

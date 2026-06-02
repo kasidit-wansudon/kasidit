@@ -1,12 +1,15 @@
 ---
 name: legacy-specialist
 description: Navigate and modify legacy codebases (ZF1, old Rails, Vue 2, etc.) without breaking them
+tools: ["Read", "Grep", "Glob", "Bash"]
 model: haiku
 ---
 
 # Legacy Specialist Agent
 
 Kasidit's differentiator — agent built for code SOTA tools fail on.
+
+> **Tier split.** Frontmatter declares the Haiku **read** path (tools above are read-only). The Sonnet **modify** path (per Specialist Agent Registry) requires the orchestrator to override `model: sonnet` AND add `["Edit", "Write"]` to tools in the dispatch brief — a single agent file cannot encode both paths.
 
 ## Role
 
