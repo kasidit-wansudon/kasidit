@@ -4,6 +4,9 @@ Side-by-side comparison. Detailed per-version notes live on each release page.
 
 | Version | Date | Theme | Headline change |
 |---|---|---|---|
+| [[v0.16.0]] | 2026-07-09 | **Deploy Split** | `/kasi-deploy` (real execute path, Cloudflare/Vercel/Netlify auto-run behind a typed prod confirm gate) + `/kasi-review-deploy` (strict read-only preflight, any tier). Supersedes `/kasi-devopt deploy`. Haiku tier-gated off auto-execute. 23 → 25 commands. |
+| [[v0.15.0]] | 2026-06-02 | **Team Mode** | `/kasi-team` — HYBRID panel brainstorm + mandatory user decision gate + parallel dispatch + QA synthesis. CORE (lead/QA) + DYNAMIC specialist composition, no new agent files. `sudo` shorthand now defaults to N=6 (was N=2). Hook internal references renamed `kasidit-*` → `kasi-*`. |
+| [[v0.14.0]] | 2026-05-26 | **MAST-Evidence Dispatch Hardening** | `DONE WHEN:` field + `PRIOR CONTEXT` split into `COMPLETED:`/`OPEN:` with `[agent-name]` attribution (targets MAST FM-1.5 + FM-1.3, the top 2 multi-agent failure modes, NeurIPS 2025). Specialist Registry gets a `Default Tier` column (Haiku for read-only research, cutting typical `/kasi-multi 6` dispatch cost ~50%). Refinement Counter added (caps same-hypothesis polish at 3 rounds). Rule 8 reframed positive per Pink Elephant Problem evidence. |
 | [[v0.13.0]] | 2026-05-02 | **thClaws Runtime Support (Consolidated)** | Supersedes v0.12.0/v0.12.1. Single clean install path. New `install-thclaws.sh` (full file install: SKILL.md + 22 commands + 11 agents + 4 hooks + 15 checklists + scripts). ~85% feature parity. Hook event mapping (4/5 hooks adapted). |
 | [[v0.12.0]] | 2026-05-02 | **thClaws Runtime Support** | Kasidit now runs on Claude Code **and** [thClaws](https://github.com/thClaws/thClaws). New `install-thclaws.sh`, mirrored `.thclaws-plugin/` manifests, hook event mapping (4/5 hooks adapted, 1 skipped), `docs/thclaws-setup.md`. ~85% feature parity. Bug fix: leftover `kasidit-*` glob in `install.sh`. |
 | [[v0.11.0]] | 2026-04-30 | **Backend + Bridge + Runbook** | 6 new commands: `/kasi-backend` (mission router), `/kasi-graph` (function call graph), `/kasi-struc` (project-state cache + auto-bridge), `/kasi-devopt` (DevOps mission, never executes), `/kasi-acknowledge` + `/kasi-knowledge-list` (runbook capture + replay). 3 new backend checklists. 4 helper scripts. Hooks renamed `kasidit-*` → `kasi-*`. |
@@ -20,7 +23,35 @@ Side-by-side comparison. Detailed per-version notes live on each release page.
 
 ## What changed between each pair
 
-### v0.12.0 → v0.13.0 (this release)
+### v0.15.0 → v0.16.0 (this release)
+
+- **`/kasi-deploy` — first command permitted to execute a deploy itself.** Fixed capability table: Cloudflare (`wrangler`), Vercel, and Netlify are auto-executable (first-party idempotent one-shot CLI); SSH/bare-VPS and infra-as-code platforms (Docker/k8s/Terraform/Serverless/Fly/Platform.sh) stay plan-only, exactly as `/kasi-devopt deploy` always was. Prod execution requires a **typed** `confirm: deploy-prod` gate — a plain "yes" is rejected. Staging/preview needs only a plain confirm. Dirty working tree forces plan-only unless `--allow-dirty`. Always runs the preflight first; blocks entirely on a NOT READY verdict. On failure: reports the error, never auto-retries or auto-rollbacks.
+- **`/kasi-review-deploy` — the never-executes guarantee, extracted.** Strict read-only preflight checklist, zero execution and zero file writes on any platform, at any tier including Haiku. Pulled out of `/kasi-devopt deploy <env>` as its own command so "never runs anything" is an unconditional property of the command, not a soft rule embedded in a multi-mode one.
+- **`/kasi-devopt`'s `deploy <env>` sub-mode superseded.** Redirects to the two new commands on invocation; old flow kept inline for reference, not run for new missions. Other sub-modes (`env`, `data`, `infra`, `secrets`, `runbook`, `health`, `connect`) unchanged.
+- **Tier gating for deploy execution.** Haiku restricted to the plan-only path on `/kasi-deploy` regardless of platform — auto-execute requires Sonnet or Opus, matching the existing pattern of refusing high-stakes work at the cheapest tier.
+- **Command count** 23 → 25.
+
+### v0.14.0 → v0.15.0
+
+- **Team Mode — `/kasi-team`.** HYBRID dev-team workflow: Main spawns a brainstorm panel (default N=3) whose role-agents each propose an approach + top-3 risks, synthesizes into 2-3 options with trade-offs, presents to the **user for a mandatory decision gate**. After the pick: dispatches implementation specialists in parallel (reusing `/kasi-multi` fan-out mechanics) + mandatory QA pass (`audit-specialist --focus=quality`) before final synthesis. Distinct from `/kasi-multi`/`sudo` (which execute a known approach) — Team Mode decides the approach first.
+- **CORE + DYNAMIC composition.** Core roles (Lead = `architect-planner`, QA = `audit-specialist --focus=quality`) always present; dynamic lenses (security/perf/migration) + implementation specialists picked per mission from the existing registry. No new agent files.
+- **Refinement Counter capped at 1 round** for the brainstorm phase (vs framework default 3) to prevent option proliferation. `--fast` skips the refinement round only — QA pass never skipped.
+- **Haiku tier:** panel reduced to N=2, 0 refinement rounds, dispatch cap N=4; refuses missions requiring a security/migration lens.
+- **`sudo` shorthand now defaults to N=6** (was N=2), matching `/kasi-multi`'s default roster. Still a pacing signal, not a permission escalation.
+- **Hook internal references renamed `kasidit-*` → `kasi-*`** (docstrings, comment headers, `kasi-log.sh` → `kasi-log.py` cross-call). JSONL log-marker tokens (`[kasidit-log]`, `[kasidit-pattern]`, …) intentionally unchanged for parser compatibility.
+- **Counter/tier specs made Sonnet-explicit** across several command docs; deprecated-agent stubs (`code-reviewer`, `perf-profiler`, `security-auditor`) reworded — they're kept **indefinitely** for name resolution, not "removed in v0.11" as previously claimed.
+
+### v0.13.0 → v0.14.0
+
+- **Dispatch brief — `DONE WHEN:` field.** Specialist briefs must declare measurable completion signals (tests pass, no lint, curl returns expected shape). Addresses MAST taxonomy (arXiv 2503.13657, NeurIPS 2025) failure mode FM-1.5 "unaware of termination conditions" — 12.4% of multi-agent failures across 1,600+ production traces.
+- **`PRIOR CONTEXT` split into `COMPLETED:` + `OPEN:` with `[agent-name]` attribution.** Addresses MAST FM-1.3 step repetition (15.7%, the #1 multi-agent failure mode) by making progress state explicit and preventing specialists from re-executing finished work.
+- **Specialist Agent Registry gets a `Default Tier` column.** Read-only research = Haiku, analytical/synthesis = Sonnet, creative/high-stakes = Opus. Includes a 20% correction-rate watch to escalate Haiku → Sonnet when re-prompt cost negates the savings. Projected cost reduction on read-heavy multi-agent runs: 50-80% (`/kasi-multi 6` typical dispatch ~$0.45 → ~$0.23).
+- **Refinement Counter** (separate from the Failure Counter) added. Caps same-hypothesis polish at 3 rounds; halts on confidence-same-or-lower across iterations — guards against the "coherence trap" (Reflexion ICLR 2024) of increasingly polished but still-wrong reasoning.
+- **Rule 8 reframed positive.** "Output direct, reserve explanation" replaces "Explain = Hallucinate" per Pink Elephant Problem evidence (arXiv 2503.22395, 2025) — LLMs systematically underperform under negation. Behavior identical; framing is now actionable rather than prohibitive.
+- **Agent model tier defaults tuned:** `deep-researcher` sonnet → haiku (3× cheaper for read-only), `architect-planner` opus → sonnet (was over-provisioned for plan-only work), `legacy-specialist` → haiku explicit for read-only paths.
+- Evidence base: 80+ verified URLs — Anthropic official docs, arXiv 2025-2026 (MAST taxonomy, Pink Elephant, Reflexion), production retrospectives (Shopify/Stripe/Airbnb/GitHub Copilot/Cursor).
+
+### v0.12.0 → v0.13.0
 
 - **Consolidates v0.12.0 + v0.12.1 into a single clean release.** v0.12.0 install was partial (missed copying SKILL.md / commands / agents to thClaws skill dirs). v0.12.1 patched it. v0.13.0 ships the full `install-thclaws.sh` as the canonical install path; v0.12.x are superseded.
 - **Same install-thclaws.sh as v0.12.1** — full file copy (SKILL.md + includes/ + 22 commands + 11 agents + 4 hooks + 15 checklists + 4 scripts + Gravity hub + settings.json hook entries).

@@ -1359,7 +1359,9 @@ Optional commands user may use to steer the skill:
 - **`/kasi-backend <fix|audit|scaffold|design|perf|security> <scope>`** — backend mission router; counterpart to `/kasi-ui`. Auto-detects Laravel / Node stack (v0.11).
 - **`/kasi-graph <build|show|extract|impact|trace|cycles|dead>`** — function call graph build + subgraph extract; primitive consumed by `/kasi-backend audit|perf` (v0.11).
 - **`/kasi-struc <build|refresh|show|tree|module|path|bridge|verify>`** — project structure index + auto-bridge cache; commands read state instead of rescanning (v0.11).
-- **`/kasi-devopt <deploy|env|data|infra|secrets|runbook|health|connect>`** — DevOps mission (deploy plan, env diff, data flow map, secrets audit, runbooks). Never executes deploys — outputs plan, user runs (v0.11).
+- **`/kasi-devopt <env|data|infra|secrets|runbook|health|connect>`** — DevOps mission (env diff, data flow map, secrets audit, runbooks). Its `deploy <env>` sub-mode is superseded by `/kasi-deploy` + `/kasi-review-deploy` (v0.16); kept for redirect/back-compat (v0.11).
+- **`/kasi-deploy <env>`** — deploy mission with real execute path. Auto-runs the deploy command on CLI-native platforms (Cloudflare `wrangler`, Vercel, Netlify) behind a confirm gate (typed `confirm: deploy-prod` for prod); falls back to plan-only (never executes) for SSH/manual/infra-as-code platforms. Always runs the `/kasi-review-deploy` preflight first — blocks on NOT READY (v0.16).
+- **`/kasi-review-deploy <env>`** — read-only deploy preflight. Zero execution, zero file writes, any platform — reports ready / ready-with-warnings / not-ready. Extracted from the old `/kasi-devopt deploy` flow as its own guarantee (v0.16).
 - **`/kasi-acknowledge [capture|template|update|link]`** — capture the steps just performed as a replayable runbook in `.kasidit/knowledge/runbooks/` (v0.11).
 - **`/kasi-knowledge-list [list|show|recent|tag|kind|search|replay|stats|stale]`** — browse stored runbooks, replay step-by-step (v0.11).
 

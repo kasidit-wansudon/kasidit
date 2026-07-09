@@ -36,6 +36,8 @@ The fix is not a bigger model. The fix is **scaffolding**: checklists, confidenc
 | Knowledge resets every session | one-shot prompts | **Gravity hub** persists patterns / runbooks / route-memory across projects |
 | One audit = one whole-repo grep | slow + noisy | **subgraph extraction** — scope to 10 functions, not 1000 |
 | Deploy procedure forgotten | re-figure it next time | **`/kasi-acknowledge`** captures it as a replayable runbook |
+| "Never let AI touch deploy" vs "just let it run anything" | pick one extreme | **`/kasi-deploy`** executes only on a fixed safe-platform table (typed confirm for prod); **`/kasi-review-deploy`** stays permanently read-only if you want zero execution risk |
+| Approach unclear before a big change | AI just picks one and runs | **`/kasi-team`** — panel proposes options, **you** decide, then it dispatches |
 
 **The real edge:** discipline turns Haiku into a senior engineer's executor. On Opus it unlocks depth. On Haiku it _replaces_ raw reasoning with checklists, verifier passes, and forced abstention. Same framework, every tier.
 
@@ -43,11 +45,11 @@ The fix is not a bigger model. The fix is **scaffolding**: checklists, confidenc
 
 - **87.5% valid fix rate on a SWE-bench Lite sample** (56/300 tasks, strict PASS 60.7%, v0.7.4)
 - Production-tested on a **288K-line legacy PHP codebase**
-- 5 backend hooks. 21 slash commands. 8 specialist agents. 15 default checklists. 11 core rules — all enforced, not aspirational.
+- 5 backend hooks. 25 slash commands. 8 specialist agents. 15 default checklists. 11 core rules — all enforced, not aspirational.
 
 ## What you get
 
-- **21 slash commands** — `/kasi-review · security · fix · ui · backend · graph · struc · devopt · acknowledge · knowledge-list · cascade · init · scaffold · docs · status · promote · pull · sync · search · multi · wiki-sync`
+- **25 slash commands** — `/kasi-review · security · fix · ui · backend · graph · struc · devopt · deploy · review-deploy · acknowledge · knowledge-list · cascade · team · init · scaffold · docs · status · promote · pull · sync · search · multi · wiki-sync`
 - **`/kasi` mode command** — pick intensity: `off / router / lite / full / ultra`
 - **8 specialist agents** — `architect-planner`, `audit-specialist` (`--focus=quality|security|perf`), `bug-hunter`, `deep-researcher`, `legacy-specialist`, `migration-specialist`, `refactor-surgeon`, `test-writer`
 - **5 runtime hooks** — prompt classifier, confidence-label verifier, backend-save recorder, update + drift check
@@ -90,7 +92,7 @@ cd kasidit
 bash plugins/kasidit/install-thclaws.sh
 ```
 
-~85% feature parity (4/5 hooks adapted to thClaws events; full SKILL.md + 21 commands + 8 agents + 15 checklists). See [docs/thclaws-setup.md](./docs/thclaws-setup.md) for hook event mapping and limitations.
+~85% feature parity (4/5 hooks adapted to thClaws events; full SKILL.md + 25 commands + 8 agents + 15 checklists). See [docs/thclaws-setup.md](./docs/thclaws-setup.md) for hook event mapping and limitations.
 
 ## Update
 

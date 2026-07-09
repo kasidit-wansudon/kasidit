@@ -8,7 +8,7 @@ Kasidit is a Claude Code plugin that makes AI coding grounded instead of halluci
 
 - [[Installation]] — install the plugin, run the v0.10 backend installer, init a project.
 - [[Getting Started]] — your first mission in under 5 minutes.
-- [[Commands]] — full reference for every command (Mode + missions + Gravity).
+- [[Commands]] — full reference for every command (Mode + missions + backend/devops + deploy + Gravity), 25 total.
 - [[Kasi-Mode]] — `/kasi off|router|lite|full|ultra` (v0.10).
 - [[Backend-Hooks]] — runtime hooks (v0.10).
 - [[Gravity Pattern]] — two-tier knowledge system (Centerlite + Dcenterlite).
@@ -27,6 +27,9 @@ Kasidit is a Claude Code plugin that makes AI coding grounded instead of halluci
 
 Deep per-release notes, in descending order:
 
+- [[v0.16.0]] — **Deploy Split.** `/kasi-deploy` (real execute path — auto-runs on Cloudflare/Vercel/Netlify behind a typed prod confirm gate, plan-only fallback elsewhere) + `/kasi-review-deploy` (strict read-only preflight, any tier). Supersedes `/kasi-devopt deploy`. 23 → 25 commands.
+- [[v0.15.0]] — **Team Mode.** `/kasi-team` — HYBRID panel brainstorm + mandatory user decision gate + parallel dispatch + QA synthesis. `sudo` now defaults to N=6.
+- [[v0.14.0]] — **MAST-Evidence Dispatch Hardening.** `DONE WHEN:` field, `PRIOR CONTEXT` COMPLETED/OPEN split with agent attribution, per-agent tier column (Haiku for read-only research), Refinement Counter against the "coherence trap."
 - [[v0.13.0]] — **thClaws Runtime Support (Consolidated).** Supersedes v0.12.0/v0.12.1. Single clean install path. Kasidit now runs on both Claude Code and [thClaws](https://github.com/thClaws/thClaws). Same SKILL.md, 21 commands, 8 agents, 15 checklists. ~85% feature parity on thClaws.
 - [[v0.12.0]] — **thClaws Runtime Support.** Kasidit now runs on both Claude Code and [thClaws](https://github.com/thClaws/thClaws). New `install-thclaws.sh`, mirrored `.thclaws-plugin/` manifests, hook event mapping (4/5 hooks adapted), `docs/thclaws-setup.md`. ~85% feature parity on thClaws.
 - [[v0.11.0]] — **Backend Mission Router + Structure Bridge + Runbook Capture.** 6 new commands (`/kasi-backend`, `/kasi-graph`, `/kasi-struc`, `/kasi-devopt`, `/kasi-acknowledge`, `/kasi-knowledge-list`), 3 new backend checklists (Laravel · Node · API design), 4 helper scripts (function call graph + state cache writers). Hooks renamed `kasidit-*` → `kasi-*` (history preserved; emit-token protocol kept).
