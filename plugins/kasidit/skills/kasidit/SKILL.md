@@ -5,6 +5,8 @@ description: Mindful AI coding discipline framework. Activate ONLY when user inv
 
 # Kasidit — Mindful AI Coding Framework
 
+**Framework version: v0.16.0** (2026-07-09 — Deploy Split: `/kasi-deploy` + `/kasi-review-deploy`). See [CHANGELOG.md](https://github.com/kasidit-wansudon/kasidit/blob/main/CHANGELOG.md) for the full history. Inline `(vX.Y)` tags on individual rules/commands below mark when that specific piece was introduced — they are not the file's current version; the line above is the single source of truth for that.
+
 ## Router Mode (default)
 
 > Thin classifier. Keep guardrails on, escalate only when the work needs it.
