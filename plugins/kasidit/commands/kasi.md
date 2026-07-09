@@ -63,6 +63,8 @@ session override  (/kasi <level> this turn)
 | `/kasi-ui` | `full` | mission ends |
 | `/kasi-multi` / `/kasi-cascade` | `full` | command completes |
 | `/kasi-team` | `full` | command completes |
+| `/kasi-deploy` | `full` (prod target additionally forces typed confirm gate regardless of mode) | mission ends |
+| `/kasi-review-deploy` | `lite` | command completes |
 | `/kasi-promote` / `/kasi-pull` / `/kasi-sync` | `lite` | command completes |
 | `/kasi-search` / `/kasi-status` | no change | — |
 | casual chat, `/kasi`, `/kasi status` | stay router | — |
@@ -76,7 +78,7 @@ session override  (/kasi <level> this turn)
 
 When mode escalates to `full` or `ultra` (via heavy command or explicit `/kasi full|ultra`), the orchestrator spawns **minimum 2 specialist agents in parallel** by default — never serial single-agent — for speed.
 
-- Applies to: `/kasi-review`, `/kasi-security`, `/kasi-fix`, `/kasi-ui`, `/kasi-multi`, `/kasi-cascade`, any `full`/`ultra` mission.
+- Applies to: `/kasi-review`, `/kasi-security`, `/kasi-fix`, `/kasi-ui`, `/kasi-multi`, `/kasi-cascade`, `/kasi-deploy`, any `full`/`ultra` mission.
 - Not applies to: router, lite, or explicit `/kasi-multi 1`.
 - Scope: **session only.** Not persisted. Next session follows config defaults.
 - User override per session: `/kasi parallel 1` (serial) or `/kasi parallel N` (force N).

@@ -8,7 +8,7 @@ Run a DevOps-focused Kasidit mission. Counterpart to `/kasi-backend` for the dep
 
 | Sub | What it does | Specialist |
 |-----|--------------|------------|
-| `deploy <env>` | walk through deploy flow for env, dry-run preflight | `architect-planner` |
+| `deploy <env>` | **superseded (v0.16)** — redirects to `/kasi-deploy` (execute-capable) or `/kasi-review-deploy` (read-only) | — |
 | `pipeline <name>` | inspect/edit CI pipeline (GH Actions / GitLab CI / etc) | `migration-specialist` |
 | `env diff` | diff env vars across `.env.example` / `.env.staging` / prod | `audit-specialist --focus=quality` |
 | `infra <kind>` | review infra-as-code (Terraform / wrangler / docker / k8s) | `audit-specialist --focus=security` |
@@ -59,7 +59,9 @@ If no sub-mode → ask user to pick one.
 
 Used to answer: "what connects to what, with what credential, on what protocol?"
 
-**Pre-mission step (mandatory for `deploy` and `health`):**
+**`deploy <env>` redirect (v0.16):** this sub-mode is split into two dedicated commands — `/kasi-deploy <env>` (can execute, for CLI-native platforms) and `/kasi-review-deploy <env>` (never executes, report only). On invocation of `/kasi-devopt deploy <env>`, ask which one the user wants; do not run the old inline flow below for new missions. The flow is kept for reference only.
+
+**Pre-mission step (mandatory for `health`):**
 
 Run state bridge check first:
 
@@ -69,7 +71,7 @@ Run state bridge check first:
 
 If recent deploy_history exists in STATE — read it before proposing new deploy.
 
-**Flow (deploy <env>):**
+**Flow (deploy <env>) — deprecated, kept for reference, see redirect above:**
 
 1. Confirm env (staging/prod) + service.
 2. Read `STATE/config.json` + `STATE/deploy_history.jsonl`.
@@ -82,6 +84,8 @@ If recent deploy_history exists in STATE — read it before proposing new deploy
 4. Show deploy plan to user — commands to run, in order.
 5. User confirms → user runs commands themselves (Kasidit does NOT execute deploy).
 6. User reports outcome → write entry to `STATE/deploy_history.jsonl`.
+
+This exact flow now lives in `/kasi-review-deploy` (steps 1-4) — `/kasi-deploy` adds an execute path on top of it for auto-executable platforms.
 
 **Flow (env diff):**
 
@@ -160,7 +164,8 @@ Env diff:
 **Examples:**
 
 ```
-/kasi-devopt deploy staging
+/kasi-deploy staging              # was: /kasi-devopt deploy staging
+/kasi-review-deploy staging        # read-only variant
 /kasi-devopt env diff
 /kasi-devopt data map
 /kasi-devopt data connect kasion-site ai-router

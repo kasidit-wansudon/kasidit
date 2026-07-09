@@ -22,7 +22,7 @@ Toggle Kasidit framework intensity. Controls how much of `SKILL.md` is brought i
 /kasi status                # resolved config: session > project > global > default
 ```
 
-Heavy commands (`/kasi-review`, `/kasi-security`, `/kasi-fix`, `/kasi-ui`, `/kasi-multi`, `/kasi-cascade`) auto-escalate to `full` for the duration, then revert.
+Heavy commands (`/kasi-review`, `/kasi-security`, `/kasi-fix`, `/kasi-ui`, `/kasi-multi`, `/kasi-cascade`, `/kasi-team`, `/kasi-deploy`) auto-escalate to `full` (or `ultra` for `/kasi-security`) for the duration, then revert. `/kasi-review-deploy` stays `lite` — read-only, no escalation needed.
 
 **State precedence is spec, not runtime.** No code currently merges the three configs into a single resolved value — the AI and the user apply the chain by reading the files. See [[Kasi-Mode]] for full details.
 
@@ -85,6 +85,115 @@ Fan-out mode — dispatch N specialists in parallel, each with an isolated conte
 - Haiku: **capped at N=4** — synthesis collapses above that
 
 Introduced in [[v0.9.2]]. See [[Multi-Agent-Orchestration]].
+
+### `/kasi-team`
+
+**Deep page:** [[Kasi-Team]]
+
+HYBRID panel brainstorm + user decision gate + parallel dispatch + QA synthesis ([[v0.15.0]]). Distinct from `/kasi-multi` / `sudo` (which execute a known approach) — Team Mode decides the approach first.
+
+Composition: CORE (Lead = `architect-planner`, QA = `audit-specialist --focus=quality`) + DYNAMIC lenses (security/perf/migration) + implementation specialists, picked per mission from the Specialist Agent Registry. No new agent files.
+
+Flow: panel proposes 2-3 options with trade-offs → **mandatory user decision gate** → dispatch implementation specialists in parallel (reuses `/kasi-multi` mechanics) → mandatory QA pass before final synthesis.
+
+Refinement Counter capped at **1 round** for the brainstorm phase (vs framework default 3) to prevent option proliferation. Haiku: panel reduced to N=2, 0 refinement rounds, dispatch cap N=4; refuses missions needing a security/migration lens.
+
+## Backend & DevOps commands ([[v0.11.0]])
+
+### `/kasi-backend`
+
+**Deep page:** [[Kasi-Backend]]
+
+```
+/kasi-backend <fix|audit|scaffold|design|perf|security> <scope>
+```
+
+Multi-mode backend mission router — counterpart to `/kasi-ui`. Auto-detects Laravel / Node stack from `composer.json` / `package.json`.
+
+### `/kasi-graph`
+
+**Deep page:** [[Kasi-Graph]]
+
+```
+/kasi-graph <build|show|extract|impact|trace|cycles|dead>
+```
+
+Function call graph build + subgraph extraction. Consumed by `/kasi-backend audit|perf` for scoped analysis. Regex-MVP (file-level call attribution) — per-function-body extraction via ast-grep AST path is a roadmap item, not shipped.
+
+### `/kasi-struc`
+
+**Deep page:** [[Kasi-Struc]]
+
+```
+/kasi-struc <build|refresh|show|tree|module|path|bridge|verify>
+```
+
+Project structure index + auto-bridge cache at `.kasidit/STATE/`. Commands read cached state instead of rescanning the repo every invocation. `refresh` does an incremental update via `git diff` since last build.
+
+### `/kasi-devopt`
+
+**Deep page:** [[Kasi-Devopt]]
+
+```
+/kasi-devopt <env|data|infra|secrets|runbook|health|connect>
+```
+
+DevOps mission — env var diffing, data-flow mapping, secrets audit, infra-as-code review, runbook generation, health checks, service-connection docs. Its `deploy <env>` sub-mode is **superseded by `/kasi-deploy` + `/kasi-review-deploy`** ([[v0.16.0]]) — invoking it now redirects to those two commands; the old never-executes flow is kept inline for reference only.
+
+### `/kasi-acknowledge`
+
+**Deep page:** [[Kasi-Acknowledge]]
+
+```
+/kasi-acknowledge [capture|template|update|link]
+```
+
+Capture the steps just performed (deploy, migration, hotfix, etc.) as a replayable runbook in `.kasidit/knowledge/runbooks/`.
+
+### `/kasi-knowledge-list`
+
+**Deep page:** [[Kasi-Knowledge-List]]
+
+```
+/kasi-knowledge-list [list|show|recent|tag|kind|search|replay|stats|stale]
+```
+
+Browse stored runbooks and knowledge entries. `replay` prints "how to do it again" step-by-step.
+
+## Deploy commands ([[v0.16.0]])
+
+### `/kasi-deploy`
+
+**Deep page:** [[Kasi-Deploy]]
+
+```
+/kasi-deploy staging
+/kasi-deploy prod
+/kasi-deploy prod --allow-dirty
+```
+
+Deploy mission with a **real execute path** — the first Kasidit command permitted to run a deploy command itself, and only under a fixed platform capability table:
+
+| Platform | Mode |
+|---|---|
+| Cloudflare Workers/Pages, Vercel, Netlify | **auto-executable** — first-party idempotent one-shot CLI |
+| SSH/bare-VPS, Docker/k8s/Terraform/Serverless/Fly/Platform.sh | **plan-only** — shows commands, user runs them (same as the old `/kasi-devopt deploy` behavior) |
+
+Always runs the `/kasi-review-deploy` preflight first — blocks entirely on a NOT READY verdict. Prod execution requires a **typed** `confirm: deploy-prod` gate (a plain "yes" is not accepted); staging/preview needs only a plain confirm. Dirty working tree forces plan-only unless `--allow-dirty`. On failure: reports the error, never auto-retries or auto-rollbacks — that's a separate user decision.
+
+**Tier gating:** Haiku is restricted to the plan-only path regardless of platform — auto-execute requires Sonnet or Opus. See [[Model Tiers]].
+
+### `/kasi-review-deploy`
+
+**Deep page:** [[Kasi-Review-Deploy]]
+
+```
+/kasi-review-deploy staging
+/kasi-review-deploy prod diff
+/kasi-review-deploy prod secrets
+```
+
+Read-only deploy preflight — the strict extraction of the old `/kasi-devopt deploy` checklist. **Zero execution, zero file writes, on any platform, at any tier** (including Haiku — a mechanical checklist scan carries no execution risk). Answers "is it safe to deploy", not "how do I deploy". Verdict: ready / ready with warnings / not ready.
 
 ## Project commands
 

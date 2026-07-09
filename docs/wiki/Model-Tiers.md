@@ -77,6 +77,12 @@ Force override: `tier opus | sonnet | haiku`.
 - Haiku: grep / scan / checklist step
 - Opus: synthesize step
 
+### Deploy execution ([[v0.16.0]])
+
+- Opus/Sonnet: full auto-execute path on `/kasi-deploy` (Cloudflare/Vercel/Netlify), both staging and prod (prod requires the typed `confirm: deploy-prod` gate regardless of tier)
+- Haiku: **restricted to plan-only**, on every platform, no exception — deploy execution is high-stakes and Haiku's correction rate isn't trusted for irreversible-adjacent shell commands. Escalate: "auto-execute needs Sonnet or Opus tier."
+- `/kasi-review-deploy` (read-only preflight) has **no tier restriction** — a mechanical checklist scan carries no execution risk at any tier, including Haiku.
+
 ## Why Haiku rules are harder
 
 Haiku does not have weaker reasoning *in general* — it has weaker **ungrounded** reasoning. Given a checklist, it executes faithfully. Given an open question ("should we refactor UserService?"), it confabulates.

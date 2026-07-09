@@ -51,6 +51,16 @@ Yes — it creates `.kasidit/` in the project root and optionally adds a `.claud
 
 Yes. `/plugin uninstall kasidit`, remove the hook block from `settings.json` (or restore from `settings.json.kasidit-backup-<ts>`), `rm -rf ~/.claude/skills/kasidit/center/` and `.kasidit/` per project. See [[Installation#Uninstall]].
 
+### Does Kasidit ever run a deploy for me?
+
+As of [[v0.16.0]], yes — conditionally. `/kasi-deploy` auto-executes on platforms with a first-party idempotent one-shot CLI (Cloudflare `wrangler`, Vercel, Netlify), behind a confirm gate: staging needs a plain confirm, prod needs the **typed** phrase `confirm: deploy-prod` (a plain "yes" is rejected). Every other platform (SSH/VPS, Docker, k8s, Terraform, Serverless, Fly, Platform.sh) stays plan-only — Kasidit shows the commands, you run them, exactly like the old `/kasi-devopt deploy` behavior.
+
+If you never want Kasidit to execute anything, use `/kasi-review-deploy` instead — it has zero execution and zero file writes on any platform, at any tier, permanently. It answers "is it safe to deploy", not "how do I deploy".
+
+### What's new in v0.16?
+
+See [[v0.16.0]]. Two new commands: `/kasi-deploy` (execute-capable, fixed platform capability table, typed prod confirm gate) and `/kasi-review-deploy` (permanently read-only preflight, superseding `/kasi-devopt deploy`'s old inline flow). Haiku is tier-gated off the auto-execute path.
+
 ### How do I update from v0.9 to v0.10?
 
 ```

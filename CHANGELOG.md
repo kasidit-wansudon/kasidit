@@ -4,6 +4,20 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.16.0] — 2026-07-09
+
+### Added
+
+- **`/kasi-deploy <env>` command.** Deploy mission with a real execute path — first Kasidit command permitted to run a deploy command itself, and only under a fixed capability table. Cloudflare (`wrangler`), Vercel, and Netlify are **auto-executable** (first-party idempotent one-shot CLI); SSH/bare-VPS and infra-as-code platforms (Docker/k8s/Terraform/Serverless/Fly/Platform.sh) remain **plan-only** — Kasidit shows commands, user runs them, exactly as `/kasi-devopt deploy` always did. Prod execution requires a typed `confirm: deploy-prod` gate (plain yes is not accepted); staging/preview needs only a plain confirm. Dirty working tree forces plan-only unless `--allow-dirty`. Always runs the `/kasi-review-deploy` preflight first and blocks entirely on a NOT READY verdict. On failure: reports the error, does not auto-retry or auto-rollback.
+- **`/kasi-review-deploy <env>` command.** Strict read-only extraction of the preflight checklist that used to live inside `/kasi-devopt deploy <env>`. Zero execution, zero file writes, any platform, any tier (including Haiku) — answers "is it safe to deploy", not "how do I deploy". Exists standalone so a user can review readiness without ever touching `/kasi-deploy`'s execute path.
+- **Tier gating for deploy execution.** Haiku is restricted to the plan-only path on `/kasi-deploy` regardless of platform — auto-execute requires Sonnet or Opus. Matches the existing pattern of refusing high-stakes work at the cheapest tier (`/kasi-devopt infra`, `/kasi-backend security`).
+
+### Changed
+
+- **`/kasi-devopt`'s `deploy <env>` sub-mode superseded.** The sub-mode row now redirects to `/kasi-deploy` / `/kasi-review-deploy` on invocation; the original never-executes flow is kept inline for reference only, not run for new missions. `/kasi-devopt`'s other sub-modes (`env`, `data`, `infra`, `secrets`, `runbook`, `health`, `connect`) are unchanged.
+- **Router auto-escalate table (`kasi.md`)** — added `/kasi-deploy` → `full` (prod target forces the typed confirm gate regardless of session mode) and `/kasi-review-deploy` → `lite`. `/kasi-deploy` added to the "minimum 2 parallel agents" list alongside the other action-taking heavy commands.
+- **Command count** 23 → 25 across `plugin.json` / `marketplace.json` descriptions.
+
 ## [0.15.0] — 2026-06-02
 
 ### Added
