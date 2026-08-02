@@ -1,0 +1,2 @@
+{"type": "user", "message": {"content": "do the mission"}}
+{"type": "assistant", "message": {"content": [{"type": "text", "text": "[kasidit-log] kind=fix mode=full turns=3 outcome=pass"}]}}

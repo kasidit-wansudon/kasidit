@@ -4,6 +4,24 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.16.1] — 2026-08-02
+
+### Fixed
+
+- **`kasi-verify.py` and `kasi-record.py` were dead on every real Stop/PostToolUse call.** Both read `assistant_text`/`tool_uses` fields the harness never actually sends — a bare `except: pass` silenced the failure since v0.10. Verified against a live session transcript rather than the payload shape the hooks themselves assumed. Fixed by reading `transcript_path` (new `kasi_transcript.py` helper) and reconstructing the current turn's text and tool calls. `kasi-verify.py` removed from `PostToolUse` entirely — that event carries no assistant text, so checking it there was a structural no-op — and now runs on `Stop` only. `install.sh` strips the stale `PostToolUse` registration on upgrade. Exceptions now log to `hook-errors.log` instead of vanishing.
+- Two related bugs the fix above would otherwise have shipped with: `install.sh`'s hook-copy glob didn't pick up the new helper module (fixed), and `install-thclaws.sh` wired `kasi-verify.py` to `post_tool_use` — the identical structural bug, on a different harness (unwired; not confirmed whether any thClaws event carries an equivalent to `transcript_path`).
+
+### Added
+
+- **`test_hook_contract.py`.** Tests hooks against real transcript-shaped payloads (captured from a live session, not assumed) — the gap that let the above ship undetected for months. `test_hooks.py` kept as a unit-test suite with a header noting it is not proof of harness connectivity.
+- **`correctness-money.md` / `correctness-datetime.md` / `correctness-locale.md`** checklists, selected by what the mission touches (money math, date/time handling, i18n/locale) rather than by language alone.
+
+### Changed
+
+- **Rule 11 (confidence labels) reworked.** `[high]` retired as a self-graded label — issued in practice on logic that later failed real tests, so it added no information. No label is now the default/normal state; `[unverified]` / `[assumed]` / `[unknown]` mark the exception. A `verified: <cmd>` citation replaces `[high]`; `kasi-verify.py` checks that the cited command actually ran as a Bash call in the transcript.
+- **`SKILL.md` split** into a router-only file (~1.1k tokens) plus `references/{full,agents,gravity,ui}.md`, read on demand when the router escalates. Different from the v0.10 split-and-revert: that split kept both halves inside the same skill package with no on-demand read step, so full content loaded every time regardless; this one depends on the model actually reading a reference file before assuming its content — best-effort, not a guarantee.
+- Checklist count 15 → 18 across `plugin.json` / `marketplace.json` / `README.md`.
+
 ## [0.16.0] — 2026-07-09
 
 ### Added

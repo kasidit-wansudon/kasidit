@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
 """
-kasi-verify.py — PostToolUse / Stop hook
+kasi-verify.py — Stop hook only
 
-Scan assistant output for confidence labels ([high]/[medium]/[low]/[unsure])
-and cross-check against the tool calls made in the same turn.
+Scan assistant output for confidence labels ([unverified]/[assumed]/[unknown],
+plus legacy [high]/[medium]/[low]/[unsure]) and cross-check against the tool
+calls made in the same turn.
 
-Rule: a [high] claim about a file/line must have at least one Read or Bash
-tool call that plausibly inspected it. Otherwise downgrade to [medium] by
-emitting a context message.
+Two checks:
+1. A file:line claim tagged with a legacy `[high]` label must have at least
+   one Read/Bash tool call that plausibly inspected it, or it's flagged as
+   unverified.
+2. A `verified: <cmd>` citation (the v4 replacement for self-graded [high])
+   must match an actual Bash tool call made this turn, or it's flagged as
+   an unbacked claim.
 
-Output: if any mismatch, print a single line to stdout:
-  [kasidit-verify] downgraded N [high] → [medium] — no matching Read/Bash call
+Output: one line per mismatch type found. No output on clean pass.
 
-No output on clean pass.
+NOTE: this hook must only ever be registered on Stop, not PostToolUse.
+PostToolUse fires per tool call and never carries assistant text — a
+confidence-label check there is a structural no-op (see P0-1 audit,
+2026-08-02). Stop carries `transcript_path`, which is read via
+kasi_transcript.load_current_turn() to reconstruct the current turn's text
+and tool calls — the real payload has no `assistant_text`/`tool_uses`
+fields the previous version read.
 
 Zero dependency beyond stdlib.
 """
@@ -23,18 +33,66 @@ import json
 import os
 import re
 import sys
+import time
 from pathlib import Path
 from typing import List, Optional, Tuple
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from kasi_transcript import load_current_turn  # noqa: E402
 
 CENTER = Path(os.environ.get("KASIDIT_CENTER",
     os.path.expanduser("~/.claude/skills/kasidit/center")))
 LOG_FILE = CENTER / "verify.log"
+ERROR_LOG = CENTER / "hook-errors.log"
 
-LABEL_RE = re.compile(r"(?:^|\s)\[(high|medium|low|unsure)\]\s+([^\s:`]+(?::\d+)?)", re.IGNORECASE | re.MULTILINE)
+
+def _log_error(hook: str, exc: Exception) -> None:
+    try:
+        CENTER.mkdir(parents=True, exist_ok=True)
+        with ERROR_LOG.open("a") as f:
+            f.write(json.dumps({
+                "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "hook": hook,
+                "error": repr(exc),
+            }) + "\n")
+    except Exception:
+        pass
+
+LABEL_RE = re.compile(r"(?:^|\s)\[(high|medium|low|unsure|unverified|assumed|unknown)\]\s+([^\s:`]+(?::\d+)?)", re.IGNORECASE | re.MULTILINE)
+
+# Rule 11 (v4): `[high]` is retired as a bare self-grade. A claim only counts
+# as verified when it cites the command that verified it — `verified: <cmd>`.
+# This hook checks that <cmd> was actually run as a Bash tool call this turn.
+VERIFIED_RE = re.compile(r"verified:\s*`?([^`\n]+?)`?\s*(?:\n|$)", re.IGNORECASE)
 
 
 def extract_labels(text: str) -> List[Tuple[str, str]]:
     return [(m.group(1).lower(), m.group(2)) for m in LABEL_RE.finditer(text)]
+
+
+def bash_commands_run(tool_events: List[dict]) -> List[str]:
+    out = []
+    for e in tool_events:
+        name = e.get("tool_name") or e.get("name") or ""
+        if name == "Bash":
+            cmd = (e.get("tool_input") or e.get("input") or {}).get("command") or ""
+            if cmd:
+                out.append(cmd)
+    return out
+
+
+def check_verified_citations(text: str, tool_events: List[dict]) -> List[str]:
+    """Return citations claimed via `verified: <cmd>` that don't match any
+    Bash call actually made this turn — an unbacked verification claim."""
+    ran = bash_commands_run(tool_events)
+    unbacked = []
+    for m in VERIFIED_RE.finditer(text):
+        claim = m.group(1).strip().rstrip(".,;")
+        if not claim:
+            continue
+        if not any(claim in cmd or cmd in claim for cmd in ran):
+            unbacked.append(claim)
+    return unbacked
 
 
 def files_touched_by_tools(tool_events: List[dict]) -> set:
@@ -65,12 +123,19 @@ def main():
     except Exception:
         return
 
-    text = payload.get("assistant_text") or payload.get("text") or ""
-    tool_events = payload.get("tool_uses") or payload.get("tool_events") or []
+    transcript_path = payload.get("transcript_path") or ""
+    if not transcript_path or not Path(transcript_path).exists():
+        return
+    text, tool_events = load_current_turn(transcript_path)
 
     master_warn = check_master_counter(text, tool_events)
     if master_warn:
         print(master_warn)
+
+    unbacked = check_verified_citations(text, tool_events)
+    if unbacked:
+        print(f"[kasidit-verify] unbacked verification claim — cited `verified: ...` "
+              f"but no matching Bash call this turn: {', '.join(unbacked[:5])}")
 
     labels = extract_labels(text)
     high_claims = [(lab, tgt) for lab, tgt in labels if lab == "high"]
@@ -132,5 +197,5 @@ def check_master_counter(text: str, tool_events: List[dict]) -> Optional[str]:
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
-        pass
+    except Exception as exc:
+        _log_error("kasi-verify", exc)

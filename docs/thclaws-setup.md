@@ -19,8 +19,8 @@ This guide is for thClaws users. For Claude Code, see the main [README](../READM
 | Gravity hub (`~/.config/thclaws/skills/kasidit/center/`) | ✅ Full |
 | Hook: `kasi-update-check.sh` (`session_start`) | ✅ Direct port |
 | Hook: `kasi-drift-check.sh` (`session_start`) | ✅ Direct port |
-| Hook: `kasi-verify.py` (`post_tool_use`) | ⚠️ Partial — fires per-tool, no per-turn aggregation |
-| Hook: `kasi-record.py` (`session_end`) | ⚠️ Partial — per-session aggregation, not per-turn |
+| Hook: `kasi-verify.py` | ❌ Not wired — requires a per-turn transcript (see P0-1 audit, 2026-08-02); no confirmed thClaws event provides one |
+| Hook: `kasi-record.py` (`session_end`) | ⚠️ Unverified — needs a transcript-equivalent field in `session_end`'s payload; not confirmed against a real thClaws payload |
 | Hook: `kasi-route.py` (`UserPromptSubmit`) | ❌ Skipped — thClaws has no equivalent event |
 | Hook: `kasi-log.sh` / `kasi-log.py` (`UserPromptSubmit`) | ❌ Skipped — same |
 
@@ -64,8 +64,8 @@ KASIDIT_SKIP_SETTINGS=1 bash plugins/kasidit/install-thclaws.sh
 |---|---|---|---|
 | `kasi-update-check.sh` | `SessionStart` | `session_start` | none |
 | `kasi-drift-check.sh` | `SessionStart` | `session_start` | none |
-| `kasi-verify.py` | `PostToolUse` + `Stop` | `post_tool_use` | per-tool only; no end-of-turn aggregation |
-| `kasi-record.py` | `Stop` | `session_end` | aggregates over the whole session, not per turn |
+| `kasi-verify.py` | `Stop` only (see P0-1 audit, 2026-08-02 — never `PostToolUse`) | not wired | reads `transcript_path` for the current turn; no confirmed thClaws event exposes an equivalent, so it is installed but not registered |
+| `kasi-record.py` | `Stop` | `session_end` | aggregates over the whole session, not per turn — unverified whether `session_end`'s payload carries a transcript-equivalent field this hook needs |
 | `kasi-route.py` | `UserPromptSubmit` | — | dropped on thClaws; mode classification falls back to user-applied |
 | `kasi-log.sh` | `UserPromptSubmit` | — | dropped; prompt logging unavailable |
 
@@ -100,7 +100,7 @@ with open(p, 'w') as f: json.dump(d, f, indent=2)
 
 1. **No prompt classifier line at turn start.** On Claude Code, `kasi-route.py` injects `[kasidit] kind=... mode=... history=N/M` into the turn context. On thClaws this doesn't run — mode selection is fully manual (`/kasi off|router|lite|full|ultra`).
 2. **No global prompt log.** Claude Code's `~/.claude/skills/kasidit/center/logs/YYYY-MM-DD.jsonl` is not populated under thClaws. `kasi-search` still works on `.kasidit/knowledge/`, but no cross-project prompt history.
-3. **`kasi-verify.py` runs more often.** On Claude Code it fires twice (post-tool + Stop). On thClaws it fires once per tool — same end signal, different cadence. If you see verification messages mid-turn instead of end-of-turn, that's why.
+3. **`kasi-verify.py` does not run on thClaws.** It requires a per-turn transcript (`transcript_path`, populated on Claude Code's `Stop` event only). No thClaws event has been confirmed to carry an equivalent, so the hook is copied to `~/.config/thclaws/hooks/` but not registered in `settings.json`. Confidence-label verification is prompt-level only under thClaws.
 4. **`kasi-record.py` batches.** Per-session JSONL write instead of per-turn. The store is the same JSONL; consumer code does not need to change.
 
 ---

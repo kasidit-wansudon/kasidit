@@ -93,7 +93,7 @@ run mkdir -p "$HOOKS_DIR" "$CENTER" "$CHECKLISTS" "$KNOWLEDGE" "$LOGS_DIR"
 
 # -------- 2. copy hooks --------
 log "copying hooks → $HOOKS_DIR"
-for f in "$PLUGIN_ROOT"/hooks/kasi-*.py "$PLUGIN_ROOT"/hooks/kasi-*.sh; do
+for f in "$PLUGIN_ROOT"/hooks/kasi-*.py "$PLUGIN_ROOT"/hooks/kasi-*.sh "$PLUGIN_ROOT"/hooks/kasi_*.py; do
   [ -e "$f" ] || continue
   base="$(basename "$f")"
   dst="$HOOKS_DIR/$base"
@@ -210,10 +210,16 @@ else
 SessionStart|bash ~/.claude/hooks/kasi-update-check.sh
 SessionStart|bash ~/.claude/hooks/kasi-drift-check.sh
 UserPromptSubmit|python3 ~/.claude/hooks/kasi-route.py
-PostToolUse|python3 ~/.claude/hooks/kasi-verify.py
 Stop|python3 ~/.claude/hooks/kasi-verify.py
 Stop|python3 ~/.claude/hooks/kasi-record.py
 "
+
+# kasi-verify.py must never run on PostToolUse — it fires per tool call and
+# carries no assistant text, so a confidence-label check there is a
+# structural no-op. Older installs may still have it registered there
+# (pre-2026-08-02); strip it below regardless of merger backend.
+STALE_ENTRY_EVT="PostToolUse"
+STALE_ENTRY_CMD="python3 ~/.claude/hooks/kasi-verify.py"
 
   if [ "$MERGER" = "jq" ]; then
     # initialize file if missing
@@ -257,6 +263,16 @@ Stop|python3 ~/.claude/hooks/kasi-record.py
       fi
     done < "$TMPENTRIES"
     rm -f "$TMPENTRIES"
+    if [ "$DRY_RUN" -eq 1 ]; then
+      printf '[dry-run] strip stale %s → %s\n' "$STALE_ENTRY_EVT" "$STALE_ENTRY_CMD"
+    else
+      TMP="$(mktemp)"
+      jq --arg evt "$STALE_ENTRY_EVT" --arg cmd "$STALE_ENTRY_CMD" '
+        .hooks[$evt] = ((.hooks[$evt] // []) | map(
+          .hooks = ((.hooks // []) | map(select(.command != $cmd)))
+        ) | map(select((.hooks // []) | length > 0)))
+      ' "$SETTINGS" > "$TMP" && mv "$TMP" "$SETTINGS"
+    fi
   elif [ "$MERGER" = "python3" ]; then
     if [ "$DRY_RUN" -eq 1 ]; then
       echo "$ENTRIES" | while IFS='|' read -r EVT CMD; do
@@ -271,10 +287,10 @@ entries = [
     ("SessionStart", "bash ~/.claude/hooks/kasi-update-check.sh"),
     ("SessionStart", "bash ~/.claude/hooks/kasi-drift-check.sh"),
     ("UserPromptSubmit", "python3 ~/.claude/hooks/kasi-route.py"),
-    ("PostToolUse", "python3 ~/.claude/hooks/kasi-verify.py"),
     ("Stop", "python3 ~/.claude/hooks/kasi-verify.py"),
     ("Stop", "python3 ~/.claude/hooks/kasi-record.py"),
 ]
+STALE = [("PostToolUse", "python3 ~/.claude/hooks/kasi-verify.py")]
 try:
     with open(path) as f:
         data = json.load(f)
@@ -302,10 +318,29 @@ for evt, cmd in entries:
         arr.append({"hooks": [{"type": "command", "command": cmd}]})
         added += 1
 
+removed = 0
+for evt, cmd in STALE:
+    arr = hooks.get(evt)
+    if not arr:
+        continue
+    kept = []
+    for item in arr:
+        item_hooks = [h for h in (item.get("hooks") or []) if h.get("command") != cmd]
+        if len(item_hooks) != len(item.get("hooks") or []):
+            removed += 1
+        if item_hooks:
+            item["hooks"] = item_hooks
+            kept.append(item)
+        elif item.get("hooks"):
+            continue
+        else:
+            kept.append(item)
+    hooks[evt] = kept
+
 with open(path, "w") as f:
     json.dump(data, f, indent=2)
     f.write("\n")
-print(f"[install] settings.json merged; {added} new entries.")
+print(f"[install] settings.json merged; {added} new entries, {removed} stale entries removed.")
 print(f"KASIDIT_ADDED={added}")
 PYEOF
       )"
@@ -328,7 +363,7 @@ if [ "$CONFIG_CREATED" -eq 1 ]; then CFG_STATE="new"; else CFG_STATE="ok"; fi
 printf 'config          %s mode=%s (%s)\n' "$CFG_STATE" "$INITIAL_MODE" "$CONFIG_JSON"
 HOOKS_UNCHANGED=$((HOOKS_COUNT - HOOKS_COPIED))
 printf 'hooks           %d present (copied=%d unchanged=%d) in %s\n' "$HOOKS_COUNT" "$HOOKS_COPIED" "$HOOKS_UNCHANGED" "$HOOKS_DIR"
-printf 'registrations   %d wired in %s (SessionStart x2, UserPromptSubmit, PostToolUse, Stop x2)\n' "$HOOKS_REGISTERED" "$SETTINGS"
+printf 'registrations   %d wired in %s (SessionStart x2, UserPromptSubmit, Stop x2)\n' "$HOOKS_REGISTERED" "$SETTINGS"
 printf 'gravity hub     %s (JSONLx5, checklists=%d seeded, knowledge templates)\n' "$CENTER" "$CHECKLISTS_SEEDED"
 printf 'stamps          %s, %s\n' "$STAMP_SYNC" "$STAMP_UPD"
 printf '\n'
