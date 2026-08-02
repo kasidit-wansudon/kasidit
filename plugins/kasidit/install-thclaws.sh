@@ -105,11 +105,23 @@ log "copying hooks → $HOOKS_DIR"
 # Supported on thClaws: session_start, post_tool_use, session_end
 # kasi-update-check.sh    → session_start
 # kasi-drift-check.sh     → session_start
-# kasi-verify.py          → post_tool_use (per-tool, no per-turn aggregation)
-# kasi-record.py          → session_end (per-session, not per-turn)
+# kasi-verify.py          → NOT WIRED (see P0-1 audit, 2026-08-02). It now
+#                           reads `transcript_path` and requires per-turn
+#                           assistant text, exactly like Claude Code's Stop
+#                           event. post_tool_use fires per-tool with no
+#                           transcript access — wiring it there would repeat
+#                           the same silent-no-op bug this hook was just
+#                           fixed for, on a different harness. Copied below
+#                           (in case a future thClaws session_end payload
+#                           carries an equivalent field worth wiring to) but
+#                           NOT registered in any hook slot until that's
+#                           verified against a real thClaws payload.
+# kasi-record.py          → session_end (per-session, not per-turn) — same
+#                           caveat: verify session_end actually carries a
+#                           transcript-equivalent field before trusting output.
 # kasi-route.py           → SKIPPED (no UserPromptSubmit equivalent)
 # kasi-log.sh / kasi-log.py → SKIPPED (no UserPromptSubmit equivalent)
-THCLAWS_HOOKS="kasi-update-check.sh kasi-drift-check.sh kasi-verify.py kasi-record.py"
+THCLAWS_HOOKS="kasi-update-check.sh kasi-drift-check.sh kasi-verify.py kasi-record.py kasi_transcript.py"
 for name in $THCLAWS_HOOKS; do
   src="$PLUGIN_ROOT/hooks/$name"
   [ -e "$src" ] || continue
@@ -187,9 +199,18 @@ if [ -d "$INCLUDES_SRC" ]; then
     run cp "$f" "$SKILL_DIR/includes/$base"
   done
 fi
+REFERENCES_SRC="$PLUGIN_ROOT/skills/kasidit/references"
+if [ -d "$REFERENCES_SRC" ]; then
+  run mkdir -p "$SKILL_DIR/references"
+  for f in "$REFERENCES_SRC"/*; do
+    [ -e "$f" ] || continue
+    base="$(basename "$f")"
+    run cp "$f" "$SKILL_DIR/references/$base"
+  done
+fi
 SKILL_COUNT=0
 [ -f "$SKILL_DIR/SKILL.md" ] && SKILL_COUNT=1
-log "skill files seeded: SKILL.md=$SKILL_COUNT, includes/"
+log "skill files seeded: SKILL.md=$SKILL_COUNT, includes/, references/"
 
 # -------- 5d. seed slash commands (so /kasi-* are discoverable) --------
 COMMANDS_SRC="$PLUGIN_ROOT/commands"
@@ -267,7 +288,7 @@ else
     log "      install python3, then re-run."
   else
     if [ "$DRY_RUN" -eq 1 ]; then
-      printf '[dry-run] register thClaws hooks (session_start, post_tool_use, session_end)\n'
+      printf '[dry-run] register thClaws hooks (session_start, session_end)\n'
     else
       _PY_OUT="$(python3 - "$SETTINGS" <<'PYEOF'
 import json, os, sys
@@ -284,9 +305,11 @@ new_hooks = {
         f"bash {hooks_dir}/kasi-update-check.sh ; "
         f"bash {hooks_dir}/kasi-drift-check.sh"
     ),
-    "post_tool_use": f"python3 {hooks_dir}/kasi-verify.py",
     "session_end":   f"python3 {hooks_dir}/kasi-record.py",
 }
+# kasi-verify.py deliberately NOT registered - see the P0-1 comment above
+# the hook-copy loop. Wiring it to post_tool_use would repeat the exact
+# bug the Claude Code counterpart of this file (install.sh) was just fixed for.
 
 try:
     with open(path) as f:
@@ -335,7 +358,7 @@ if [ "$CONFIG_CREATED" -eq 1 ]; then CFG_STATE="new"; else CFG_STATE="ok"; fi
 printf 'config          %s mode=%s runtime=thclaws (%s)\n' "$CFG_STATE" "$INITIAL_MODE" "$CONFIG_JSON"
 HOOKS_UNCHANGED=$((HOOKS_COUNT - HOOKS_COPIED))
 printf 'hooks           %d present (copied=%d unchanged=%d) in %s\n' "$HOOKS_COUNT" "$HOOKS_COPIED" "$HOOKS_UNCHANGED" "$HOOKS_DIR"
-printf 'registrations   %s wired in %s (session_start, post_tool_use, session_end)\n' "$HOOKS_REGISTERED" "$SETTINGS"
+printf 'registrations   %s wired in %s (session_start, session_end)\n' "$HOOKS_REGISTERED" "$SETTINGS"
 printf 'gravity hub     %s (JSONLx5, checklists=%d seeded, knowledge templates)\n' "$CENTER" "$CHECKLISTS_SEEDED"
 printf 'stamps          %s, %s\n' "$STAMP_SYNC" "$STAMP_UPD"
 printf '\n'

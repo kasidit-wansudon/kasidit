@@ -45,7 +45,7 @@ The fix is not a bigger model. The fix is **scaffolding**: checklists, confidenc
 
 - **87.5% valid fix rate on a SWE-bench Lite sample** (56/300 tasks, strict PASS 60.7%, v0.7.4)
 - Production-tested on a **288K-line legacy PHP codebase**
-- 5 backend hooks. 25 slash commands. 8 specialist agents. 15 default checklists. 11 core rules — all enforced, not aspirational.
+- 5 backend hooks. 25 slash commands. 8 specialist agents. 18 default checklists. 11 core rules — all enforced, not aspirational.
 
 ## What you get
 
@@ -55,7 +55,7 @@ The fix is not a bigger model. The fix is **scaffolding**: checklists, confidenc
 - **5 runtime hooks** — prompt classifier, confidence-label verifier, backend-save recorder, update + drift check
 - **Master Orchestrator** — main agent delegates; never executes strong work itself
 - **Gravity** — two-tier knowledge: Centerlite hub + per-project Dcenterlite, with promote / pull / sync
-- **15 default checklists** — security · code-review · perf · backend across PHP / Node / Python / Go
+- **18 default checklists** — security · code-review · perf · backend across PHP / Node / Python / Go, plus domain checklists (money / datetime / locale) selected by what the mission touches
 - **Tier-aware rules** — tighter discipline on Haiku, full framework on Opus
 
 ## Quick taste
@@ -92,7 +92,7 @@ cd kasidit
 bash plugins/kasidit/install-thclaws.sh
 ```
 
-~85% feature parity (4/5 hooks adapted to thClaws events; full SKILL.md + 25 commands + 8 agents + 15 checklists). See [docs/thclaws-setup.md](./docs/thclaws-setup.md) for hook event mapping and limitations.
+~85% feature parity (4/5 hooks adapted to thClaws events; full SKILL.md + 25 commands + 8 agents + 18 checklists). See [docs/thclaws-setup.md](./docs/thclaws-setup.md) for hook event mapping and limitations.
 
 ## Update
 
@@ -110,7 +110,7 @@ Then re-run `bash plugins/kasidit/install.sh` (idempotent — safe to run again)
 1. **One mission.** Refuse vague scope; demand narrowing.
 2. **Design before code.** Show structure, ask, then build.
 3. **Runtime is the judge.** Code _looks right_ ≠ done.
-4. **Confidence labels.** Tag every non-trivial finding `[high|medium|low|unsure]`.
+4. **Confidence labels.** No label = normal. Flag the exception only: `[unverified]` / `[assumed]` / `[unknown]`.
 5. **Master delegates.** Strong work goes to specialists; main never executes it.
 6. **Tier-aware.** Weaker model = more scaffolding, not more guessing.
 
@@ -120,7 +120,7 @@ Then re-run `bash plugins/kasidit/install.sh` (idempotent — safe to run again)
 
 The 11 core rules and Master Orchestrator are **prompt-level conventions** — the AI self-applies them. The 5 runtime hooks (`kasi-route.py`, `kasi-verify.py`, `kasi-record.py`, `kasi-update-check.sh`, `kasi-drift-check.sh`) are **harness-enforced** and run regardless of what the model decides.
 
-If you only want one thing from this repo, run `kasi-verify.py` — it catches `[high]` claims with no matching tool call and flags master-orchestrator violations. On its own, that single hook prevents most AI hallucination patterns.
+`kasi-verify.py` and `kasi-record.py` run on the `Stop` event only — that's the only hook that carries `transcript_path`, which both hooks read to reconstruct the turn's assistant text and tool calls. (Prior to 2026-08-02, `kasi-verify.py` was also wired to `PostToolUse`, where it silently did nothing — that event never carries assistant text. Fixed; see `plugins/kasidit/hooks/test_hook_contract.py` for tests against the real payload shape, not an assumed one.) `kasi-verify.py` catches unverified `[unverified]`-worthy claims made without a matching tool call and flags master-orchestrator violations.
 
 ## License
 

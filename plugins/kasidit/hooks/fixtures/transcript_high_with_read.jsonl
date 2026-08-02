@@ -1,0 +1,4 @@
+{"type": "user", "message": {"content": "fix auth.php"}}
+{"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Read", "input": {"file_path": "/p/auth.php"}}]}}
+{"type": "user", "message": {"content": [{"type": "tool_result", "content": "...file contents..."}]}, "toolUseResult": {}}
+{"type": "assistant", "message": {"content": [{"type": "text", "text": "[high] auth.php:42 SQL injection found"}]}}

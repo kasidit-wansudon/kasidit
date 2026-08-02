@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 """Snapshot tests for Kasidit hooks.
 
+NOTE (P0-2, 2026-08-02): this file is NOT proof that these hooks connect to
+the real Claude Code harness. It builds payloads to the shape each hook's
+code expects, which for a while (v0.10–v0.16) was `assistant_text`/
+`tool_uses` — fields the real PostToolUse/Stop payload never sends. This
+suite was 10/10 green the entire time kasi-verify.py and kasi-record.py
+were dead in production. See test_hook_contract.py for tests against the
+real payload shape (transcript_path pointing at a real transcript JSONL) —
+that file is the one that would have caught the regression.
+
 Runs each hook with representative payloads and asserts expected stdout.
 No framework dep — plain assert + subprocess.
 
@@ -64,6 +73,28 @@ def assert_empty(desc: str, actual: str) -> None:
         print(f"ok   {desc}")
 
 
+def stop_payload_for(tmp_dir: str, text: str, tool_events=None) -> dict:
+    """Build a real Stop-shaped payload backed by a throwaway transcript
+    file, matching what kasi-verify.py / kasi-record.py actually receive."""
+    content = []
+    for e in (tool_events or []):
+        content.append({"type": "tool_use", "name": e["tool_name"], "input": e["tool_input"]})
+    if text:
+        content.append({"type": "text", "text": text})
+    lines = [
+        {"type": "user", "message": {"content": "do the thing"}},
+        {"type": "assistant", "message": {"content": content}},
+    ]
+    tp = Path(tmp_dir) / "transcript.jsonl"
+    with tp.open("w") as f:
+        for l in lines:
+            f.write(json.dumps(l) + "\n")
+    return {
+        "session_id": "test", "transcript_path": str(tp), "cwd": "/tmp",
+        "hook_event_name": "Stop", "stop_hook_active": False,
+    }
+
+
 def test_route_security_keyword():
     center, cleanup = fresh_center()
     try:
@@ -96,10 +127,7 @@ def test_route_unclassified_silent():
 def test_verify_downgrade_high():
     center, cleanup = fresh_center()
     try:
-        payload = {
-            "assistant_text": "[high] auth.php:42 SQL injection risk",
-            "tool_uses": [],
-        }
+        payload = stop_payload_for(center, "[high] auth.php:42 SQL injection risk")
         _, out = run(center, "kasi-verify.py", payload)
         assert_contains("verify downgrades unverified [high]", out, "downgraded 1 [high]")
     finally:
@@ -109,10 +137,10 @@ def test_verify_downgrade_high():
 def test_verify_high_with_read_passes():
     center, cleanup = fresh_center()
     try:
-        payload = {
-            "assistant_text": "[high] auth.php:42 SQL injection risk",
-            "tool_uses": [{"tool_name": "Read", "tool_input": {"file_path": "/some/path/auth.php"}}],
-        }
+        payload = stop_payload_for(
+            center, "[high] auth.php:42 SQL injection risk",
+            tool_events=[{"tool_name": "Read", "tool_input": {"file_path": "/some/path/auth.php"}}],
+        )
         _, out = run(center, "kasi-verify.py", payload)
         assert_empty("verify silent when [high] matches Read tool call", out)
     finally:
@@ -122,10 +150,10 @@ def test_verify_high_with_read_passes():
 def test_verify_master_violation():
     center, cleanup = fresh_center()
     try:
-        payload = {
-            "assistant_text": "Delegating to audit-specialist for review.",
-            "tool_uses": [{"tool_name": "Edit", "tool_input": {"file_path": "x.php"}}],
-        }
+        payload = stop_payload_for(
+            center, "Delegating to audit-specialist for review.",
+            tool_events=[{"tool_name": "Edit", "tool_input": {"file_path": "x.php"}}],
+        )
         _, out = run(center, "kasi-verify.py", payload)
         assert_contains("verify flags master violation", out, "master violation")
     finally:
@@ -135,9 +163,7 @@ def test_verify_master_violation():
 def test_record_parses_log_emit():
     center, cleanup = fresh_center()
     try:
-        payload = {
-            "assistant_text": "[kasidit-log] kind=bug-fix mode=lite turns=2 outcome=pass"
-        }
+        payload = stop_payload_for(center, "[kasidit-log] kind=bug-fix mode=lite turns=2 outcome=pass")
         _, out = run(center, "kasi-record.py", payload)
         assert_contains("record appends log emit", out, "backend entries saved")
 
@@ -159,9 +185,8 @@ def test_record_parses_log_emit():
 def test_record_pattern_emit():
     center, cleanup = fresh_center()
     try:
-        payload = {
-            "assistant_text": '[kasidit-pattern] name=bearer-auth file=x.php note="trust hierarchy"'
-        }
+        payload = stop_payload_for(
+            center, '[kasidit-pattern] name=bearer-auth file=x.php note="trust hierarchy"')
         run(center, "kasi-record.py", payload)
         pat_file = Path(center) / "patterns.jsonl"
         if not pat_file.exists():
@@ -176,7 +201,7 @@ def test_route_reads_history():
     center, cleanup = fresh_center()
     try:
         # Isolated center — seed 4 bug-fix pass records from scratch.
-        payload = {"assistant_text": "[kasidit-log] kind=bug-fix mode=lite turns=2 outcome=pass"}
+        payload = stop_payload_for(center, "[kasidit-log] kind=bug-fix mode=lite turns=2 outcome=pass")
         for _ in range(4):
             run(center, "kasi-record.py", payload)
         _, out = run(center, "kasi-route.py", {"prompt": "fix the bug in login"})
@@ -194,9 +219,7 @@ def test_e2e_record_then_route_recommends_from_history():
         # Emit 4 records matching the classifier kind for the later prompt.
         # Prompt "UI overflow on card layout" classifies as kind=ui (first
         # matching keyword in kasidit-route.KEYWORDS), mode=lite.
-        record_payload = {
-            "assistant_text": "[kasidit-log] kind=ui mode=lite turns=1 outcome=pass"
-        }
+        record_payload = stop_payload_for(center, "[kasidit-log] kind=ui mode=lite turns=1 outcome=pass")
         for _ in range(4):
             code, _ = run(center, "kasi-record.py", record_payload)
             if code != 0:

@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
-kasi-record.py — Stop / SubagentStop / PostToolUse hook
+kasi-record.py — Stop hook
+
+Reads `transcript_path` from the Stop payload and reconstructs the current
+turn's assistant text via kasi_transcript.load_current_turn() — the payload
+itself carries no `assistant_text` field (see P0-1 audit, 2026-08-02).
 
 Incremental backend save. AI emits tiny structured lines at mission end or
 pattern discovery; this hook parses them out of assistant text and appends
@@ -35,8 +39,25 @@ import time
 from pathlib import Path
 from typing import Optional
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from kasi_transcript import load_current_turn  # noqa: E402
+
 CENTER = Path(os.environ.get("KASIDIT_CENTER",
     os.path.expanduser("~/.claude/skills/kasidit/center")))
+ERROR_LOG = CENTER / "hook-errors.log"
+
+
+def _log_error(hook: str, exc: Exception) -> None:
+    try:
+        CENTER.mkdir(parents=True, exist_ok=True)
+        with ERROR_LOG.open("a") as f:
+            f.write(json.dumps({
+                "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "hook": hook,
+                "error": repr(exc),
+            }) + "\n")
+    except Exception:
+        pass
 
 EMIT_RE = re.compile(
     r"\[kasidit-(log|pattern|memory|rule)\]\s+(.+?)(?=$|\n)",
@@ -119,7 +140,10 @@ def main():
     else:
         _PROJECT_KASIDIT = Path(cwd) / ".kasidit"
 
-    text = payload.get("assistant_text") or payload.get("text") or ""
+    transcript_path = payload.get("transcript_path") or ""
+    if not transcript_path or not Path(transcript_path).exists():
+        return
+    text, _tool_events = load_current_turn(transcript_path)
     if "[kasidit-" not in text:
         return
 
@@ -143,5 +167,5 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
-        pass
+    except Exception as exc:
+        _log_error("kasi-record", exc)
