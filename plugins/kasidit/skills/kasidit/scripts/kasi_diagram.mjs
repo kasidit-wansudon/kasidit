@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 // kasi_diagram.mjs — soft bridge from Kasidit to Archify (https://github.com/tt-a1i/archify).
 //
-// Archify is NOT bundled. This script only locates an existing install and
-// calls its CLI. If Archify is missing, it exits 3 and the caller falls back
-// to a text diagram (Rule 3). Node >= 18, no dependencies.
+// Archify is NOT bundled. This script locates an existing install and calls
+// its CLI. `ensure` auto-installs it with `npx skills add tt-a1i/archify -g`
+// when missing; if that fails it exits 3 and the caller falls back to a text
+// diagram (Rule 3). Node >= 18, no dependencies.
 //
 // Usage:
 //   kasi_diagram.mjs find
+//   kasi_diagram.mjs ensure [--agent <name>]      # find, else auto-install
 //   kasi_diagram.mjs langs [--json]
 //   kasi_diagram.mjs render <type> <input.json> <output.html> [--lang <tag>] [--check] [--project <dir>]
 //
@@ -15,7 +17,7 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join, resolve, basename } from 'node:path';
-import { homedir, tmpdir } from 'node:os';
+import { homedir, tmpdir, platform } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -45,6 +47,49 @@ function findArchify() {
     if (existsSync(join(dir, 'bin', 'archify.mjs'))) return dir;
   }
   return null;
+}
+
+// The `skills` CLI needs Node >= 20.12 (node:util styleText). Archify itself
+// runs on 18, so only the installer needs a newer runtime: use the current
+// node if new enough, else the newest one found under nvm / Homebrew.
+function nodeAtLeast(version, major, minor) {
+  const [a, b] = version.replace(/^v/, '').split('.').map(Number);
+  return a > major || (a === major && b >= minor);
+}
+
+function installerBinDir() {
+  if (nodeAtLeast(process.version, 20, 12)) return dirname(process.execPath);
+  const roots = [
+    [join(homedir(), '.nvm', 'versions', 'node'), (v) => join(v, 'bin')],
+    ['/opt/homebrew/Cellar/node', (v) => join(v, 'bin')],
+    ['/usr/local/Cellar/node', (v) => join(v, 'bin')],
+  ];
+  const found = [];
+  for (const [root, binOf] of roots) {
+    if (!existsSync(root)) continue;
+    for (const v of readdirSync(root)) {
+      const bin = binOf(join(root, v));
+      if (existsSync(join(bin, 'node')) && existsSync(join(bin, 'npx')) && nodeAtLeast(v, 20, 12)) found.push([v, bin]);
+    }
+  }
+  found.sort((x, y) => y[0].localeCompare(x[0], undefined, { numeric: true }));
+  return found[0]?.[1] ?? null;
+}
+
+function installArchify(agent) {
+  const bin = installerBinDir();
+  if (!bin) {
+    process.stderr.write('[kasi-diagram] auto-install needs Node >= 20.12 for the skills CLI; none found.\n');
+    return false;
+  }
+  const npx = join(bin, platform() === 'win32' ? 'npx.cmd' : 'npx');
+  process.stderr.write(`[kasi-diagram] installing archify: npx skills add tt-a1i/archify -g --agent ${agent} -y\n`);
+  const r = spawnSync(npx, ['-y', 'skills', 'add', 'tt-a1i/archify', '-g', '--agent', agent, '-y'], {
+    env: { ...process.env, PATH: `${bin}:${process.env.PATH ?? ''}` },
+    stdio: ['ignore', 'inherit', 'inherit'],
+    timeout: 300_000,
+  });
+  return r.status === 0;
 }
 
 function listLangs(archify) {
@@ -90,7 +135,7 @@ function parseFlags(argv) {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--check' || a === '--json') flags[a.slice(2)] = true;
-    else if (a === '--lang' || a === '--project') flags[a.slice(2)] = argv[++i];
+    else if (a === '--lang' || a === '--project' || a === '--agent') flags[a.slice(2)] = argv[++i];
     else pos.push(a);
   }
   return { pos, flags };
@@ -116,6 +161,14 @@ const archify = findArchify();
 if (cmd === 'find') {
   if (!archify) fail(3, 'archify not installed. Install: npx skills add tt-a1i/archify -g  (or set ARCHIFY_HOME)');
   console.log(archify);
+  process.exit(0);
+}
+
+if (cmd === 'ensure') {
+  let dir = archify;
+  if (!dir && installArchify(flags.agent ?? 'claude-code')) dir = findArchify();
+  if (!dir) fail(3, 'archify unavailable after auto-install attempt. Manual: npx skills add tt-a1i/archify -g');
+  console.log(dir);
   process.exit(0);
 }
 
@@ -176,4 +229,4 @@ if (cmd === 'render') {
   process.exit(0);
 }
 
-fail(2, 'usage: kasi_diagram.mjs <find|langs|render> ...');
+fail(2, 'usage: kasi_diagram.mjs <find|ensure|langs|render> ...');

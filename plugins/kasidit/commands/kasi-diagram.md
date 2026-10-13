@@ -2,7 +2,7 @@
 description: Interactive diagram mission — soft bridge to Archify (architecture/workflow/sequence/dataflow/lifecycle) with selectable UI language
 ---
 
-Render a design (Rule 3) as an interactive HTML diagram via [Archify](https://github.com/tt-a1i/archify). Kasidit does **not** bundle Archify — it calls an existing install. No install → fall back to a text diagram.
+Render a design (Rule 3) as an interactive HTML diagram via [Archify](https://github.com/tt-a1i/archify). Kasidit does **not** bundle Archify — it calls an install in the user's skills dir, auto-installing it on first use. Install fails → fall back to a text diagram.
 
 **Usage:** `/kasi-diagram [type] [--lang <tag>] [subject]`
 
@@ -16,13 +16,14 @@ Render a design (Rule 3) as an interactive HTML diagram via [Archify](https://gi
 
 ```bash
 node ~/.claude/skills/kasidit/scripts/kasi_diagram.mjs find          # exit 3 = not installed
+node ~/.claude/skills/kasidit/scripts/kasi_diagram.mjs ensure        # find, else auto-install (exit 3 = install failed)
 node ~/.claude/skills/kasidit/scripts/kasi_diagram.mjs langs         # available UI languages
 node ~/.claude/skills/kasidit/scripts/kasi_diagram.mjs render <type> <in.json> <out.html> --lang <tag> [--check]
 ```
 
 **Flow:**
 
-1. **Detect** — run `find`. Exit 3 → stop the Archify path: draw a text diagram (Rule 3 default) and tell the user the install command `npx skills add tt-a1i/archify -g`. Never install it yourself.
+1. **Detect / install** — run `ensure`. If Archify is missing it runs `npx skills add tt-a1i/archify -g --agent claude-code -y` automatically (needs Node >= 20.12 for the `skills` CLI; picks the newest nvm/Homebrew Node if the current one is older) and tells the user it did so. Exit 3 → install failed: draw a text diagram (Rule 3 default) and show the manual command. Other agents: `ensure --agent <name>`.
 2. **Narrow** — one subject, one diagram type. Vague ("diagram the whole project") → numbered options (Rule 1).
 3. **Pick language** — resolution order:
    1. `--lang` flag
