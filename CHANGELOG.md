@@ -4,6 +4,15 @@ All notable changes to Kasidit are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- **`/kasi-diagram [type] [--lang <tag>]` command.** Renders a Rule 3 design as an interactive standalone HTML diagram (architecture / workflow / sequence / dataflow / lifecycle) through a *soft* bridge to [Archify](https://github.com/tt-a1i/archify) (MIT). Archify is not bundled or auto-installed: `scripts/kasi_diagram.mjs find` locates an existing install (`ARCHIFY_HOME`, `~/.claude/skills/archify`, `~/.agents/skills/archify`, …) and exits 3 when absent, in which case the mission stays on the text diagram. The bridge stages a temp copy, injects the locale catalog, then runs Archify's `validate` → `render` → optional `visual-check`. Archify's network update check is disabled by default (`ARCHIFY_UPDATE_CHECK_DISABLED=1`).
+- **Selectable diagram UI language.** Resolution: `--lang` → `.kasidit/config.json` `diagram.lang` → ask the user with numbered options from `kasi_diagram.mjs langs`. Built-in `en` / `zh-CN` (Archify), `th` shipped by Kasidit (`skills/kasidit/locales/th.json`, 438/438 keys, placeholders validated; machine-authored, not yet native-reviewed), and `de es fr it ja ko pt ru` from Archify's example catalogs.
+- `install.sh` now copies `scripts/*.mjs` and `skills/kasidit/locales/*.json`.
+- Command count 25 → 26.
+
 ## [0.16.1] — 2026-08-02
 
 ### Fixed

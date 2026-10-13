@@ -45,11 +45,11 @@ The fix is not a bigger model. The fix is **scaffolding**: checklists, confidenc
 
 - **87.5% valid fix rate on a SWE-bench Lite sample** (56/300 tasks, strict PASS 60.7%, v0.7.4)
 - Production-tested on a **288K-line legacy PHP codebase**
-- 5 backend hooks. 25 slash commands. 8 specialist agents. 18 default checklists. 11 core rules — all enforced, not aspirational.
+- 5 backend hooks. 26 slash commands. 8 specialist agents. 18 default checklists. 11 core rules — all enforced, not aspirational.
 
 ## What you get
 
-- **25 slash commands** — `/kasi-review · security · fix · ui · backend · graph · struc · devopt · deploy · review-deploy · acknowledge · knowledge-list · cascade · team · init · scaffold · docs · status · promote · pull · sync · search · multi · wiki-sync`
+- **26 slash commands** — `/kasi-review · security · fix · ui · backend · graph · struc · devopt · deploy · review-deploy · diagram · acknowledge · knowledge-list · cascade · team · init · scaffold · docs · status · promote · pull · sync · search · multi · wiki-sync`
 - **`/kasi` mode command** — pick intensity: `off / router / lite / full / ultra`
 - **8 specialist agents** — `architect-planner`, `audit-specialist` (`--focus=quality|security|perf`), `bug-hunter`, `deep-researcher`, `legacy-specialist`, `migration-specialist`, `refactor-surgeon`, `test-writer`
 - **5 runtime hooks** — prompt classifier, confidence-label verifier, backend-save recorder, update + drift check

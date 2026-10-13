@@ -148,11 +148,22 @@ fi
 SCRIPTS_SRC="$PLUGIN_ROOT/skills/kasidit/scripts"
 if [ -d "$SCRIPTS_SRC" ]; then
   run mkdir -p "$SCRIPTS_DIR"
-  for f in "$SCRIPTS_SRC"/*.sh "$SCRIPTS_SRC"/*.py; do
+  for f in "$SCRIPTS_SRC"/*.sh "$SCRIPTS_SRC"/*.py "$SCRIPTS_SRC"/*.mjs; do
     [ -e "$f" ] || continue
     base="$(basename "$f")"
     run cp "$f" "$SCRIPTS_DIR/$base"
     run chmod +x "$SCRIPTS_DIR/$base"
+  done
+fi
+
+# -------- 5c. diagram locales (kasi-diagram) — overwrite OK, source of truth is plugin --------
+LOCALES_SRC="$PLUGIN_ROOT/skills/kasidit/locales"
+LOCALES_DIR="${CLAUDE_HOME}/skills/kasidit/locales"
+if [ -d "$LOCALES_SRC" ]; then
+  run mkdir -p "$LOCALES_DIR"
+  for f in "$LOCALES_SRC"/*.json; do
+    [ -e "$f" ] || continue
+    run cp "$f" "$LOCALES_DIR/$(basename "$f")"
   done
 fi
 

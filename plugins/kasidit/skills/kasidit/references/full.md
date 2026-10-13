@@ -128,6 +128,8 @@ Text diagram stays default for backend / data flow. Visual prototype for UI.
 
 See **Claude Design Integration** section for routing rules.
 
+**Interactive diagram (v0.17, optional):** when a text diagram is too dense or a non-technical reader must follow it, offer `/kasi-diagram` — soft bridge to Archify (architecture / workflow / sequence / dataflow / lifecycle) with a user-selected UI language. Archify is not bundled; if it is not installed, stay with the text diagram.
+
 Skip this step only for trivial one-line fixes.
 
 ### 4. Official documentation only
@@ -546,6 +548,7 @@ Optional commands user may use to steer the skill:
 - **`/kasi-struc <build|refresh|show|tree|module|path|bridge|verify>`** — project structure index + auto-bridge cache; commands read state instead of rescanning (v0.11).
 - **`/kasi-devopt <env|data|infra|secrets|runbook|health|connect>`** — DevOps mission (env diff, data flow map, secrets audit, runbooks). Its `deploy <env>` sub-mode is superseded by `/kasi-deploy` + `/kasi-review-deploy` (v0.16); kept for redirect/back-compat (v0.11).
 - **`/kasi-deploy <env>`** — deploy mission with real execute path. Auto-runs the deploy command on CLI-native platforms (Cloudflare `wrangler`, Vercel, Netlify) behind a confirm gate (typed `confirm: deploy-prod` for prod); falls back to plan-only (never executes) for SSH/manual/infra-as-code platforms. Always runs the `/kasi-review-deploy` preflight first — blocks on NOT READY (v0.16).
+- **`/kasi-diagram [type] [--lang <tag>]`** — interactive HTML diagram via a soft bridge to Archify (not bundled; falls back to text diagram). UI language chosen per diagram or saved in `.kasidit/config.json` → `diagram.lang`; Thai catalog ships in `locales/th.json` (v0.17).
 - **`/kasi-review-deploy <env>`** — read-only deploy preflight. Zero execution, zero file writes, any platform — reports ready / ready-with-warnings / not-ready. Extracted from the old `/kasi-devopt deploy` flow as its own guarantee (v0.16).
 - **`/kasi-acknowledge [capture|template|update|link]`** — capture the steps just performed as a replayable runbook in `.kasidit/knowledge/runbooks/` (v0.11).
 - **`/kasi-knowledge-list [list|show|recent|tag|kind|search|replay|stats|stale]`** — browse stored runbooks, replay step-by-step (v0.11).
