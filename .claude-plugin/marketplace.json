@@ -13,7 +13,7 @@
     {
       "name": "kasidit",
       "source": "./plugins/kasidit",
-      "description": "Mindful AI coding framework that forces discipline to prevent hallucination. 25 slash commands, 8 specialist agents, 5 runtime hooks, 18 default checklists, Master Orchestrator + Team Mode + tier-aware rules + Gravity hub. Works on Opus, Sonnet, and Haiku.",
+      "description": "Mindful AI coding framework that forces discipline to prevent hallucination. 26 slash commands, 8 specialist agents, 5 runtime hooks, 18 default checklists, Master Orchestrator + Team Mode + tier-aware rules + Gravity hub. Works on Opus, Sonnet, and Haiku.",
       "version": "0.16.1",
       "author": {
         "name": "Kasidit Wansudon",

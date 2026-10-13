@@ -83,6 +83,7 @@ Router itself never writes code or reads source files beyond `.kasidit/` index f
 - Delegation to specialist agents, Team Mode, or fan-out → `references/agents.md` (Master Orchestrator Rule, Team Mode, Multi-Agent Orchestration, Multi-Agent Fan-Out).
 - Cross-session/cross-project memory, patterns, or the running mission index → `references/gravity.md` (สารบัญ System, Gravity Pattern, Global Prompt Log).
 - UI mockup, visual design, or CSS/layout work → `references/ui.md` (UI Override Mode, Claude Design Integration).
+- Interactive architecture / sequence / data-flow diagram → `/kasi-diagram` (soft bridge to Archify; text diagram if not installed).
 
 Domain checklists (money / datetime / locale) live in `defaults/checklists/correctness-*.md` — see `references/full.md` § CHECKLISTS/ for the selection rule.
 
