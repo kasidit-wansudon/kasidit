@@ -47,6 +47,20 @@ The fix is not a bigger model. The fix is **scaffolding**: checklists, confidenc
 - Production-tested on a **288K-line legacy PHP codebase**
 - 5 backend hooks. 26 slash commands. 8 specialist agents. 18 default checklists. 11 core rules — all enforced, not aspirational.
 
+### Head-to-head benchmark (v0.17, 2026-11)
+
+12 tasks (6 SWE-bench Lite + 6 SWE-bench Verified "1-4 hours"), scored with the official swebench Docker harness. Same prompt, same restricted permissions, each arm isolated from user config. Kasidit runs via `/kasi-fix`; [Superpowers](https://github.com/obra/superpowers) v7.0.2 self-activates via its hook.
+
+| Resolved | Haiku | Fable | **Total (24)** | Cost | $ / resolved |
+|---|---|---|---|---|---|
+| **Kasidit** | **8/12** | 10/12 | **18/24 (75%)** | $37.18 | $2.07 |
+| Superpowers | 6/12 | **11/12** | 17/24 (71%) | $44.07 | $2.59 |
+| No framework | 6/12 | 9/12 | 15/24 (63%) | **$29.57** | **$1.97** |
+
+- **Haiku:** Kasidit resolved the most *and* was the cheapest ($0.67 per resolved task vs $1.22 with no framework).
+- **Fable:** Superpowers resolved the most; both frameworks cost more than no framework.
+- **Caveats:** one run per arm; Kasidit vs Superpowers is a 1-task gap — a tie within noise. The clear signal is that both frameworks beat no framework on resolve rate.
+
 ## What you get
 
 - **26 slash commands** — `/kasi-review · security · fix · ui · backend · graph · struc · devopt · deploy · review-deploy · diagram · acknowledge · knowledge-list · cascade · team · init · scaffold · docs · status · promote · pull · sync · search · multi · wiki-sync`

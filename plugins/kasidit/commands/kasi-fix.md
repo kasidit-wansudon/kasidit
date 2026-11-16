@@ -28,3 +28,4 @@ Next: <how to verify>
 - Counter max 4 (Opus) / 3 (Sonnet) / 2 (Haiku) before Wave 1
 - Never declare done without runtime evidence
 - If [unsure], list separately — do not guess
+- Leave changes in the working tree — never stage or commit
