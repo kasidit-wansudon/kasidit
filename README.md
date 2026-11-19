@@ -32,7 +32,8 @@ The fix is not a bigger model. The fix is **scaffolding**: checklists, confidenc
 | AI claims `[high]` confidence | trusts it | **runtime hook downgrades it** if no Read/Bash call matches |
 | Master agent spawns helpers, then edits files itself | nobody notices | **hook flags master-orchestrator violation** |
 | Runs the same on Haiku as on Opus | "Haiku is too small" | **tier-aware rules — Haiku gets MORE scaffolding, not less** |
-| Convention-only rules | model decides to ignore them | **5 runtime-enforced hooks** + 16 prompt-level rules |
+| Convention-only rules | model decides to ignore them | **7 runtime-enforced hooks** + 16 prompt-level rules |
+| Your rules (reply language, style) fade after a long session or compact | AI drifts back to defaults | **`main.md` pinned rules** — re-sent every prompt, reply language checked before the turn ends |
 | Knowledge resets every session | one-shot prompts | **Gravity hub** persists patterns / runbooks / route-memory across projects |
 | One audit = one whole-repo grep | slow + noisy | **subgraph extraction** — scope to 10 functions, not 1000 |
 | Deploy procedure forgotten | re-figure it next time | **`/kasi-acknowledge`** captures it as a replayable runbook |
@@ -45,7 +46,7 @@ The fix is not a bigger model. The fix is **scaffolding**: checklists, confidenc
 
 - **87.5% valid fix rate on a SWE-bench Lite sample** (56/300 tasks, strict PASS 60.7%, v0.7.4)
 - Production-tested on a **288K-line legacy PHP codebase**
-- 5 backend hooks. 26 slash commands. 8 specialist agents. 18 default checklists. 11 core rules — all enforced, not aspirational.
+- 7 runtime hooks. 27 slash commands. 8 specialist agents. 18 default checklists. 11 core rules — all enforced, not aspirational.
 
 ### Head-to-head benchmark (v0.17, 2026-11)
 
@@ -63,10 +64,11 @@ The fix is not a bigger model. The fix is **scaffolding**: checklists, confidenc
 
 ## What you get
 
-- **26 slash commands** — `/kasi-review · security · fix · ui · backend · graph · struc · devopt · deploy · review-deploy · diagram · acknowledge · knowledge-list · cascade · team · init · scaffold · docs · status · promote · pull · sync · search · multi · wiki-sync`
+- **27 slash commands** — `/kasi-review · security · fix · ui · backend · graph · struc · devopt · deploy · review-deploy · diagram · acknowledge · knowledge-list · cascade · team · init · scaffold · docs · status · promote · pull · sync · search · multi · wiki-sync · main`
 - **`/kasi` mode command** — pick intensity: `off / router / lite / full / ultra`
 - **8 specialist agents** — `architect-planner`, `audit-specialist` (`--focus=quality|security|perf`), `bug-hunter`, `deep-researcher`, `legacy-specialist`, `migration-specialist`, `refactor-surgeon`, `test-writer`
-- **5 runtime hooks** — prompt classifier, confidence-label verifier, backend-save recorder, update + drift check
+- **7 runtime hooks** — prompt classifier, confidence-label verifier, backend-save recorder, update + drift check, pinned-rules injector + reply-language check
+- **Pinned rules (`main.md`)** — your reply language and must-follow rules, re-sent every prompt; asks your language on first run
 - **Master Orchestrator** — main agent delegates; never executes strong work itself
 - **Gravity** — two-tier knowledge: Centerlite hub + per-project Dcenterlite, with promote / pull / sync
 - **18 default checklists** — security · code-review · perf · backend across PHP / Node / Python / Go, plus domain checklists (money / datetime / locale) selected by what the mission touches
@@ -85,6 +87,39 @@ Fix:        app/Exports/UserExport.php:42 — use ->whereDate(..., $tz) not ->wh
 Confidence: [medium] — pattern match, not yet runtime-verified
 Verify:     curl /api/users/export?on=2026-04-26 → expect 142 rows
 ```
+
+## Pinned rules — `main.md`
+
+**The problem:** you write "reply in Thai" or "never commit without asking" in `CLAUDE.md`. It works for a while. Then the session gets long, or Claude compacts, and the AI quietly drifts back to its defaults. `CLAUDE.md` is loaded once at session start; nothing re-sends it.
+
+**What Kasidit does:**
+
+| When | Hook | What happens |
+|---|---|---|
+| Session start, resume, clear, **after compact** | `kasi-main.py` | Sends your whole `main.md` |
+| **Every prompt** | `kasi-route.py` | Re-sends the reply-language rule + your `## Always` lines |
+| Before the turn ends | `kasi-main-check.py` | If the reply contains a script foreign to your language, blocks it once and asks the AI to rewrite |
+
+**First run asks your language.** After install, before doing anything else, the AI asks which language to reply in and saves it. Then it offers (optional) to import must-follow rules from your existing `CLAUDE.md` / `AGENTS.md`, and to add one rule of your own.
+
+```markdown
+---
+reply_language: th          # set by onboarding; 18 languages supported
+allow_scripts: chinese      # optional — let Chinese file names through
+---
+## Always                   # re-sent every prompt — keep it 3-7 lines
+- One mission at a time; narrow vague requests before acting.
+- Never commit without asking.
+
+## Context                  # sent at session start + after compact
+- Prefers tables over prose.
+```
+
+- Global file: `~/.claude/skills/kasidit/center/main.md`. Per project: `.kasidit/main.md` (merged on top).
+- Manage it with `/kasi-main` — `show`, `language th`, `add <rule>`, `allow chinese`, `import`, `onboard`.
+- The language check never blocks Latin text (code terms are English in every language), and ignores `code` and `> quoted` text.
+
+**Honest limits:** re-sending a rule makes the AI *see* it every turn — it does not *force* compliance. Only the reply-language check is enforced, because only that can be checked by code. Keep `## Always` short: it costs tokens on every prompt (hard cap 1,200 characters).
 
 ## Install
 
@@ -132,7 +167,7 @@ Then re-run `bash plugins/kasidit/install.sh` (idempotent — safe to run again)
 
 ## Honesty
 
-The 11 core rules and Master Orchestrator are **prompt-level conventions** — the AI self-applies them. The 5 runtime hooks (`kasi-route.py`, `kasi-verify.py`, `kasi-record.py`, `kasi-update-check.sh`, `kasi-drift-check.sh`) are **harness-enforced** and run regardless of what the model decides.
+The 11 core rules and Master Orchestrator are **prompt-level conventions** — the AI self-applies them. The 7 runtime hooks (`kasi-route.py`, `kasi-verify.py`, `kasi-record.py`, `kasi-update-check.sh`, `kasi-drift-check.sh`, `kasi-main.py`, `kasi-main-check.py`) are **harness-enforced** and run regardless of what the model decides.
 
 `kasi-verify.py` and `kasi-record.py` run on the `Stop` event only — that's the only hook that carries `transcript_path`, which both hooks read to reconstruct the turn's assistant text and tool calls. (Prior to 2026-08-02, `kasi-verify.py` was also wired to `PostToolUse`, where it silently did nothing — that event never carries assistant text. Fixed; see `plugins/kasidit/hooks/test_hook_contract.py` for tests against the real payload shape, not an assumed one.) `kasi-verify.py` catches unverified `[unverified]`-worthy claims made without a matching tool call and flags master-orchestrator violations.
 
