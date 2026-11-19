@@ -465,6 +465,75 @@ def test_main_check_off_without_forbid():
         cleanup()
 
 
+def status_payload(tmp_dir: str, tools: int, text_after: int = -1, prompt_age_sec: int = 5,
+                   session: str = "s1") -> dict:
+    """Transcript: one prompt, then `tools` tool calls; assistant text after
+    call number `text_after` (if >= 0)."""
+    from datetime import datetime, timedelta, timezone
+    now = datetime.now(timezone.utc)
+    iso = lambda d: d.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    lines = [{"type": "user", "uuid": "p1", "timestamp": iso(now - timedelta(seconds=prompt_age_sec)),
+              "message": {"content": "do the thing"}}]
+    for n in range(1, tools + 1):
+        lines.append({"type": "assistant", "uuid": f"a{n}", "timestamp": iso(now),
+                      "message": {"content": [{"type": "tool_use", "name": "Bash", "input": {}}]}})
+        if n == text_after:
+            lines.append({"type": "assistant", "uuid": f"t{n}", "timestamp": iso(now),
+                          "message": {"content": [{"type": "text", "text": "status update"}]}})
+    tp = Path(tmp_dir) / f"transcript-{session}-{tools}.jsonl"
+    tp.write_text("\n".join(json.dumps(l) for l in lines) + "\n")
+    return {"session_id": session, "transcript_path": str(tp), "cwd": "/tmp", "hook_event_name": "PostToolUse"}
+
+
+def test_status_nudge_threshold_and_no_repeat():
+    center, cleanup = fresh_center()
+    try:
+        _, out = run(center, "kasi-status-nudge.py", status_payload(center, 5))
+        assert_empty("status quiet under 8 tool calls", out)
+        _, out = run(center, "kasi-status-nudge.py", status_payload(center, 8))
+        assert_contains("status nudges at 8 tool calls", out, "[kasidit status]")
+        assert_contains("status nudge is PostToolUse context", out, '"hookEventName": "PostToolUse"')
+        _, out = run(center, "kasi-status-nudge.py", status_payload(center, 9))
+        assert_empty("status does not repeat right after a nudge", out)
+        _, out = run(center, "kasi-status-nudge.py", status_payload(center, 16))
+        assert_contains("status nudges again after another 8", out, "[kasidit status]")
+    finally:
+        cleanup()
+
+
+def test_status_text_resets_counter():
+    center, cleanup = fresh_center()
+    try:
+        _, out = run(center, "kasi-status-nudge.py", status_payload(center, 12, text_after=10))
+        assert_empty("status quiet when AI wrote text 2 calls ago", out)
+    finally:
+        cleanup()
+
+
+def test_status_time_trigger():
+    center, cleanup = fresh_center()
+    try:
+        _, out = run(center, "kasi-status-nudge.py", status_payload(center, 2, prompt_age_sec=300))
+        assert_contains("status nudges after 2+ minutes silent", out, "[kasidit status]")
+        assert_contains("status reports elapsed time", out, "5m")
+    finally:
+        cleanup()
+
+
+def test_status_configurable_and_off():
+    center, cleanup = fresh_center()
+    try:
+        run_cli(center, "set", "status_every", "3")
+        _, out = run(center, "kasi-status-nudge.py", status_payload(center, 3, session="cfg"))
+        assert_contains("status_every from main.md is used", out, "[kasidit status]")
+        run_cli(center, "set", "status_every", "0")
+        run_cli(center, "set", "status_after_sec", "0")
+        _, out = run(center, "kasi-status-nudge.py", status_payload(center, 30, prompt_age_sec=900, session="off"))
+        assert_empty("status off when both thresholds are 0", out)
+    finally:
+        cleanup()
+
+
 def main():
     global VERBOSE
     argv = sys.argv[1:]

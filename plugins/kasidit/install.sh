@@ -228,6 +228,7 @@ SessionStart|bash ~/.claude/hooks/kasi-update-check.sh
 SessionStart|bash ~/.claude/hooks/kasi-drift-check.sh
 SessionStart|python3 ~/.claude/hooks/kasi-main.py
 UserPromptSubmit|python3 ~/.claude/hooks/kasi-route.py
+PostToolUse|python3 ~/.claude/hooks/kasi-status-nudge.py
 Stop|python3 ~/.claude/hooks/kasi-verify.py
 Stop|python3 ~/.claude/hooks/kasi-record.py
 Stop|python3 ~/.claude/hooks/kasi-main-check.py
@@ -307,6 +308,7 @@ entries = [
     ("SessionStart", "bash ~/.claude/hooks/kasi-drift-check.sh"),
     ("SessionStart", "python3 ~/.claude/hooks/kasi-main.py"),
     ("UserPromptSubmit", "python3 ~/.claude/hooks/kasi-route.py"),
+    ("PostToolUse", "python3 ~/.claude/hooks/kasi-status-nudge.py"),
     ("Stop", "python3 ~/.claude/hooks/kasi-verify.py"),
     ("Stop", "python3 ~/.claude/hooks/kasi-record.py"),
     ("Stop", "python3 ~/.claude/hooks/kasi-main-check.py"),
@@ -384,7 +386,7 @@ if [ "$CONFIG_CREATED" -eq 1 ]; then CFG_STATE="new"; else CFG_STATE="ok"; fi
 printf 'config          %s mode=%s (%s)\n' "$CFG_STATE" "$INITIAL_MODE" "$CONFIG_JSON"
 HOOKS_UNCHANGED=$((HOOKS_COUNT - HOOKS_COPIED))
 printf 'hooks           %d present (copied=%d unchanged=%d) in %s\n' "$HOOKS_COUNT" "$HOOKS_COPIED" "$HOOKS_UNCHANGED" "$HOOKS_DIR"
-printf 'registrations   %d wired in %s (SessionStart x3, UserPromptSubmit, Stop x3)\n' "$HOOKS_REGISTERED" "$SETTINGS"
+printf 'registrations   %d wired in %s (SessionStart x3, UserPromptSubmit, PostToolUse, Stop x3)\n' "$HOOKS_REGISTERED" "$SETTINGS"
 printf 'gravity hub     %s (JSONLx5, checklists=%d seeded, knowledge templates)\n' "$CENTER" "$CHECKLISTS_SEEDED"
 printf 'stamps          %s, %s\n' "$STAMP_SYNC" "$STAMP_UPD"
 printf '\n'

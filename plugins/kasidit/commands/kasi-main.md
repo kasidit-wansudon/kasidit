@@ -11,6 +11,7 @@ Hooks that read them (on by default after install):
 - `kasi-main.py` (SessionStart, also after compact) — sends the whole file + onboarding.
 - `kasi-route.py` (every prompt) — sends the language rule + `## Always`.
 - `kasi-main-check.py` (Stop) — blocks a reply in a script foreign to `reply_language`.
+- `kasi-status-nudge.py` (PostToolUse) — on long work, tells the AI to post a short status after `status_every` tool calls (default 8) or `status_after_sec` seconds (default 120) without a word to the user. `status <n|off>` sets `status_every`.
 
 Frontmatter is written only through the CLI, never by hand:
 

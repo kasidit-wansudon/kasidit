@@ -3,6 +3,8 @@ reply_language:
 onboarded: false
 forbid_scripts:
 allow_scripts:
+status_every: 8
+status_after_sec: 120
 ---
 # main.md — pinned rules
 
@@ -12,6 +14,8 @@ Rules here come before everything else, in every session.
 - `## Always` is re-sent on every prompt (keep it 3-7 short lines).
 - `## Context` is sent at session start and after every compact.
 - `allow_scripts` lets a script through, e.g. `han` for Chinese file names.
+- `status_every` / `status_after_sec`: on long work, after this many tool calls
+  or seconds without a word to you, the AI is told to post a short status. 0 = off.
 A project can add `.kasidit/main.md` on top of this file. Manage it with /kasi-main.
 
 ## Always

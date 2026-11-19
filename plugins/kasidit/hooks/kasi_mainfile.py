@@ -26,6 +26,8 @@ Frontmatter keys:
   onboarded      — true once the onboarding steps after language were offered.
   forbid_scripts — extra scripts to block (comma-separated).
   allow_scripts  — scripts never blocked, e.g. han for Chinese file names.
+  status_every / status_after_sec — kasi-status-nudge.py thresholds
+                   (tool calls / seconds without a word to the user; 0 = off).
 
 CLI (used by /kasi-main so frontmatter is never hand-edited):
   python3 kasi_mainfile.py set <key> <value> [--project <dir>]
