@@ -7,8 +7,10 @@ into context. Keeps LLM side dumb and thin. All logic runs here.
 
 Output (stdout, appended to turn context by Claude Code hook system):
   [kasidit] kind=<kind> mode=<recommended> history=<n_pass>/<n_total> avg_turns=<x>
+  [kasidit main] always: ...     ← `## Always` from main.md, every prompt
+  [kasidit main] reply language not set ...  ← until onboarding step 1 is done
 
-If no history or off-topic → output nothing. Zero token cost on quiet path.
+Off-topic prompt with no history → only the main.md lines (language rule + Always).
 """
 
 from __future__ import annotations
@@ -20,6 +22,15 @@ import sys
 from pathlib import Path
 from collections import defaultdict
 from typing import List, Optional, Tuple
+
+try:
+    from kasi_mainfile import load_always, reply_language
+except ImportError:  # helper not installed yet — routing must still work
+    def load_always(cwd):
+        return ""
+
+    def reply_language(cwd):
+        return "unknown"
 
 CENTER = Path(os.environ.get("KASIDIT_CENTER",
     os.path.expanduser("~/.claude/skills/kasidit/center")))
@@ -99,16 +110,26 @@ def main():
     records = load_memory()
     best = shortest_successful_mode(kind, records)
 
+    line = None
     if best and best["n_pass"] >= 3:
         total = sum(1 for r in records if r.get("kind") == kind)
         line = (f"[kasidit] kind={kind} mode={best['mode']} "
                 f"history={best['n_pass']}/{total} avg_turns={best['avg_turns']:.1f}")
-    elif kind == "unclassified":
-        return
-    else:
+    elif kind != "unclassified":
         line = f"[kasidit] kind={kind} mode={default_mode} [low-history]"
 
-    print(line)
+    if line:
+        print(line)
+
+    # Pinned rules ride on every prompt, classified or not — they fade otherwise.
+    cwd = payload.get("cwd")
+    if not reply_language(cwd):
+        print("[kasidit main] reply language not set — ask the user which language to reply in "
+              "before anything else (onboarding step 1).")
+    always = load_always(cwd)
+    if always:
+        print("[kasidit main] always:")
+        print(always)
 
 
 if __name__ == "__main__":
